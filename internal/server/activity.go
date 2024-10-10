@@ -21,8 +21,13 @@ func InitDB() {
 		log.Fatal(err)
 	}
 	// Create table if not exists
-	// if _, err = db.Exec(CreateTableUsers, CreateTablePost, CreateTableEngagement); err != nil {
 	if _, err = db.Exec(CreateTableUsers); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = db.Exec(CreateTablePost); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = db.Exec(CreateTableEngagement); err != nil {
 		log.Fatal(err)
 	}
 }
