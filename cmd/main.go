@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"forum/internal/server"
 	"net/http"
+
+	"forum/internal/server"
 )
 
 const (
@@ -19,6 +20,8 @@ func main() {
 	http.HandleFunc("/", server.LoginPage)
 	// Handle login form submission
 	http.HandleFunc("/login", server.LoginHandler)
+	http.HandleFunc("/sign_up", server.Sign_UpHandler)
+	http.HandleFunc("/index", server.Index)
 	// Start the server
 	fmt.Println(GREEN + "http://localhost:8080")
 	fmt.Println(RED + "Ctrl+C to stop it" + RESET)
