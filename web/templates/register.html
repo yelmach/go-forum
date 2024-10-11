@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forum Registration</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+      }
+      h1 {
+        text-align: center;
+        color: #1877f2;
+        margin-bottom: 1.5rem;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+      input {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+      button {
+        background-color: #1877f2;
+        color: white;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #166fe5;
+      }
+      .error {
+        color: #c00;
+        margin-top: 1rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Join Our Forum</h1>
+      <form id="registerForm">
+        <input type="email" placeholder="Email" name="email" required />
+        <input type="text" placeholder="Username" name="username" required />
+        <input
+          type="password"
+          placeholder="Password"
+          name="password"
+          required
+        />
+        <button type="submit">Register</button>
+      </form>
+      <p id="errorMessage" class="error"></p>
+    </div>
+
+    <script>
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const email = document.querySelector("input[name='email']").value;
+          const username = document.querySelector(
+            "input[name='username']"
+          ).value;
+          const password = document.querySelector(
+            "input[name='password']"
+          ).value;
+          const errorMessage = document.getElementById("errorMessage");
+
+          try {
+            const response = await fetch("http://localhost:8080/api/users", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email, username, password }),
+            });
+
+            if (response.ok) {
+              console.log(response);
+              window.location.href = "/login";
+            } else {
+              const result = await response.json();
+              console.log(result);
+              console.error("Registration failed:", response.statusText);
+              errorMessage.textContent = result.Msg;
+            }
+          } catch (error) {
+            console.error("Error during registration:", error);
+            errorMessage.textContent =
+              "An error occurred. Please try again later.";
+          }
+        });
+    </script>
+  </body>
+</html>
