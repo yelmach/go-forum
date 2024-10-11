@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link rel="stylesheet" href="../static/css/register_login.css">
 </head>
 <body>
     <nav class="navbar">
-        <span id="logo">01Forum</span>
+        <div id="logo">
+            <img id="logo-img" src="../static/img/logo.svg" alt="">
+            <span id="logo-name"><b>01</b>Forum</span>
+        </div>
         <a href="" id="login">login</a>
     </nav>
 
@@ -15,18 +19,16 @@
         <div class="form-container">
             <h2>Join 01Forum community</h2>
             <p>Get more features and priviliges by joining to the most helpful community</p>
-            <form action="">
-                <input type="text" name="username"/>
-                <input type="email" name="email">
-                <input type="password" name="password">
-                <input type="password" name="confirm">
+            <form action="" method="post">
+                <input type="text" name="username" placeholder="Username"/>
+                <input type="email" name="email" placeholder="Email">
+                <input type="password" name="password" placeholder="Password">
+                <input type="password" name="confirm" placeholder="Repeat password">
                 
-                <input type="submit" name="register">
+                <button id="submit" name="register">register</button>
             </form>
         </div>
-        <div class="showcase-img">
-            <img src="../static/img/Image.png" alt="">
-        </div>
+        <img class="showcase-img" src="../static/img/Image.png" alt="">
     </div>
 </body>
 </html>
