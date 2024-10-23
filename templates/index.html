@@ -1,166 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../static/img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../static/css/main.css">
-    <style>
-        .navbar {
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 3fr 1fr;
-            background-color: #FAFAFA;
-        }
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            background-color: #fff;
-            padding: 3rem 0;
-        }
-        .menu-select > i {
-            width: 18px;
-            height: 18px;
-        }
-        .menu-select > h2 {
-            font-size: 1.1rem;
-        }
-        .menu-select {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-            text-transform: capitalize;
-            padding: 1rem 1.5rem;
-            border-left: 5px solid transparent;
-            border-radius: 5px;
-        }
-        .active,
-        .menu-select:hover {
-            color: #f48023;
-            border-color: #f48023;
-            background-color: #FCF4EC;
-        }
-        .categories {
-            margin-left: 4rem;
-            list-style: none;
-            margin-top: -0.5rem;
-        }
-        .categories > li {
-            margin-bottom: 0.5rem;
-        }
-        .categories li > a {
-            color: #050505;
-        } 
-        .posts-container {
-            width: 100%;
-            height: 100vh;
-            padding: 2.5rem 3rem;
-        }
-
-        /********** Post **********/
-        .post {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem 2rem;
-            margin-bottom: 1.75rem;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 12px;
-        }
-        .username {
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-        .timestamp {
-            color: #65676B;
-            font-size: 0.8em;
-        }
-        .user-info,
-        .post-content {
-            margin-bottom: 1rem;
-        }
-        .post-content > h3 {
-            margin-bottom: 0.65rem;
-        }
-        .tags {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .tag {
-            background-color: #E4E6EB;
-            color: #050505;
-            padding: 4px 8px;
-            border-radius: 16px;
-            font-size: 0.8em;
-        }
-        .post-stats {
-            display: flex;
-            gap: 1rem;
-            color: #65676B;
-            font-size: 0.9em;
-        }
-        
-        .tags-stats {
-            display: flex;
-            justify-content: space-between;
-        }
-        /********** Post **********/
-
-        /********** Widget **********/
-        .widget {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            height: 300px;
-            padding: 16px;
-            margin: 2rem;
-            margin-left: 0;
-        }
-        .section {
-            margin-bottom: 20px;
-        }
-        .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-        }
-        .section-title svg {
-            margin-right: 8px;
-        }
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-            margin: 0;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        a {
-            color: #1a73e8;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        /********** Widget **********/
-    </style>
-    <title>Login</title>
+    <title>Home Page</title>
 </head>
+
 <body>
     <nav class="navbar">
         <div id="logo">
@@ -176,18 +24,18 @@
     <div class="container">
         <div class="sidebar">
             <div class="menu-select active">
-                <i class="fa-solid fa-clock"></i>
+                <i class="ri-time-line"></i>
                 <h2>recent posts</h2>
             </div>
-            <div class="menu-select">
-                <i class="fa-solid fa-tag"></i>
+            <div class="menu-select disable">
+                <i class="ri-price-tag-3-line"></i>
                 <h2>categories</h2>
             </div>
             <ul class="categories">
-                <li><a href="#">#Golang</a></li>
-                <li><a href="#">#Javascript</a></li>
-                <li><a href="#">#Design</a></li>
-                <li><a href="#">#Rust</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Golang</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Javascript</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Design</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Rust</a></li>
             </ul>
         </div>
         <div class="posts-container">
@@ -201,7 +49,8 @@
                 </div>
                 <div class="post-content">
                     <h3>How to patch KDE on FreeBSD?</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquet maecenas ut sit nulla</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquet maecenas ut sit nulla
+                    </p>
                 </div>
                 <div class="tags-stats">
                     <div class="tags">
@@ -210,9 +59,55 @@
                         <span class="tag">overflow</span>
                     </div>
                     <div class="post-stats">
-                        <span>👍 125</span>
-                        <span>👎 90</span>
-                        <span>💬 21</span>
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="user-info">
+                    <img src="../static/img/usrs/Ava01.png" alt="User avatar" class="avatar">
+                    <div>
+                        <div class="username">Golanginya</div>
+                        <div class="timestamp">5 min ago</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h3>How to patch KDE on FreeBSD?</h3>
+                    <p>
+                        is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+                        industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of
+                        type and scrambled it to make a type specimen book. It has survived not only five centuries, but
+                        also the leap into electronic typesetting, remaining essentially unchanged. It was popularised
+                        in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more
+                        recently with desktop publishing software like Aldus PageMaker including versions of Lorem
+                        Ipsum.
+                    </p>
+                </div>
+                <div class="tags-stats">
+                    <div class="tags">
+                        <span class="tag">golang</span>
+                        <span class="tag">linux</span>
+                        <span class="tag">overflow</span>
+                    </div>
+                    <div class="post-stats">
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -226,7 +121,11 @@
                 </div>
                 <div class="post-content">
                     <h3>How to patch KDE on FreeBSD?</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquet maecenas ut sit nulla</p>
+                    <p>
+                        There are many variations of passages of Lorem Ipsum available, but the majority have suffered
+                        alteration in some form, by injected humour, or randomised words which don't look even slightly
+                        believable. If you are going to use a passage of Lorem Ipsum...
+                    </p>
                 </div>
                 <div class="tags-stats">
                     <div class="tags">
@@ -235,34 +134,15 @@
                         <span class="tag">overflow</span>
                     </div>
                     <div class="post-stats">
-                        <span>👍 125</span>
-                        <span>👎 90</span>
-                        <span>💬 21</span>
-                    </div>
-                </div>
-            </div>
-            <div class="post">
-                <div class="user-info">
-                    <img src="../static/img/usrs/Ava01.png" alt="User avatar" class="avatar">
-                    <div>
-                        <div class="username">Golanginya</div>
-                        <div class="timestamp">5 min ago</div>
-                    </div>
-                </div>
-                <div class="post-content">
-                    <h3>How to patch KDE on FreeBSD?</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquet maecenas ut sit nulla</p>
-                </div>
-                <div class="tags-stats">
-                    <div class="tags">
-                        <span class="tag">golang</span>
-                        <span class="tag">linux</span>
-                        <span class="tag">overflow</span>
-                    </div>
-                    <div class="post-stats">
-                        <span>👍 125</span>
-                        <span>👎 90</span>
-                        <span>💬 21</span>
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -271,7 +151,7 @@
         <div class="widget">
             <div class="section">
                 <h2 class="section-title">
-                    <i class="fa-regular fa-star"></i>
+                    <i class="ri-star-line"></i>
                     Must-read posts
                 </h2>
                 <ul>
@@ -281,7 +161,7 @@
             </div>
             <div class="section">
                 <h2 class="section-title">
-                    <i class="fa-solid fa-link"></i>
+                    <i class="ri-links-line"></i>
                     Featured links
                 </h2>
                 <ul>
@@ -292,5 +172,7 @@
             </div>
         </div>
     </div>
+
 </body>
+
 </html>

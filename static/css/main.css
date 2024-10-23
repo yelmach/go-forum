@@ -1,26 +1,25 @@
 /* Import Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css');
+@import url('https://cdn.jsdelivr.net/npm/remixicon@4.4.0/fonts/remixicon.min.css');
 
 /* Reset Default Styles */
-*, html {
+*,
+html {
     box-sizing: border-box;
     padding: 0 0;
     margin: 0 0;
 }
-/* Reset Default Styles */
 
 html {
     font-size: 16px;
-    letter-spacing: 1px;
-    font-family: "Sora", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
 }
 
 body {
     overflow: hidden;
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 
 a {
@@ -35,6 +34,10 @@ a {
     padding: 1rem 3.5rem;
 }
 
+.navbar a {
+    text-decoration: none !important;
+}
+
 #logo {
     display: flex;
     align-items: center;
@@ -43,7 +46,7 @@ a {
 
 #logo-img {
     height: 30px;
-} 
+}
 
 #logo-name {
     font-size: 1.3rem;
@@ -56,12 +59,13 @@ a {
 
 #login,
 #register {
-    font-size: 0.75rem;
+    font-size: .8rem;
     text-transform: capitalize;
-    font-weight: 1000;
+    letter-spacing: .5px;
+    font-weight: 800;
     color: #1682FD;
     background-color: #EAEAEA;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     border-radius: 5px;
 }
 
@@ -70,99 +74,230 @@ a {
     background-color: #f48023;
 }
 
+#register:hover {
+    background-color: rgba(244, 128, 35, 0.8);
+    border-color: transparent;
+}
+
 #login:hover {
     color: #EAEAEA;
     background-color: #1682FD;
 }
 
-#register > i,
-#login > i {
+#register>i,
+#login>i {
     margin-right: 8px;
 }
-/********** Navbar **********/
 
-/********** Register **********/
-.grid_3-7 {
+.navbar {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.container {
     display: grid;
-    grid-template-columns: 40% 60%;
+    grid-template-columns: 1fr 3fr 1fr;
     background-color: #FAFAFA;
 }
 
-.showcase-img {
-    display: block;
-    height: 100vh;
-    width: 100%;
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: #fff;
+    padding: 3rem 0;
 }
 
-h2 {
-    font-size: 1.5rem;
-    font-weight: 900;
+.menu-select {
+    display: flex;
+    gap: 5px;
+    align-items: center;
     text-transform: capitalize;
+    padding: 1rem 1.5rem;
+    border-left: 5px solid transparent;
+    border-radius: 5px;
 }
 
-p {
-    font-size: 1.1rem;
-    font-weight: 200;
+.menu-select>i {
+    font-size: 20px;
+    margin-right: 2px;
 }
 
-.form-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    padding: 12rem 6.25rem;
+.menu-select>h2 {
+    font-size: 1.05rem;
+    letter-spacing: 1px;
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
+.active,
+.menu-select:hover {
+    color: #f48023;
+    border-color: #f48023;
+    background-color: #FCF4EC;
 }
 
-input {
-    font-size: 0.95rem;
-    display: block;
+.disable {
+    color: #000 !important;
+    background-color: #fff !important;
+    border-color: transparent !important;
+}
+
+.categories {
+    letter-spacing: 1px;
+    margin-left: 4.5rem;
+    list-style: none;
+    margin-top: -0.25rem;
+}
+
+.categories>li {
+    margin-bottom: 0.5rem;
+}
+
+.categories li>a {
+    color: #050505;
+}
+
+.posts-container {
     width: 100%;
-    padding: 0.9rem 1.5rem;
-    border: 2px solid #EAEAEA;
-    border-radius: 5px;
-    outline: none;
+    height: 100vh;
+    padding: 2.5rem 3rem;
 }
 
-input::placeholder {
+/********** Post **********/
+.post {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+}
+
+.post-content>h3 {
+    margin-bottom: 0.65rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.timestamp {
+    color: #65676B;
+    font-size: 0.8em;
+}
+
+.user-info,
+.post-content {
+    margin-bottom: 1rem;
+}
+
+.tags-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tags {
+    display: flex;
+    gap: 8px;
+}
+
+.tag {
+    font-size: 0.8em;
+    font-family: 'Courier New', Courier, monospace;
     color: #808080;
-    font-size: 0.75rem;
-}
-
-input:focus,
-input:hover {
-    border: 2px solid #F48023;
-}
-
-#submit {
-    font-size: 0.85rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    color: #FFF;
-    background-color: #F48023;
-    border: 2px solid #F48023;
-    padding: 0.9rem 1.5rem;
+    background-color: #EAEAEA;
+    padding: 5px 10px;
     border-radius: 5px;
 }
 
-#register:hover,
-#submit:hover,
-#submit:active {
-    background-color: rgba(244, 128, 35, 0.8);
-    border-color: transparent;
+.post-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #65676B;
+    font-size: 0.9em;
 }
-/********** Register **********/
 
-@media (max-width: 1300px) {
-    .showcase-img {
-        display: none;
-    }
+.post-stats i {
+    font-size: 18px;
+    color: #808080;
+}
 
-    .grid_3-7 {
-        grid-template-columns: 1fr;
-    }
+.post-stats i:hover {
+    color: #1a73e8;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/********** Widget **********/
+.widget {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    padding: 16px;
+    margin: 2rem;
+    margin-left: 0;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    padding-bottom: 7px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #EAEAEA;
+}
+
+.section-title i {
+    font-size: 22px;
+    font-weight: 100;
+    margin-right: 8px;
+}
+
+.section ul {
+    padding-left: 0;
+    margin: 0;
+    margin-left: 15px;
+}
+
+.section li {
+    margin-bottom: 8px;
+}
+
+.section li::marker {
+    content: '• ';
+    color: #1a73e8;
+}
+
+.section a {
+    color: #1a73e8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
