@@ -7,7 +7,7 @@ import (
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(`D:\github\forum-01\web\templates\index.html`)
+	tmpl, err := template.ParseFiles("./web/templates/index.html")
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -17,7 +17,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(`D:\github\forum-01\web\templates\register.html`)
+	tmpl, err := template.ParseFiles("./web/templates/register.html")
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -27,7 +27,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(`D:\github\forum-01\web\templates\login.html`)
+	tmpl, err := template.ParseFiles("./web/templates/login.html")
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -35,4 +35,3 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl.Execute(w, nil)
 }
-

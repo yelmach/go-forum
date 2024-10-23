@@ -1,195 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forum Page</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f0f2f5;
-        margin: 0;
-        padding: 0;
-      }
-      .navbar {
-        background-color: #1877f2;
-        padding: 1rem;
-        color: white;
-      }
-      .navbar-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-      .navbar h1 {
-        margin: 0;
-      }
-      .navbar-links a {
-        color: white;
-        text-decoration: none;
-        margin-left: 1rem;
-      }
-      .container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-      }
-      .post {
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-      .post h2 {
-        color: #1877f2;
-        margin-top: 0;
-      }
-      .post-meta {
-        color: #65676b;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
-      }
-      .post-content {
-        margin-bottom: 1rem;
-      }
-      .post-actions a {
-        color: #1877f2;
-        text-decoration: none;
-        margin-right: 1rem;
-      }
-      .post-actions a:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <title>Home Page</title>
+</head>
+
+<body>
     <nav class="navbar">
-      <div class="navbar-content">
-        <h1>Our Forum</h1>
-        <div class="navbar-links">
-          <a href="#">Home</a>
-          <a href="#">Categories</a>
-          <a href="#" id="profileLink">Profile</a>
-          <a href="#" id="logoutLink">Logout</a>
+        <a id="logo" href="/">
+            <img id="logo-img" src="/assets/img/logo.svg" alt="">
+            <span id="logo-name"><b>01</b>Forum</span>
+        </a>
+        <div class="sign">
+            <a href="/register" id="register"><i class="fa-solid fa-user-plus"></i>register</a>
+            <a href="/login" id="login"><i class="fa-solid fa-right-to-bracket"></i>login</a>
         </div>
-      </div>
     </nav>
 
     <div class="container">
-      <h1>Recent Posts</h1>
-      <div id="posts"></div>
+        <div class="sidebar">
+            <div class="menu-select active">
+                <i class="ri-time-line"></i>
+                <h2>recent posts</h2>
+            </div>
+            <div class="menu-select disable">
+                <i class="ri-price-tag-3-line"></i>
+                <h2>categories</h2>
+            </div>
+            <ul class="categories">
+                <li><a href="#"><i class="ri-hashtag"></i>Golang</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Javascript</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Design</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Rust</a></li>
+            </ul>
+        </div>
+        <div class="posts-container">
+            <div class="post">
+                <div class="user-info">
+                    <img src="/assets/img/usrs/Ava01.png" alt="User avatar" class="avatar">
+                    <div>
+                        <div class="username">Golanginya</div>
+                        <div class="timestamp">5 min ago</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h3>How to patch KDE on FreeBSD?</h3>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquet maecenas ut sit nulla
+                    </p>
+                </div>
+                <div class="tags-stats">
+                    <div class="tags">
+                        <span class="tag">golang</span>
+                        <span class="tag">linux</span>
+                        <span class="tag">overflow</span>
+                    </div>
+                    <div class="post-stats">
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="user-info">
+                    <img src="/assets/img/usrs/Ava01.png" alt="User avatar" class="avatar">
+                    <div>
+                        <div class="username">Golanginya</div>
+                        <div class="timestamp">5 min ago</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h3>How to patch KDE on FreeBSD?</h3>
+                    <p>
+                        is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+                        industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of
+                        type and scrambled it to make a type specimen book. It has survived not only five centuries, but
+                        also the leap into electronic typesetting, remaining essentially unchanged. It was popularised
+                        in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more
+                        recently with desktop publishing software like Aldus PageMaker including versions of Lorem
+                        Ipsum.
+                    </p>
+                </div>
+                <div class="tags-stats">
+                    <div class="tags">
+                        <span class="tag">golang</span>
+                        <span class="tag">linux</span>
+                        <span class="tag">overflow</span>
+                    </div>
+                    <div class="post-stats">
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="post">
+                <div class="user-info">
+                    <img src="/assets/img/usrs/Ava01.png" alt="User avatar" class="avatar">
+                    <div>
+                        <div class="username">Golanginya</div>
+                        <div class="timestamp">5 min ago</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h3>How to patch KDE on FreeBSD?</h3>
+                    <p>
+                        There are many variations of passages of Lorem Ipsum available, but the majority have suffered
+                        alteration in some form, by injected humour, or randomised words which don't look even slightly
+                        believable. If you are going to use a passage of Lorem Ipsum...
+                    </p>
+                </div>
+                <div class="tags-stats">
+                    <div class="tags">
+                        <span class="tag">golang</span>
+                        <span class="tag">linux</span>
+                        <span class="tag">overflow</span>
+                    </div>
+                    <div class="post-stats">
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="widget">
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="ri-star-line"></i>
+                    Must-read posts
+                </h2>
+                <ul>
+                    <li><a href="#">Please read rules before you start working on a platform</a></li>
+                    <li><a href="#">Vision & Strategy of AIemhelp</a></li>
+                </ul>
+            </div>
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="ri-links-line"></i>
+                    Featured links
+                </h2>
+                <ul>
+                    <li><a href="#">AIemhelp source-code on GitHub</a></li>
+                    <li><a href="#">Golang best-practices</a></li>
+                    <li><a href="#">AIem School dashboard</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <script>
-      const API_URL = "http://localhost:8080"; // Update this to match your Go server address
+</body>
 
-      // Check session on page load
-      document.addEventListener("DOMContentLoaded", checkSession);
-
-      function checkSession() {
-        const sessionId = localStorage.getItem("sessionId");
-        if (!sessionId) {
-          window.location.href = "/login";
-          return;
-        }
-
-        fetch(`${API_URL}/api/check_session`, {
-          method: "GET",
-          headers: {
-            Authorization: sessionId,
-          },
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Session invalid");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            loadPosts();
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            localStorage.removeItem("sessionId");
-            window.location.href = "/login";
-          });
-      }
-
-      function loadPosts() {
-        // In a real application, you would fetch posts from the server here
-        const posts = [
-          {
-            title: "Welcome to Our New Forum!",
-            author: "Admin",
-            date: "October 10, 2024",
-            content:
-              "Hello everyone! We're excited to launch our new forum. Feel free to introduce yourself and start discussions on topics you're passionate about.",
-          },
-          {
-            title: "Tips for Productive Discussions",
-            author: "Moderator",
-            date: "October 9, 2024",
-            content:
-              "Here are some tips to keep our discussions productive and respectful: 1) Be kind, 2) Stay on topic, 3) Provide evidence for your claims, 4) Listen to others' perspectives.",
-          },
-          {
-            title: "What's Your Favorite Book?",
-            author: "BookLover123",
-            date: "October 8, 2024",
-            content:
-              "I'm always looking for new reading recommendations. What's your favorite book and why? Let's share our top picks and discover new literary treasures!",
-          },
-        ];
-
-        const postsContainer = document.getElementById("posts");
-        posts.forEach((post) => {
-          const postElement = document.createElement("div");
-          postElement.className = "post";
-          postElement.innerHTML = `
-                    <h2>${post.title}</h2>
-                    <p class="post-meta">Posted by ${post.author} on ${post.date}</p>
-                    <div class="post-content">
-                        <p>${post.content}</p>
-                    </div>
-                    <div class="post-actions">
-                        <a href="#">Comment</a>
-                        <a href="#">Share</a>
-                    </div>
-                `;
-          postsContainer.appendChild(postElement);
-        });
-      }
-
-      // Logout functionality
-      document
-        .getElementById("logoutLink")
-        .addEventListener("click", function (e) {
-          e.preventDefault();
-          const sessionId = localStorage.getItem("sessionId");
-          if (sessionId) {
-            fetch(`${API_URL}/api/logout`, {
-              method: "POST",
-              headers: {
-                Authorization: sessionId,
-              },
-            })
-              .then((response) => response.json())
-              .then((data) => {
-                localStorage.removeItem("sessionId");
-                window.location.href = "/login";
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                localStorage.removeItem("sessionId");
-                window.location.href = "/login";
-              });
-          } else {
-            window.location.href = "/login";
-          }
-        });
-    </script>
-  </body>
 </html>

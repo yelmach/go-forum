@@ -1,14 +1,18 @@
 /* Import Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css');
+@import url('https://cdn.jsdelivr.net/npm/remixicon@4.4.0/fonts/remixicon.min.css');
+
 
 /* Reset Default Styles */
-*, html {
+*,
+html {
     box-sizing: border-box;
     padding: 0 0;
     margin: 0 0;
 }
+
 /* Reset Default Styles */
 
 html {
@@ -36,6 +40,7 @@ a {
 }
 
 #logo {
+    color: #000;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -43,9 +48,11 @@ a {
 
 #logo-img {
     height: 30px;
-} 
+}
 
 #logo-name {
+    font-family: 'Sora', sans-serif;
+    font-style: normal;
     font-size: 1.3rem;
 }
 
@@ -76,10 +83,11 @@ a {
     border-radius: 5px;
 }
 
-#register > i,
-#login > i {
+#register>i,
+#login>i {
     margin-right: 8px;
 }
+
 /********** Navbar **********/
 
 /********** Register **********/
@@ -156,6 +164,7 @@ input:hover {
     background-color: rgba(244, 128, 35, 0.8);
     border-color: transparent;
 }
+
 /********** Register **********/
 
 @media (max-width: 1300px) {
