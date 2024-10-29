@@ -14,3 +14,8 @@ type Session struct {
 	Username  string
 	ExpiresAt time.Time
 }
+type Categories struct {
+	Id       int
+	Categori string
+	PostId   int
+}
