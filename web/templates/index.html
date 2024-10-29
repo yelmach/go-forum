@@ -1,19 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum</title>
-    <style>
-       body {
-            background: linear-gradient(to right, #5766f0, #57c5c5);
-            height: 100vh;
-            justify-content: center;
-            align-items: center;
-        } 
-    </style>
+    <link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <title>Home Page</title>
 </head>
+
 <body>
-    
+    <nav class="navbar">
+        <a id="logo" href="/">
+            <img id="logo-img" src="/assets/img/logo.svg" alt="">
+            <span id="logo-name"><b>01</b>Forum</span>
+        </a>
+        <div class="sign">
+            <a href="/register" id="register"><i class="fa-solid fa-user-plus"></i>register</a>
+            <a href="/login" id="login"><i class="fa-solid fa-right-to-bracket"></i>login</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="menu-select active">
+                <i class="ri-time-line"></i>
+                <h2>recent posts</h2>
+            </div>
+            <div class="menu-select disable">
+                <i class="ri-price-tag-3-line"></i>
+                <h2>categories</h2>
+            </div>
+            <ul class="categories">
+                <li><a href="#"><i class="ri-hashtag"></i>Golang</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Javascript</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Design</a></li>
+                <li><a href="#"><i class="ri-hashtag"></i>Rust</a></li>
+            </ul>
+        </div>
+        <div class="posts-container">
+            <div class="post">
+                <div class="user-info">
+                    <img src="/assets/img/usrs/Ava01.png" alt="User avatar" class="avatar">
+                    <div>
+                        <div class="username">Golanginya</div>
+                        <div class="timestamp">5 min ago</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h3>How to patch KDE on FreeBSD?</h3>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquet maecenas ut sit nulla
+                    </p>
+                </div>
+                <div class="tags-stats">
+                    <div class="tags">
+                        <span class="tag">golang</span>
+                        <span class="tag">linux</span>
+                        <span class="tag">overflow</span>
+                    </div>
+                    <div class="post-stats">
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="user-info">
+                    <img src="/assets/img/usrs/Ava01.png" alt="User avatar" class="avatar">
+                    <div>
+                        <div class="username">Golanginya</div>
+                        <div class="timestamp">5 min ago</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h3>How to patch KDE on FreeBSD?</h3>
+                    <p>
+                        is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+                        industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of
+                        type and scrambled it to make a type specimen book. It has survived not only five centuries, but
+                        also the leap into electronic typesetting, remaining essentially unchanged. It was popularised
+                        in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more
+                        recently with desktop publishing software like Aldus PageMaker including versions of Lorem
+                        Ipsum.
+                    </p>
+                </div>
+                <div class="tags-stats">
+                    <div class="tags">
+                        <span class="tag">golang</span>
+                        <span class="tag">linux</span>
+                        <span class="tag">overflow</span>
+                    </div>
+                    <div class="post-stats">
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="post">
+                <div class="user-info">
+                    <img src="/assets/img/usrs/Ava01.png" alt="User avatar" class="avatar">
+                    <div>
+                        <div class="username">Golanginya</div>
+                        <div class="timestamp">5 min ago</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <h3>How to patch KDE on FreeBSD?</h3>
+                    <p>
+                        There are many variations of passages of Lorem Ipsum available, but the majority have suffered
+                        alteration in some form, by injected humour, or randomised words which don't look even slightly
+                        believable. If you are going to use a passage of Lorem Ipsum...
+                    </p>
+                </div>
+                <div class="tags-stats">
+                    <div class="tags">
+                        <span class="tag">golang</span>
+                        <span class="tag">linux</span>
+                        <span class="tag">overflow</span>
+                    </div>
+                    <div class="post-stats">
+                        <div class="stat">
+                            <i class="ri-thumb-up-line"></i><span>125</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-thumb-down-line"></i><span>90</span>
+                        </div>
+                        <div class="stat">
+                            <i class="ri-chat-4-line"></i><span>21</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="widget">
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="ri-star-line"></i>
+                    Must-read posts
+                </h2>
+                <ul>
+                    <li><a href="#">Please read rules before you start working on a platform</a></li>
+                    <li><a href="#">Vision & Strategy of AIemhelp</a></li>
+                </ul>
+            </div>
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="ri-links-line"></i>
+                    Featured links
+                </h2>
+                <ul>
+                    <li><a href="#">AIemhelp source-code on GitHub</a></li>
+                    <li><a href="#">Golang best-practices</a></li>
+                    <li><a href="#">AIem School dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </body>
+
 </html>

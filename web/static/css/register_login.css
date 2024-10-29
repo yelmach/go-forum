@@ -1,0 +1,178 @@
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css');
+@import url('https://cdn.jsdelivr.net/npm/remixicon@4.4.0/fonts/remixicon.min.css');
+
+
+/* Reset Default Styles */
+*,
+html {
+    box-sizing: border-box;
+    padding: 0 0;
+    margin: 0 0;
+}
+
+/* Reset Default Styles */
+
+html {
+    font-size: 16px;
+    letter-spacing: 1px;
+    font-family: "Sora", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+body {
+    overflow: hidden;
+}
+
+a {
+    text-decoration: none;
+}
+
+/********** Navbar **********/
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 3.5rem;
+}
+
+#logo {
+    color: #000;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#logo-img {
+    height: 30px;
+}
+
+#logo-name {
+    font-family: 'Sora', sans-serif;
+    font-style: normal;
+    font-size: 1.3rem;
+}
+
+
+
+#login {
+    font-size: 0.75rem;
+    text-transform: capitalize;
+    font-weight: 1000;
+    color: #1682FD;
+    background-color: #EAEAEA;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+}
+
+#login:hover {
+    color: #EAEAEA;
+    background-color: #1682FD;
+}
+
+#register {
+    font-size: 0.75rem;
+    text-transform: capitalize;
+    font-weight: 1000;
+    color: #FFF;
+    background-color: #F48023;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+}
+
+#register>i,
+#login>i {
+    margin-right: 8px;
+}
+
+/********** Navbar **********/
+
+/********** Register **********/
+.grid_3-7 {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    background-color: #FAFAFA;
+}
+
+.showcase-img {
+    display: block;
+    height: 100vh;
+    width: 100%;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    text-transform: capitalize;
+}
+
+p {
+    font-size: 1.1rem;
+    font-weight: 200;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 12rem 6.25rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+input {
+    font-size: 0.95rem;
+    display: block;
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    border: 2px solid #EAEAEA;
+    border-radius: 5px;
+    outline: none;
+}
+
+input::placeholder {
+    color: #808080;
+    font-size: 0.75rem;
+}
+
+input:focus,
+input:hover {
+    border: 2px solid #F48023;
+}
+
+#submit {
+    font-size: 0.85rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #FFF;
+    background-color: #F48023;
+    border: 2px solid #F48023;
+    padding: 0.9rem 1.5rem;
+    border-radius: 5px;
+}
+
+#register:hover,
+#submit:hover,
+#submit:active {
+    background-color: rgba(244, 128, 35, 0.8);
+    border-color: transparent;
+}
+
+/********** Register **********/
+
+@media (max-width: 1300px) {
+    .showcase-img {
+        display: none;
+    }
+
+    .grid_3-7 {
+        grid-template-columns: 1fr;
+    }
+}
