@@ -1,0 +1,4 @@
+-- database: ./database.db
+
+SELECT * FROM categories WHERE categori=='name';
+INSERT INTO categories (categori,post_id)VALUES('name');

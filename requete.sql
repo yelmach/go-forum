@@ -85,3 +85,5 @@ INSERT INTO categories (categori, post_id) VALUES
     ("History", 5),
     ("Tips", 3);
 
+SELECT * FROM categories WHERE categori==name;
+INSERT INTO categories (categori,post_id)VALUES()
