@@ -19,3 +19,8 @@ type Categories struct {
 	Categori string
 	PostId   int
 }
+type Posts struct {
+	Id      int
+	Title   string
+	Content string
+}
