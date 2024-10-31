@@ -29,30 +29,35 @@ func CreateCategories(categories models.Categories) (bool, error) {
 }
 
 func DisplayCategories(categori string) ([]models.Categories, error) {
-	var categories models.Categories
+	var categories []models.Categories
+
+	var query string
+	var args []interface{}
+
 	if categori == "" {
-		rows, err := utils.DataBase.Query("SELECT * FROM categories")
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-		var categoriSlice []models.Categories
-		for rows.Next() {
-			rows.Scan(&categories.Id, categories.Categori, categories.PostId)
-			categoriSlice = append(categoriSlice, categories)
-		}
-		return categoriSlice, nil
+		query = "SELECT * FROM categories"
 	} else {
-		rows, err := utils.DataBase.Query("SELECT categori FROM categories WHERE categori = ?", categori)
+		query = "SELECT * FROM categories WHERE categori = ?"
+		args = append(args, categori)
+	}
+
+	rows, err := utils.DataBase.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var category models.Categories
+		err := rows.Scan(&category.Id, &category.Categori, &category.PostId)
 		if err != nil {
 			return nil, err
 		}
-		defer rows.Close()
-		var categoriSlice []models.Categories
-		for rows.Next() {
-			rows.Scan(&categories.Id, categories.Categori, categories.PostId)
-			categoriSlice = append(categoriSlice, categories)
-		}
-		return categoriSlice, nil
+		categories = append(categories, category)
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return categories, nil
 }

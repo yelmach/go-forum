@@ -18,8 +18,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	fmt.Println("data : ", data[1].Categori)
-	tmpl.Execute(w, nil)
+	tmpl.Execute(w, data)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {

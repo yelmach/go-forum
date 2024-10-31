@@ -32,6 +32,13 @@
                 <h2>categories</h2>
             </div>
             <ul class="categories">
+                {{if .}}
+                {{range .}}
+                <li><a href="#"><i class="ri-hashtag"></i>{{ .Categori }}</a></li>
+                {{end}}
+                {{else}}
+                <li>No categories found.</li>
+                {{end}}
                 <li><a href="#"><i class="ri-hashtag"></i>Golang</a></li>
                 <li><a href="#"><i class="ri-hashtag"></i>Javascript</a></li>
                 <li><a href="#"><i class="ri-hashtag"></i>Design</a></li>
