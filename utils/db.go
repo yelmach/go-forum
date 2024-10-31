@@ -15,7 +15,9 @@ func InitDb() error {
 		return err
 	}
 
-	db.Ping()
+	if err = db.Ping(); err != nil {
+		return err
+	}
 
 	_, err = db.Exec(`-- Users table
 	CREATE TABLE IF NOT EXISTS users (
