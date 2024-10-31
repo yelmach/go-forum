@@ -28,11 +28,31 @@ func CreateCategories(categories models.Categories) (bool, error) {
 	return true, nil
 }
 
-func DisplayCategories(categories models.Categories) (string, error) {
-	var resalt string
-	err := utils.DataBase.QueryRow("SELECT categori FROM categories").Scan(&resalt)
-	if err != nil {
-		return "", err
+func DisplayCategories(categori string) ([]models.Categories, error) {
+	var categories models.Categories
+	if categori == "" {
+		rows, err := utils.DataBase.Query("SELECT * FROM categories")
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		var categoriSlice []models.Categories
+		for rows.Next() {
+			rows.Scan(&categories.Id, categories.Categori, categories.PostId)
+			categoriSlice = append(categoriSlice, categories)
+		}
+		return categoriSlice, nil
+	} else {
+		rows, err := utils.DataBase.Query("SELECT categori FROM categories WHERE categori = ?", categori)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		var categoriSlice []models.Categories
+		for rows.Next() {
+			rows.Scan(&categories.Id, categories.Categori, categories.PostId)
+			categoriSlice = append(categoriSlice, categories)
+		}
+		return categoriSlice, nil
 	}
-	return resalt, nil
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+
+	"forum/controllers"
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -12,7 +14,11 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-
+	data, err := controllers.DisplayCategories("")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	fmt.Println("data : ", data[1].Categori)
 	tmpl.Execute(w, nil)
 }
 
