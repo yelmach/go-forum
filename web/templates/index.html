@@ -32,20 +32,18 @@
                 <h2>categories</h2>
             </div>
             <ul class="categories">
-                {{if .}}
-                {{range .}}
+                {{if .Categories}}
+                {{range .Categories}}
                 <li><a href="#"><i class="ri-hashtag"></i>{{ .Categori }}</a></li>
                 {{end}}
                 {{else}}
                 <li>No categories found.</li>
                 {{end}}
-                <li><a href="#"><i class="ri-hashtag"></i>Golang</a></li>
-                <li><a href="#"><i class="ri-hashtag"></i>Javascript</a></li>
-                <li><a href="#"><i class="ri-hashtag"></i>Design</a></li>
-                <li><a href="#"><i class="ri-hashtag"></i>Rust</a></li>
             </ul>
         </div>
         <div class="posts-container">
+            {{if .Posts}}
+            {{range .Posts}}
             <div class="post">
                 <div class="user-info">
                     <img src="/assets/img/usrs/Ava01.png" alt="User avatar" class="avatar">
@@ -55,15 +53,14 @@
                     </div>
                 </div>
                 <div class="post-content">
-                    <h3>How to patch KDE on FreeBSD?</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquet maecenas ut sit nulla
-                    </p>
+                    <h3>{{.Title}}</h3>
+                    <p>{{.Content}}</p>
                 </div>
                 <div class="tags-stats">
                     <div class="tags">
-                        <span class="tag">golang</span>
-                        <span class="tag">linux</span>
-                        <span class="tag">overflow</span>
+                        <span class="tag">Categori</span>
+                        <span class="tag">Categori</span>
+                        <span class="tag">Categori</span>
                     </div>
                     <div class="post-stats">
                         <div class="stat">
@@ -78,8 +75,11 @@
                     </div>
                 </div>
             </div>
-
-            <div class="post">
+            {{end}}
+            {{else}}
+            <li>No posts found.</li>
+            {{end}}
+            <!-- <div class="post">
                 <div class="user-info">
                     <img src="/assets/img/usrs/Ava01.png" alt="User avatar" class="avatar">
                     <div>
@@ -152,7 +152,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
         </div>
         <div class="widget">
