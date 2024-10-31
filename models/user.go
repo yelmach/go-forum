@@ -23,4 +23,5 @@ type Posts struct {
 	Id      int
 	Title   string
 	Content string
+	UserId  int
 }
