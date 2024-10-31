@@ -62,6 +62,7 @@ func LoginUser(user models.User) (models.User, error) {
 	return existUser, nil
 }
 
+// StoreSession is designed to save a new user session in a database if it doesn't already exist
 func StoreSession(id string, user models.User) error {
 	// check for already stored session
 	var count int
@@ -108,6 +109,7 @@ func GetSession(r *http.Request) (models.User, error) {
 	if err != nil {
 		return models.User{}, err
 	}
+	fmt.Println(user_id)
 
 	stmt, err = utils.DataBase.Prepare("SELECT id, username, email, password FROM users WHERE id = ?")
 	if err != nil {

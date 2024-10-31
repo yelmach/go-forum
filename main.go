@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	err := utils.InitDb() // initial data base
+	err := utils.InitDb()
 	if err != nil {
 		log.Fatalln(err)
 		return
