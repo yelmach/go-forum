@@ -56,7 +56,8 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 
 	// Check for errors from iterating over rows
 	if err = dbPosts.Err(); err != nil {
-		log.Fatal(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
