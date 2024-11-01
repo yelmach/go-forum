@@ -135,6 +135,7 @@ input {
     border: 2px solid #EAEAEA;
     border-radius: 5px;
     outline: none;
+    transition: border-color .6s ease;
 }
 
 input::placeholder {
@@ -145,6 +146,7 @@ input::placeholder {
 input:focus,
 input:hover {
     border: 2px solid #F48023;
+    /* transition: border-color 0.3s ease; */
 }
 
 #submit {
@@ -163,6 +165,11 @@ input:hover {
 #submit:active {
     background-color: rgba(244, 128, 35, 0.8);
     border-color: transparent;
+}
+
+#errorMessage {
+    color: #f00;
+    font-weight: 400;
 }
 
 /********** Register **********/

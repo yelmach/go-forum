@@ -1,22 +1,20 @@
 package routers
 
 import (
+	"net/http"
+
 	"forum/handlers"
 	"forum/handlers/api"
-	"net/http"
 )
 
 func SetupRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/assets/", handlers.AssetsHandler)
+	mux.HandleFunc("GET /assets/", handlers.AssetsHandler)
 
-	mux.HandleFunc("/", handlers.HomeHandler)
-	mux.HandleFunc("/login", handlers.LoginHandler)
-	mux.HandleFunc("/register", handlers.RegisterHandler)
+	mux.HandleFunc("GET /", handlers.HomeHandler)
+	mux.HandleFunc("GET /login", handlers.LoginHandler)
+	mux.HandleFunc("GET /register", handlers.RegisterHandler)
+	mux.HandleFunc("GET /api/posts", handlers.LoadData)
 
-	mux.HandleFunc("/api/login", api.LoginUser)
-	mux.HandleFunc("/api/users", api.PostUser)
-	mux.HandleFunc("/check_session", api.SessionHandler)
-	// mux.HandleFunc("POST /post")
-	// mux.HandleFunc("POST /comment")
-	// mux.HandleFunc("POST /check_session")
+	mux.HandleFunc("POST /api/login", api.LoginUser)
+	mux.HandleFunc("POST /api/users", api.PostUser)
 }
