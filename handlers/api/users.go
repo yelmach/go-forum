@@ -109,8 +109,36 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 		Image_url:  r.FormValue("Image_url"),
 		Created_at: time.Now().Format("2006-01-02 15:04:05"),
 	}
+	if postContent.Title == "" || postContent.Content == "" {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	err = controllers.CreatePost(postContent)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := controllers.GetSession(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	commentContent := models.Comments{
+		User_id:    user.Id,
+		Post_id:    1,
+		Content:    r.FormValue("Content"),
+		Created_at: time.Now().Format("2006-01-02 15:04:05"),
+	}
+	if commentContent.Content == "" {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = controllers.CreateComments(commentContent)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }

@@ -19,4 +19,6 @@ func SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/users", api.PostUser)
 	// create posts
 	mux.HandleFunc("POST /newposts", api.CreatePostsHandler)
+	// create comments
+	mux.HandleFunc("POST /newcomment", api.CreateCommentsHandler)
 }
