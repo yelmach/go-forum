@@ -13,7 +13,7 @@ html {
 }
 
 html {
-    font-size: 16px;
+    font-size: 15px;
 }
 
 body {
@@ -108,7 +108,15 @@ a {
     flex-direction: column;
     gap: 0.5rem;
     background-color: #fff;
-    padding: 3rem 0;
+    padding: 2.5rem 0;
+}
+
+.sidebar label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #808080;
+    margin: 10px 40px;
 }
 
 .menu-select {
@@ -146,7 +154,7 @@ a {
 
 .categories {
     letter-spacing: 1px;
-    margin-left: 4.5rem;
+    margin-left: 3.5rem;
     list-style: none;
     margin-top: -0.25rem;
 }
@@ -180,6 +188,7 @@ a {
 }
 
 .post-content>h3 {
+    font-size: 1rem;
     margin-bottom: 0.65rem;
 }
 
@@ -309,4 +318,13 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 1fr 3fr;
+    }
+    .widget {
+        display: none;
+    }
 }
