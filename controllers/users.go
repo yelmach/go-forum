@@ -128,15 +128,36 @@ func GetSession(r *http.Request) (models.User, error) {
 }
 
 func CreatePost(postContent models.PostContent) error {
-	C_post, err := utils.DataBase.Prepare(`INSERT INTO posts(user_id,title,content,image_url,created_at) VALUES(?,?,?,?,?)`)
+	C_post, err := utils.DataBase.Prepare(`INSERT INTO posts(user_id, title, content, image_url, created_at) VALUES(?, ?, ?, ?, ?)`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer C_post.Close()
-	_, err = C_post.Exec(&postContent.User_id, &postContent.Title, &postContent.Content, &postContent.Image_url, &postContent.Created_at)
+
+	res, err := C_post.Exec(postContent.User_id, postContent.Title, postContent.Content, postContent.Image_url, postContent.Created_at)
 	if err != nil {
 		return err
 	}
+
+	// Get the ID of the newly created post
+	postID, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	C_postCategories, err := utils.DataBase.Prepare(`INSERT INTO post_categories(post_id, category_id) VALUES(?, ?)`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement for post_categories: %w", err)
+	}
+	defer C_postCategories.Close()
+
+	for _, categoryID := range postContent.Category_id {
+		_, err := C_postCategories.Exec(postID, categoryID)
+		if err != nil {
+			return fmt.Errorf("error linking post to category %d: %w", categoryID, err)
+		}
+	}
+
 	return nil
 }
 

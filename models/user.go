@@ -15,11 +15,12 @@ type Session struct {
 	ExpiresAt time.Time
 }
 type PostContent struct {
-	User_id    int
-	Title      string
-	Content    string
-	Image_url  string
-	Created_at string
+	User_id     int
+	Title       string
+	Content     string
+	Category_id []int
+	Image_url   string
+	Created_at  string
 }
 type Comments struct {
 	Post_id    int
