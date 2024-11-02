@@ -106,6 +106,7 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 		User_id:    user.Id,
 		Title:      r.FormValue("Title"),
 		Content:    r.FormValue("Content"),
+		Category_id:  r.Form["categories"],
 		Image_url:  r.FormValue("Image_url"),
 		Created_at: time.Now().Format("2006-01-02 15:04:05"),
 	}

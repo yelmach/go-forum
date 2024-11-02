@@ -18,7 +18,7 @@ type PostContent struct {
 	User_id     int
 	Title       string
 	Content     string
-	Category_id []int
+	Category_id []string
 	Image_url   string
 	Created_at  string
 }

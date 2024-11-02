@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"forum/models"
 	"forum/utils"
@@ -152,12 +153,12 @@ func CreatePost(postContent models.PostContent) error {
 	defer C_postCategories.Close()
 
 	for _, categoryID := range postContent.Category_id {
-		_, err := C_postCategories.Exec(postID, categoryID)
+		Category_id, _ := strconv.Atoi(categoryID)
+		_, err := C_postCategories.Exec(postID, Category_id)
 		if err != nil {
-			return fmt.Errorf("error linking post to category %d: %w", categoryID, err)
+			return fmt.Errorf("error linking post to category %s: %w", categoryID, err)
 		}
 	}
-
 	return nil
 }
 

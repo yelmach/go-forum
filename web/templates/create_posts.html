@@ -97,11 +97,6 @@
             gap: 8px;
         }
 
-        .btn-draft {
-            background-color: #f1f1f1;
-            color: #666;
-        }
-
         .btn-publish {
             background-color: #f4b142;
             color: white;
@@ -117,8 +112,8 @@
     <form action="/newposts" method="post">
         <div class="form-container">
             <div class="select-container">
-                <select>
-                    <option value="" disabled selected>Choose categories</option>
+                <select name="categories" id="categorySelect" multiple>
+                    <option value="" disabled>Select categories</option>
                     <option value="1">Category 1</option>
                     <option value="2">Category 2</option>
                     <option value="3">Category 3</option>
@@ -138,8 +133,7 @@
                     </svg>
                     Add Image
                 </button>
-                <button class="btn btn-draft">Save as draft</button>
-                <button class="btn btn-publish">Publish</button>
+                <button type="submit" class="btn btn-publish">Publish</button>
             </div>
         </div>
     </form>
