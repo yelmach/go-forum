@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"forum/controllers"
 	"forum/models"
@@ -93,4 +94,23 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Msg: "You are logged in",
 	})
+}
+
+func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := controllers.GetSession(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	postContent := models.PostContent{
+		User_id:    user.Id,
+		Title:      r.FormValue("Title"),
+		Content:    r.FormValue("Content"),
+		Image_url:  r.FormValue("Image_url"),
+		Created_at: time.Now().Format("2006-01-02 15:04:05"),
+	}
+	err = controllers.CreatePost(postContent)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

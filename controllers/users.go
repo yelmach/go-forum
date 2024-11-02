@@ -126,3 +126,16 @@ func GetSession(r *http.Request) (models.User, error) {
 
 	return user, nil
 }
+
+func CreatePost(postContent models.PostContent) error {
+	C_post, err := utils.DataBase.Prepare(`INSERT INTO posts(user_id,title,content,image_url,created_at) VALUES(?,?,?,?,?)`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer C_post.Close()
+	_, err = C_post.Exec(&postContent.User_id, &postContent.Title, &postContent.Content, &postContent.Image_url, &postContent.Created_at)
+	if err != nil {
+		return err
+	}
+	return nil
+}
