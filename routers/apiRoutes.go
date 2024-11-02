@@ -1,14 +1,20 @@
 package routers
 
 import (
+	"net/http"
+
+	"forum/handlers"
 	"forum/handlers/api"
-	"forum/utils"
 )
 
-func InitApiRouter(app *utils.App) {
-	apiRouter := app.NewRouter("/api")
+func SetupRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /assets/", handlers.AssetsHandler)
 
-	apiRouter.Post("/users", api.PostUser)
-	apiRouter.Post("/login", api.LoginUser)
-	apiRouter.Get("/check_session", api.SessionHandler)
+	mux.HandleFunc("GET /", handlers.HomeHandler)
+	mux.HandleFunc("GET /login", handlers.LoginHandler)
+	mux.HandleFunc("GET /register", handlers.RegisterHandler)
+	mux.HandleFunc("GET /api/posts", handlers.LoadData)
+
+	mux.HandleFunc("POST /api/login", api.LoginUser)
+	mux.HandleFunc("POST /api/users", api.PostUser)
 }

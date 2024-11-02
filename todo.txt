@@ -1,0 +1,2 @@
+if user already loged in and tryed enter to login or register redirect to home page 
+remove session id after logout
