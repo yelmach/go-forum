@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"forum/models"
 	"forum/utils"
@@ -63,7 +64,7 @@ func LoginUser(user models.User) (models.User, error) {
 }
 
 // StoreSession is designed to save a new user session in a database if it doesn't already exist
-func StoreSession(id string, user models.User) error {
+func StoreSession(id string, user models.User, expiredAt time.Time) error {
 	// check for already stored session
 	var count int
 	err := utils.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ? ", id).Scan(&count)
@@ -75,14 +76,16 @@ func StoreSession(id string, user models.User) error {
 		return errors.New("session already exist")
 	}
 
-	stmt, err := utils.DataBase.Prepare("INSERT INTO sessions (user_id, session_id) VALUES (?, ?)")
+	// expiration time for this session
+
+	stmt, err := utils.DataBase.Prepare("INSERT INTO sessions (user_id, session_id, expires_at) VALUES (?, ?, ?)")
 	if err != nil {
 		return err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Id, id)
+	_, err = stmt.Exec(user.Id, id, expiredAt)
 	if err != nil {
 		return err
 	}
@@ -102,8 +105,8 @@ func GetSession(r *http.Request) (models.User, error) {
 	if err != nil {
 		return models.User{}, err
 	}
-
 	defer stmt.Close()
+
 	var user_id int
 	err = stmt.QueryRow(id[0]).Scan(&user_id)
 	if err != nil {

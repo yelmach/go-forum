@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"time"
 
 	"forum/controllers"
 	"forum/models"
@@ -59,11 +61,27 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	sessionId := id.String()
+
+	expiredAt := time.Now().Add(24 * time.Hour)
+
 	// store session in database
-	err = controllers.StoreSession(sessionId, user)
+	err = controllers.StoreSession(sessionId, user, expiredAt)
 	if err != nil {
 		http.Error(w, "You already have a session", http.StatusBadRequest)
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionId,
+		Expires:  expiredAt,
+		Path:     "/",
+		HttpOnly: true,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "user_id",
+		Value: strconv.Itoa(user.Id),
+	})
 
 	w.WriteHeader(200)
 	data, err := json.Marshal(struct {
