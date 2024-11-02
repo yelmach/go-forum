@@ -28,3 +28,11 @@ type Comments struct {
 	Content    string
 	Created_at string
 }
+
+type Reactions struct {
+	User_id    int
+	Post_id    int
+	Comment_id int
+	Is_like    bool
+	Created_at string
+}

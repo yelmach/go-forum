@@ -154,8 +154,7 @@ func CreatePost(postContent models.PostContent) error {
 
 	for _, categoryID := range postContent.Category_id {
 		Category_id, _ := strconv.Atoi(categoryID)
-		_, err := C_postCategories.Exec(postID, Category_id)
-		if err != nil {
+		if _, err := C_postCategories.Exec(postID, Category_id); err != nil {
 			return fmt.Errorf("error linking post to category %s: %w", categoryID, err)
 		}
 	}
@@ -170,8 +169,29 @@ func CreateComments(commentContent models.Comments) error {
 
 	defer C_comment.Close()
 
-	_, err = C_comment.Exec(commentContent.Post_id, commentContent.User_id, commentContent.Content, commentContent.Created_at)
+	if _, err = C_comment.Exec(commentContent.Post_id, commentContent.User_id, commentContent.Content, commentContent.Created_at); err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
+func CreateReaction(reactions models.Reactions) error {
+	var query string
+	var id int
+	isPost := reactions.Post_id != 0
+	if isPost {
+		query = `INSERT INTO reactions (user_id, post_id, is_like, created_at) VALUES (?, ?, ?, ?)`
+		id = reactions.Post_id
+	} else {
+		query = `INSERT INTO reactions (user_id, comment_id, is_like, created_at) VALUES (?, ?, ?, ?)`
+		id = reactions.Comment_id
+	}
+	C_reaction, err := utils.DataBase.Prepare(query)
 	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+	if _, err = C_reaction.Exec(reactions.User_id, id, reactions.Is_like, reactions.Created_at); err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
 

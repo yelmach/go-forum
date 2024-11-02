@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"forum/controllers"
@@ -137,6 +138,7 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if commentContent.Content == "" {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+
 		return
 	}
 	err = controllers.CreateComments(commentContent)
@@ -144,4 +146,44 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := controllers.GetSession(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	postID := r.URL.Query().Get("post_id")
+	commentID := r.URL.Query().Get("comment_id")
+	isLike := r.URL.Query().Get("is_like")
+
+	like, err := strconv.ParseBool(isLike)
+	if err != nil {
+		http.Error(w, "Invalid like value", http.StatusBadRequest)
+		return
+	}
+	reactions := models.Reactions{
+		User_id:    user.Id,
+		Post_id:    0,
+		Comment_id: 0,
+		Is_like:    like,
+		Created_at: time.Now().Format("2006-01-02 15:04:05"),
+	}
+
+	if postID != "" {
+		reactions.Post_id, _ = strconv.Atoi(postID)
+	} else if commentID != "" {
+		reactions.Comment_id, _ = strconv.Atoi(commentID)
+	} else {
+		http.Error(w, "Either post_id or comment_id must be provided", http.StatusBadRequest)
+		return
+	}
+
+	err = controllers.CreateReaction(reactions)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
