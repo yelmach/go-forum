@@ -102,16 +102,17 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	postContent := models.PostContent{
-		User_id:    user.Id,
-		Title:      r.FormValue("Title"),
-		Content:    r.FormValue("Content"),
-		Category_id:  r.Form["categories"],
-		Image_url:  r.FormValue("Image_url"),
-		Created_at: time.Now().Format("2006-01-02 15:04:05"),
+		User_id:     user.Id,
+		Title:       r.FormValue("Title"),
+		Content:     r.FormValue("Content"),
+		Category_id: r.Form["categories"],
+		Image_url:   r.FormValue("Image_url"),
+		Created_at:  time.Now().Format("2006-01-02 15:04:05"),
 	}
 	if postContent.Title == "" || postContent.Content == "" {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "err.Error()", http.StatusBadRequest)
 		return
 	}
 	err = controllers.CreatePost(postContent)
@@ -119,6 +120,7 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	http.ServeFile(w, r, "./web/templates/create_posts.html") // Serve your HTML form
 }
 
 func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {

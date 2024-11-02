@@ -35,3 +35,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl.Execute(w, nil)
 }
+
+func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("./web/templates/create_posts.html")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	tmpl.Execute(w, nil)
+}
