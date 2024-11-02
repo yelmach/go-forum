@@ -120,7 +120,7 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.ServeFile(w, r, "./web/templates/create_posts.html") // Serve your HTML form
+	http.ServeFile(w, r, "./web/templates/create_posts.html") 
 }
 
 func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
