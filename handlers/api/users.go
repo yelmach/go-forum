@@ -97,25 +97,25 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := controllers.GetSession(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// user, err := controllers.GetSession(r)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
 	postContent := models.PostContent{
-		User_id:     user.Id,
+		User_id:     1,
 		Title:       r.FormValue("Title"),
 		Content:     r.FormValue("Content"),
 		Category_id: r.Form["categories"],
 		Image_url:   r.FormValue("Image_url"),
 		Created_at:  time.Now().Format("2006-01-02 15:04:05"),
 	}
-	if postContent.Title == "" || postContent.Content == "" {
+	if postContent.Title == "" || postContent.Content == "" || len(postContent.Category_id) == 0 {
 		http.Error(w, "err.Error()", http.StatusBadRequest)
 		return
 	}
-	err = controllers.CreatePost(postContent)
+	err := controllers.CreatePost(postContent)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -112,7 +112,7 @@
     <form action="/newposts" method="post">
         <div class="form-container">
             <div class="select-container">
-                <select name="categories" id="categorySelect" multiple>
+                <select name="categories" id="categorySelect" multiple required>
                     <option value="" disabled>Select categories</option>
                     <option value="1">Category 1</option>
                     <option value="2">Category 2</option>
@@ -120,9 +120,9 @@
                 </select>
             </div>
 
-            <input type="text" name="Title" placeholder="Type catching attention title">
+            <input type="text" name="Title" placeholder="Type catching attention title" required>
 
-            <textarea name="Content" placeholder="Type your question"></textarea>
+            <textarea name="Content" placeholder="Type your question" required></textarea>
 
             <div class="button-container">
                 <button class="btn btn-add-image">
