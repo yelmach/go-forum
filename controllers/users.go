@@ -163,14 +163,17 @@ func CreatePost(postContent models.PostContent) error {
 }
 
 func CreateComments(commentContent models.Comments) error {
-	C_comment, err := utils.DataBase.Prepare(`INSERT INTO comments(post_id,user_id,content,created_at)VALUES(?,?,?,?)`)
+	C_comment, err := utils.DataBase.Prepare(`INSERT INTO comments(post_id, user_id, content, created_at) VALUES(?, ?, ?, ?)`)
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
+
 	defer C_comment.Close()
-	_, err = C_comment.Exec(&commentContent.Post_id, &commentContent.User_id, &commentContent.Content, &commentContent.Created_at)
+
+	_, err = C_comment.Exec(commentContent.Post_id, commentContent.User_id, commentContent.Content, commentContent.Created_at)
 	if err != nil {
-		return err
+		return fmt.Errorf("error executing statement: %w", err)
 	}
+
 	return nil
 }
