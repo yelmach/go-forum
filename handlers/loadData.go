@@ -51,6 +51,13 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+
+		post.Likes, post.Dislikes, err = getReaction(post.Id, true)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
 		posts = append(posts, post)
 	}
 
@@ -63,6 +70,51 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(posts)
+}
+
+func getReaction(Id int, ispost bool) ([]int, []int, error) {
+	var queryLikes, queryDislikes string
+
+	switch ispost {
+	case true:
+		queryLikes = `SELECT user_id FROM reactions WHERE post_id=? AND is_like=1`
+		queryDislikes = `SELECT user_id FROM reactions WHERE post_id=? AND is_like=0`
+	case false:
+		queryLikes = `SELECT user_id FROM reactions WHERE comment_id=? AND is_like=1`
+		queryDislikes = `SELECT user_id FROM reactions WHERE comment_id=? AND is_like=0`
+	}
+	userlikes, err := getUsersIds(queryLikes, Id)
+	if err != nil {
+		return []int{}, []int{}, err
+	}
+
+	userdislikes, err := getUsersIds(queryDislikes, Id)
+	if err != nil {
+		return []int{}, []int{}, err
+	}
+
+	return userlikes, userdislikes, nil
+}
+
+func getUsersIds(query string, Id int) ([]int, error) {
+	usersIds := []int{}
+	rows, err := utils.DataBase.Query(query, Id)
+	if err != nil {
+		return []int{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var userid int
+
+		if err := rows.Scan(&userid); err != nil {
+			return []int{}, err
+		}
+		usersIds = append(usersIds, userid)
+
+	}
+
+	return usersIds, nil
 }
 
 func getUsername(userId int) (string, error) {
@@ -79,7 +131,7 @@ func getUsername(userId int) (string, error) {
 func getPostComments(postId int) ([]models.Comment, error) {
 	comments := []models.Comment{}
 
-	query := `SELECT user_id, content, created_at FROM comments WHERE post_id=?`
+	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=?`
 	dbComments, err := utils.DataBase.Query(query, postId)
 	if err != nil {
 		return []models.Comment{}, err
@@ -89,11 +141,17 @@ func getPostComments(postId int) ([]models.Comment, error) {
 	for dbComments.Next() {
 		var comment models.Comment
 		var userId int
+		var commentid int
 
-		err := dbComments.Scan(&userId, &comment.Content, &comment.CreatedAt)
+		err := dbComments.Scan(&commentid, &userId, &comment.Content, &comment.CreatedAt)
 		if err != nil {
 			return []models.Comment{}, err
 		}
+
+		comment.Likes, comment.Dislikes, err = getReaction(commentid, false)
+		if err != nil {
+			return []models.Comment{}, err
+		}	
 
 		comment.By, err = getUsername(userId)
 		if err != nil {
