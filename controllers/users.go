@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"forum/models"
 	"forum/utils"
@@ -64,7 +63,7 @@ func LoginUser(user models.User) (models.User, error) {
 }
 
 // StoreSession is designed to save a new user session in a database if it doesn't already exist
-func StoreSession(id string, user models.User, expiredAt time.Time) error {
+func StoreSession(id string, user models.User) error {
 	// check for already stored session
 	var count int
 	err := utils.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ? ", id).Scan(&count)
@@ -78,14 +77,14 @@ func StoreSession(id string, user models.User, expiredAt time.Time) error {
 
 	// expiration time for this session
 
-	stmt, err := utils.DataBase.Prepare("INSERT INTO sessions (user_id, session_id, expires_at) VALUES (?, ?, ?)")
+	stmt, err := utils.DataBase.Prepare("INSERT INTO sessions (user_id, session_id) VALUES (?, ?)")
 	if err != nil {
 		return err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Id, id, expiredAt)
+	_, err = stmt.Exec(user.Id, id)
 	if err != nil {
 		return err
 	}

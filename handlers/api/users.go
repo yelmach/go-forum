@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
 
 	"forum/controllers"
 	"forum/models"
@@ -62,10 +61,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 	sessionId := id.String()
 
-	expiredAt := time.Now().Add(24 * time.Hour)
-
 	// store session in database
-	err = controllers.StoreSession(sessionId, user, expiredAt)
+	err = controllers.StoreSession(sessionId, user)
 	if err != nil {
 		http.Error(w, "You already have a session", http.StatusBadRequest)
 	}
@@ -73,9 +70,9 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionId,
-		Expires:  expiredAt,
 		Path:     "/",
 		HttpOnly: true,
+		MaxAge:   1000,
 	})
 
 	http.SetCookie(w, &http.Cookie{
