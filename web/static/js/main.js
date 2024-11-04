@@ -138,7 +138,7 @@ const openPost = async (postId) => {
     <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">
     <p class="username">@${post.by}</p>
     `
-    
+
     document.querySelector('.btn-cancel').addEventListener('click', function () {
         document.querySelector('.comment-input').value = '';
     });
@@ -194,13 +194,19 @@ const createdPosts = () => {
     postsContainer.classList.add('posts-container');
     disactive(document.querySelectorAll('.menu-select'))
     document.getElementById('select_2').classList.add('active')
-
-    for (const post of posts) {
-        const postDiv = createPostElement(post);
-        postsContainer.append(postDiv);
-    }
     main.innerHTML = ''
-    main.append(postsContainer)
+    if (!posts.length) {
+        main.innerHTML += `
+        <img style="display: block; width:300px; margin: 3rem auto;" src="/assets/img/no_data.svg" alt="no result"/>
+        <h2 style="text-align:center">Noting Found</h2>
+        `
+    } else {
+        for (const post of posts) {
+            const postDiv = createPostElement(post);
+            postsContainer.append(postDiv);
+        }
+        main.append(postsContainer)
+    }
 }
 
 const likedPosts = () => {
@@ -211,13 +217,19 @@ const likedPosts = () => {
     postsContainer.classList.add('posts-container');
     disactive(document.querySelectorAll('.menu-select'))
     document.getElementById('select_3').classList.add('active')
-
-    for (const post of posts) {
-        const postDiv = createPostElement(post);
-        postsContainer.append(postDiv);
-    }
     main.innerHTML = ''
-    main.append(postsContainer)
+    if (!posts.length) {
+        main.innerHTML += `
+        <img style="display: block; width:300px; margin: 3rem auto;" src="/assets/img/no_data.svg" alt="no result"/>
+        <h2 style="text-align:center">Noting Found</h2>
+        `
+    } else {
+        for (const post of posts) {
+            const postDiv = createPostElement(post);
+            postsContainer.append(postDiv);
+        }
+        main.append(postsContainer)
+    }
 }
 
 console.log(`
