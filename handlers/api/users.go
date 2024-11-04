@@ -152,7 +152,6 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if commentContent.Content == "" {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-
 		return
 	}
 	err = controllers.CreateComments(commentContent)
