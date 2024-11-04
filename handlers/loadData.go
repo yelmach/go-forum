@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -15,7 +16,7 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 	var userId int
 
 	id, _ := strconv.Atoi(r.PathValue("id"))
-
+	fmt.Println("id post : ", id)
 	query := `SELECT id, user_id, title, content, image_url, created_at FROM posts WHERE id=?`
 	err := utils.DataBase.QueryRow(query, id).Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt)
 	if err != nil {

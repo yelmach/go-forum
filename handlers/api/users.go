@@ -75,10 +75,11 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		MaxAge:   1000,
 	})
-
 	http.SetCookie(w, &http.Cookie{
-		Name:  "user_id",
-		Value: strconv.Itoa(user.Id),
+		Name:   "user_id",
+		Value:  strconv.Itoa(user.Id),
+		Path:   "/",
+		MaxAge: 1000,
 	})
 
 	w.WriteHeader(200)
@@ -112,14 +113,14 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := controllers.GetSession(r)
+	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
 
 	postContent := models.PostContent{
-		User_id:     user.Id,
+		User_id:     user_id,
 		Title:       r.FormValue("Title"),
 		Content:     r.FormValue("Content"),
 		Category_id: r.Form["categories"],
@@ -139,13 +140,13 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := controllers.GetSession(r)
+	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
 	commentContent := models.Comments{
-		User_id:    user.Id,
+		User_id:    user_id,
 		Post_id:    1,
 		Content:    r.FormValue("Content"),
 		Created_at: time.Now().Format("2006-01-02 15:04:05"),
@@ -162,9 +163,11 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := controllers.GetSession(r)
+	// id, _ := strconv.Atoi(r.PathValue("id"))
+	
+	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
 	postID := r.URL.Query().Get("post_id")
@@ -177,7 +180,7 @@ func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reactions := models.Reactions{
-		User_id:    user.Id,
+		User_id:    user_id,
 		Post_id:    0,
 		Comment_id: 0,
 		Is_like:    like,
