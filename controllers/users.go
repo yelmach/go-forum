@@ -94,10 +94,11 @@ func StoreSession(id string, user models.User) error {
 
 func GetSession(r *http.Request) (models.User, error) {
 	id := r.Header["Authorization"]
-	// fmt.Println(r.Header)
+
 	if len(id) != 1 {
 		return models.User{}, errors.New("no session id provided")
 	}
+
 	// get the id and the user from the db
 	var user models.User
 	stmt, err := utils.DataBase.Prepare("SELECT user_id FROM sessions WHERE session_id = ?")
@@ -193,6 +194,30 @@ func CreateReaction(reactions models.Reactions) error {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
 	if _, err = C_reaction.Exec(reactions.User_id, id, reactions.Is_like, reactions.Created_at); err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
+func CreateCategorie(name_categorie string) error {
+	var count int
+
+	err := utils.DataBase.QueryRow("SELECT COUNT(*) FROM categories WHERE name = ?", name_categorie).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("error checking category existence: %w", err)
+	}
+	if count > 0 {
+		return errors.New("category already exists")
+	}
+
+	C_categories, err := utils.DataBase.Prepare(`INSERT INTO categories (name) VALUES (?)`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer C_categories.Close()
+
+	if _, err := C_categories.Exec(name_categorie); err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
 

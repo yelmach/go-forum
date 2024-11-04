@@ -8,6 +8,7 @@ import (
 
 	"forum/controllers"
 	"forum/models"
+	"forum/utils"
 
 	"github.com/gofrs/uuid"
 )
@@ -68,25 +69,10 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "You already have a session", http.StatusBadRequest)
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    sessionId,
-		Path:     "/",
-		HttpOnly: true,
-		MaxAge:   1000,
-	})
-	http.SetCookie(w, &http.Cookie{
-		Name:   "user_id",
-		Value:  strconv.Itoa(user.Id),
-		Path:   "/",
-		MaxAge: 1000,
-	})
-	http.SetCookie(w, &http.Cookie{
-		Name:   "user_name",
-		Value:  user.Username,
-		Path:   "/",
-		MaxAge: 1000,
-	})
+	AddCookie(w, "session_id", sessionId)
+	AddCookie(w, "user_id", strconv.Itoa(user.Id))
+	AddCookie(w, "user_name", user.Username)
+
 	w.WriteHeader(200)
 	data, err := json.Marshal(struct {
 		Msg       string
@@ -157,11 +143,21 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		Created_at: time.Now().Format("2006-01-02 15:04:05"),
 	}
 	if commentContent.Content == "" {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	err = controllers.CreateComments(commentContent)
-	if err != nil {
+	if err = controllers.CreateComments(commentContent); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func CreateCategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	name_categorie := r.URL.Query().Get("categori_name")
+	if len(name_categorie) == 0 {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+	}
+	if err := controllers.CreateCategorie(name_categorie); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -207,4 +203,36 @@ func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	session_id := r.Cookies()[0].Value
+	query := `DELETE FROM sessions WHERE session_id=?`
+	if _, err := utils.DataBase.Exec(query, session_id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	DeleteCookie(w, "session_id")
+	DeleteCookie(w, "user_id")
+	DeleteCookie(w, "user_name")
+
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func AddCookie(w http.ResponseWriter, name, value string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   name,
+		Value:  value,
+		Path:   "/",
+		MaxAge: 60 * 60 * 24,
+	})
+}
+
+func DeleteCookie(w http.ResponseWriter, session_name string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   session_name,
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
 }
