@@ -94,11 +94,10 @@ func StoreSession(id string, user models.User) error {
 
 func GetSession(r *http.Request) (models.User, error) {
 	id := r.Header["Authorization"]
-
+	fmt.Println(r.Header)
 	if len(id) != 1 {
 		return models.User{}, errors.New("no session id provided")
 	}
-
 	// get the id and the user from the db
 	var user models.User
 	stmt, err := utils.DataBase.Prepare("SELECT user_id FROM sessions WHERE session_id = ?")

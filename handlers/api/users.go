@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -112,6 +113,7 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Cookies : ", r.Cookies())
 	user, err := controllers.GetSession(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
