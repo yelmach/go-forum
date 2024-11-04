@@ -69,26 +69,9 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "You already have a session", http.StatusBadRequest)
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    sessionId,
-		Path:     "/",
-		MaxAge:   1000,
-	})
-
-	http.SetCookie(w, &http.Cookie{
-		Name:   "user_id",
-		Value:  strconv.Itoa(user.Id),
-		Path:   "/",
-		MaxAge: 1000,
-	})
-
-	http.SetCookie(w, &http.Cookie{
-		Name:   "user_name",
-		Value:  user.Username,
-		Path:   "/",
-		MaxAge: 1000,
-	})
+	AddCookie(w, "session_id", sessionId)
+	AddCookie(w, "user_id", strconv.Itoa(user.Id))
+	AddCookie(w, "user_name", user.Username)
 
 	w.WriteHeader(200)
 	data, err := json.Marshal(struct {
@@ -219,23 +202,27 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    "",
-		Path:     "/",
-		MaxAge:   -1,
-	})
-	http.SetCookie(w, &http.Cookie{
-		Name:     "user_id",
-		Value:    "",
-		Path:     "/",
-		MaxAge:   -1,
-	})
-	http.SetCookie(w, &http.Cookie{
-		Name:     "user_name",
-		Value:    "",
-		Path:     "/",
-		MaxAge:   -1,
-	})
+	DeleteCookie(w, "session_id")
+	DeleteCookie(w, "user_id")
+	DeleteCookie(w, "user_name")
+
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func AddCookie(w http.ResponseWriter, name, value string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   name,
+		Value:  value,
+		Path:   "/",
+		MaxAge: 60 * 60 * 24,
+	})
+}
+
+func DeleteCookie(w http.ResponseWriter, session_name string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   session_name,
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
 }
