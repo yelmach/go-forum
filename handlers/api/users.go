@@ -81,6 +81,12 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		Path:   "/",
 		MaxAge: 1000,
 	})
+	http.SetCookie(w, &http.Cookie{
+		Name:   "user_name",
+		Value:  user.Username,
+		Path:   "/",
+		MaxAge: 1000,
+	})
 
 	w.WriteHeader(200)
 	data, err := json.Marshal(struct {
@@ -164,7 +170,7 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 
 func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 	// id, _ := strconv.Atoi(r.PathValue("id"))
-	
+
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
