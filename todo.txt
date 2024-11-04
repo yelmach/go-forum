@@ -1,2 +1,3 @@
 if user already loged in and tryed enter to login or register redirect to home page 
 remove session id after logout
+need to compair the session from the req with the one in the database

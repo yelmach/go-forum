@@ -8,6 +8,7 @@ import (
 
 	"forum/controllers"
 	"forum/models"
+	"forum/utils"
 
 	"github.com/gofrs/uuid"
 )
@@ -72,15 +73,16 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		Name:     "session_id",
 		Value:    sessionId,
 		Path:     "/",
-		HttpOnly: true,
 		MaxAge:   1000,
 	})
+
 	http.SetCookie(w, &http.Cookie{
 		Name:   "user_id",
 		Value:  strconv.Itoa(user.Id),
 		Path:   "/",
 		MaxAge: 1000,
 	})
+
 	http.SetCookie(w, &http.Cookie{
 		Name:   "user_name",
 		Value:  user.Username,
@@ -158,7 +160,7 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		Created_at: time.Now().Format("2006-01-02 15:04:05"),
 	}
 	if commentContent.Content == "" {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 	err = controllers.CreateComments(commentContent)
@@ -208,4 +210,32 @@ func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	session_id := r.Cookies()[0].Value
+	query := `DELETE FROM sessions WHERE session_id=?`
+	if _, err := utils.DataBase.Exec(query, session_id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "user_id",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "user_name",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+	})
+	http.Redirect(w, r, "/", http.StatusFound)
 }
