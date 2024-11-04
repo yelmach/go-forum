@@ -76,6 +76,8 @@ func StoreSession(id string, user models.User) error {
 		return errors.New("session already exist")
 	}
 
+	// expiration time for this session
+
 	stmt, err := utils.DataBase.Prepare("INSERT INTO sessions (user_id, session_id) VALUES (?, ?)")
 	if err != nil {
 		return err
@@ -103,8 +105,8 @@ func GetSession(r *http.Request) (models.User, error) {
 	if err != nil {
 		return models.User{}, err
 	}
-
 	defer stmt.Close()
+
 	var user_id int
 	err = stmt.QueryRow(id[0]).Scan(&user_id)
 	if err != nil {

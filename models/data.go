@@ -25,3 +25,10 @@ type Comment struct {
 	Likes     []int  `json:"likes"`
 	Dislikes  []int  `json:"dislikes"`
 }
+
+type Error struct {
+	Error struct {
+		Status int    `json:"status"`
+		Code   string `json:"code"`
+	} `json:"error"`
+}

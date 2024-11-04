@@ -17,10 +17,11 @@ fetch("http://localhost:8080/api/posts")
 const createPostElement = (post) => {
     const postDiv = document.createElement("div");
     postDiv.classList.add("post");
-    
+    postDiv.onclick = () => openPost(post.id);
 
     // api avatar
     // https://ui-avatars.com/api/?name=${post.by}
+    // https://xsgames.co/randomusers/assets/avatars/male/${post.id}.jpg
     postDiv.innerHTML = `
     <div class="user-info">
         <img src="https://xsgames.co/randomusers/assets/avatars/male/${post.id}.jpg" alt="User avatar" class="avatar">
@@ -45,12 +46,68 @@ const createPostElement = (post) => {
                 <i class="ri-thumb-down-line"></i><span>${post.dislikes ? post.dislikes.length : 0}</span>
             </div>
             <div class="stat">
-                <i class="ri-chat-4-line" on-click="openPost(${post.id})"></i><span>${post.comments ? post.comments.length : 0}</span>
+                <i class="ri-chat-4-line"></i><span>${post.comments ? post.comments.length : 0}</span>
             </div>
         </div>
     </div>
     `
     return postDiv;
+}
+
+const createCommentElement = (comment) => {
+    const commentDiv = document.createElement('div');
+    commentDiv.classList.add('comment');
+    commentDiv.innerHTML = `
+    <div class="user-info">
+        <img src="https://xsgames.co/randomusers/assets/avatars/male/${comment.id}.jpg" alt="User avatar" class="avatar">
+        <div>
+            <div class="username">${comment.by}</div>
+            <div class="timestamp">${timeAgo(new Date(comment.createdAt).getTime())}</div>
+        </div>
+    </div>
+    <div class="content">
+        <p>${comment.content}</p>
+    </div>
+    <div class="tags-stats">
+        <div class="post-stats">
+            <div class="stat">
+                <i class="ri-thumb-up-line"></i><span>${comment.likes.length}</span>
+            </div>
+            <div class="stat">
+                <i class="ri-thumb-down-line"></i><span>${comment.dislikes.length}</span>
+            </div>
+        </div>
+    </div>
+    `
+    return commentDiv;
+}
+
+getPostData = async (postId) => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/posts/${postId}`);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+const openPost = async (postId) => {
+    const post = await getPostData(postId);
+    const main = document.querySelector('.main');
+    const comments = document.createElement('div');
+    comments.classList.add('comments');
+
+    for (const comment of post.comments) {
+        const commentDiv = createCommentElement(comment);
+        comments.append(commentDiv);
+    }
+    main.innerHTML = createPostElement(post).outerHTML;
+    main.append(comments);
 }
 
 const timeAgo = (time) => {
@@ -70,10 +127,6 @@ const timeAgo = (time) => {
         }
     }
     return 'just now';
-}
-
-const openPost = (postId) => {
-    const post = document.createElement('div');
 }
 
 /*
@@ -118,5 +171,5 @@ console.log(`
 ╭━━━┳━━┳━╮╭━━┫┃┃┃┣╮┃
 ┣━━┃┃╭╮┃╭╮┫┃━┫┃┃┃┃┃┃
 ┃┃━━┫╰╯┃┃┃┃┃━┫╰━╯┣╯╰╮
-╰// ━━━┻━━┻╯╰┻━━┻━━━┻━━╯
+╰━━━┻━━┻╯╰┻━━┻━━━┻━━╯
 `)

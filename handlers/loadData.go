@@ -4,14 +4,62 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"forum/models"
 	"forum/utils"
 )
 
+func LoadPostData(w http.ResponseWriter, r *http.Request) {
+	var post models.Post
+	var userId int
+
+	id, _ := strconv.Atoi(r.PathValue("id"))
+
+	query := `SELECT id, user_id, title, content, image_url, created_at FROM posts WHERE id=?`
+	err := utils.DataBase.QueryRow(query, id).Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		newError := models.Error{}
+		newError.Error.Status = http.StatusNotFound
+		newError.Error.Code = "not_found"
+		json.NewEncoder(w).Encode(newError)
+		return
+	}
+
+	post.By, err = getUsername(userId)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	post.Comments, err = getPostComments(post.Id)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	post.Categories, err = getPostCategories(post.Id)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	post.Likes, post.Dislikes, err = getReaction(post.Id, true)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(post)
+}
+
 func LoadData(w http.ResponseWriter, r *http.Request) {
 	// Query to get all posts from the posts table
-	query := `SELECT id, user_id, title, content, image_url, created_at FROM posts`
+	query := `SELECT id, user_id, title, content, image_url, created_at FROM posts ORDER BY created_at DESC`
 
 	// Execute the query
 	dbPosts, err := utils.DataBase.Query(query)
@@ -111,7 +159,6 @@ func getUsersIds(query string, Id int) ([]int, error) {
 			return []int{}, err
 		}
 		usersIds = append(usersIds, userid)
-
 	}
 
 	return usersIds, nil
@@ -151,7 +198,7 @@ func getPostComments(postId int) ([]models.Comment, error) {
 		comment.Likes, comment.Dislikes, err = getReaction(commentid, false)
 		if err != nil {
 			return []models.Comment{}, err
-		}	
+		}
 
 		comment.By, err = getUsername(userId)
 		if err != nil {

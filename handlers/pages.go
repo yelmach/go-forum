@@ -12,7 +12,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-
 	tmpl.Execute(w, nil)
 }
 

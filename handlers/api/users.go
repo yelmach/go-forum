@@ -61,11 +61,25 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	sessionId := id.String()
+
 	// store session in database
 	err = controllers.StoreSession(sessionId, user)
 	if err != nil {
 		http.Error(w, "You already have a session", http.StatusBadRequest)
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionId,
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   1000,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "user_id",
+		Value: strconv.Itoa(user.Id),
+	})
 
 	w.WriteHeader(200)
 	data, err := json.Marshal(struct {
@@ -98,14 +112,14 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
-	// user, err := controllers.GetSession(r)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
+	user, err := controllers.GetSession(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	postContent := models.PostContent{
-		User_id:     1,
+		User_id:     user.Id,
 		Title:       r.FormValue("Title"),
 		Content:     r.FormValue("Content"),
 		Category_id: r.Form["categories"],
@@ -116,7 +130,7 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "err.Error()", http.StatusBadRequest)
 		return
 	}
-	err := controllers.CreatePost(postContent)
+	err = controllers.CreatePost(postContent)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -138,7 +152,6 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if commentContent.Content == "" {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-
 		return
 	}
 	err = controllers.CreateComments(commentContent)
