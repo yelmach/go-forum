@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -136,10 +138,31 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
 	}
+	fmt.Println(" ? comment ?")
+	postIdStr := r.URL.Path[len("/poste/"):]
+	postId, err := strconv.Atoi(postIdStr)
+	if err != nil || postId <= 0 {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	comment := r.URL.Query().Get("comment")
+	if comment == "" {
+		http.Error(w, "Comment is required", http.StatusBadRequest)
+		return
+	}
+
+	// Decode and clean the comment (URL decode it)
+	decodedComment, err := url.QueryUnescape(comment)
+	if err != nil {
+		http.Error(w, "Failed to decode comment", http.StatusBadRequest)
+		return
+	}
+
 	commentContent := models.Comments{
 		User_id:    user_id,
-		Post_id:    1,
-		Content:    r.FormValue("Content"),
+		Post_id:    postId,
+		Content:    decodedComment,
 		Created_at: time.Now().Format("2006-01-02 15:04:05"),
 	}
 	if commentContent.Content == "" {
@@ -166,7 +189,7 @@ func CreateCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 	// id, _ := strconv.Atoi(r.PathValue("id"))
-	
+
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
