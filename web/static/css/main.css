@@ -163,11 +163,23 @@ a {
 }
 
 .categories>li {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
     margin-bottom: 0.5rem;
+    cursor: pointer;
 }
 
-.categories li>a {
-    color: #050505;
+.categories li:hover {
+    color: #f48023;
+}
+
+.categories li>i {
+    font-size: 20px;
+}
+
+.activeCat {
+    color: #f48023;
 }
 
 .main {
@@ -264,15 +276,24 @@ a {
     color: #1a73e8;
 }
 
+.post-stats i.dislike:hover {
+    color: #EF476F;
+}
+
 .stat {
     display: flex;
     align-items: center;
     gap: 5px;
 }
 
-.post .activeThumb, 
-.comment .activeThumb {
+.post .liked, 
+.comment .liked{
     color: #1a73e8;
+}
+
+.post .disliked, 
+.comment .disliked{
+    color: #EF476F;
 }
 
 /********** comments **********/

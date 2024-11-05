@@ -119,6 +119,31 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(posts)
 }
 
+func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
+	dbCategories, err := utils.DataBase.Query(`SELECT name FROM categories`)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer dbCategories.Close()
+
+	categories := []string{}
+	for dbCategories.Next() {
+		var category string
+		dbCategories.Scan(&category)
+		categories = append(categories, category)
+	}
+
+	if err = dbCategories.Err(); err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+		
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(categories)
+}
+
 func getReaction(Id int, ispost bool) ([]int, []int, error) {
 	var queryLikes, queryDislikes string
 

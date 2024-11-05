@@ -19,6 +19,7 @@ func SetupRoutes(mux *http.ServeMux) {
 	// api
 	mux.HandleFunc("GET /api/posts", handlers.LoadData)
 	mux.HandleFunc("GET /api/posts/{id}", handlers.LoadPostData)
+	mux.HandleFunc("GET /api/categories", handlers.LoadAllCategories)
 
 	// auth
 	mux.HandleFunc("POST /api/login", api.LoginUser)

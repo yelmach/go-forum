@@ -1,9 +1,23 @@
 let POSTS = {};
-const loadData = (posts) => {
+const loadData = async (posts) => {
     POSTS = [...posts]
     const main = document.querySelector('.main');
     const postsContainer = document.createElement('div');
+    const categContainer = document.querySelector('.categories');
     postsContainer.classList.add('posts-container');
+
+    const categories = await fetch("http://localhost:8080/api/categories")
+        .then(response => response.json())
+
+    for (const category of categories) {
+        const categoryElem = document.createElement('li')
+        categoryElem.id = category;
+        categoryElem.onclick = () => filterByCategory(category);
+        categoryElem.innerHTML = `
+        <i class="ri-hashtag"></i>${category}
+        `
+        categContainer.append(categoryElem);
+    }
 
     // posts = posts.slice(0, 10);
     for (const post of posts) {
@@ -14,8 +28,8 @@ const loadData = (posts) => {
 };
 
 fetch("http://localhost:8080/api/posts")
-    .then((response) => response.json()) // parse the response from JSON
-    .then(loadData); // .then will call the `loadData` function with the JSON value.
+    .then((response) => response.json())
+    .then(loadData);
 
 // const generateAvatar = async () => {
 //     const [color, background] = await fetch("https://random-flat-colors.vercel.app/api/random?count=2")
@@ -31,8 +45,8 @@ const createPostElement = (post) => {
     postDiv.classList.add("post");
     postDiv.onclick = () => openPost(post.id);
     // const [color, background] = await generateAvatar();
-    const likeActive = post.likes.includes(userId) ? ' activeThumb' : ''
-    const dislikeActive = post.dislikes.includes(userId) ? ' activeThumb' : ''
+    const likeActive = post.likes.includes(userId) ? ' liked' : ''
+    const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
 
     postDiv.innerHTML = `
     <div class="user-info">
@@ -55,7 +69,7 @@ const createPostElement = (post) => {
                 <i class="ri-thumb-up-line${likeActive}"></i><span class="${likeActive}">${post.likes.length}</span>
             </div>
             <div class="stat">
-                <i class="ri-thumb-down-line${dislikeActive}"></i><span class="${dislikeActive}">${post.dislikes.length}</span>
+                <i class="ri-thumb-down-line dislike${dislikeActive}"></i><span class="${dislikeActive}">${post.dislikes.length}</span>
             </div>
             <div class="stat">
                 <i class="ri-chat-4-line"></i><span>${post.comments ? post.comments.length : 0}</span>
@@ -176,9 +190,11 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-const disactive = (elems) => {
+const disactive = () => {
+    const elems = [...document.querySelectorAll('.menu-select'), ...document.querySelectorAll('.categories>li')]
     for (const elem of elems) {
         elem.classList.remove('active');
+        elem.classList.remove('activeCat');
     }
 }
 
@@ -189,34 +205,28 @@ const recentPosts = () => {
 const createdPosts = () => {
     const username = getCookie("username");
     const posts = POSTS.filter(post => post.by == username)
-    const main = document.querySelector('.main');
-    const postsContainer = document.createElement('div');
-    postsContainer.classList.add('posts-container');
-    disactive(document.querySelectorAll('.menu-select'))
-    document.getElementById('select_2').classList.add('active')
-    main.innerHTML = ''
-    if (!posts.length) {
-        main.innerHTML += `
-        <img style="display: block; width:300px; margin: 3rem auto;" src="/assets/img/no_data.svg" alt="no result"/>
-        <h2 style="text-align:center">Noting Found</h2>
-        `
-    } else {
-        for (const post of posts) {
-            const postDiv = createPostElement(post);
-            postsContainer.append(postDiv);
-        }
-        main.append(postsContainer)
-    }
+    displayPosts(posts);
+    document.getElementById('select_2').classList.add('active');
 }
 
 const likedPosts = () => {
     const userId = parseInt(getCookie("user_id"));
     const posts = POSTS.filter(post => post.likes.includes(userId))
+    displayPosts(posts);
+    document.getElementById('select_3').classList.add('active');
+}
+
+const filterByCategory = (category) => {
+    const posts = POSTS.filter(post => post.categories.includes(category))
+    displayPosts(posts);
+    document.getElementById(category).classList.add('activeCat');
+}
+
+const displayPosts = (posts) => {
     const main = document.querySelector('.main');
     const postsContainer = document.createElement('div');
     postsContainer.classList.add('posts-container');
-    disactive(document.querySelectorAll('.menu-select'))
-    document.getElementById('select_3').classList.add('active')
+    disactive();
     main.innerHTML = ''
     if (!posts.length) {
         main.innerHTML += `
