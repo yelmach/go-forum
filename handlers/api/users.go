@@ -146,7 +146,8 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	if err = controllers.CreateComments(commentContent); err != nil {
+	err = controllers.CreateComments(commentContent)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -165,7 +166,7 @@ func CreateCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 	// id, _ := strconv.Atoi(r.PathValue("id"))
-
+	
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)

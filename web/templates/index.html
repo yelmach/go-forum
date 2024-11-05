@@ -25,9 +25,17 @@
     <div class="container">
         <div class="sidebar">
             <label>navigator</label>
-            <div class="menu-select active">
+            <div id="select_1" class="menu-select active" onclick="recentPosts()">
                 <i class="ri-time-line"></i>
                 <h2>recent posts</h2>
+            </div>
+            <div id="select_2" class="menu-select" onclick="createdPosts()">
+                 <i class="ri-edit-line"></i>
+                <h2>my posts</h2>
+            </div>
+            <div id="select_3" class="menu-select" onclick="likedPosts()">
+                <i class="ri-heart-line"></i>
+                <h2>liked posts</h2>
             </div>
 
             <label>categories</label>
