@@ -7,12 +7,29 @@ import (
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("./web/templates/index.html")
+	IsLoggedIn := false
+
+	tmpl, err := template.ParseFiles("./web/templates/index.html",
+		"./web/templates/components/guest_navbar.html",
+		"./web/templates/components/guest_sidebar.html",
+		"./web/templates/components/logged_navbar.html",
+		"./web/templates/components/logged_sidebar.html")
 	if err != nil {
-		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	tmpl.Execute(w, nil)
+
+	_, err = r.Cookie("session_id")
+	if err != nil {
+		IsLoggedIn = false
+		err = tmpl.ExecuteTemplate(w, "index.html", IsLoggedIn)
+	} else {
+		IsLoggedIn = true
+		err = tmpl.ExecuteTemplate(w, "index.html", IsLoggedIn)
+	}
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "failled to execute template", http.StatusInternalServerError)
+	}
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {

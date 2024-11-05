@@ -11,41 +11,20 @@
 </head>
 
 <body>
-    <nav class="navbar">
-        <a id="logo" href="/">
-            <img id="logo-img" src="/assets/img/logo.svg" alt="">
-            <span id="logo-name"><b>01</b>Forum</span>
-        </a>
-        <div class="sign">
-            <a href="/register" id="register"><i class="fa-solid fa-user-plus"></i>register</a>
-            <a href="/login" id="login"><i class="fa-solid fa-right-to-bracket"></i>login</a>
-        </div>
-    </nav>
+    {{if .}}
+        {{template "logged_navbar" .}}
+    {{else}}
+        {{template "guest_navbar" .}}
+    {{end}}
+
 
     <div class="container">
-        <div class="sidebar">
-            <label>navigator</label>
-            <div id="select_1" class="menu-select active" onclick="recentPosts()">
-                <i class="ri-time-line"></i>
-                <h2>recent posts</h2>
-            </div>
-            <div id="select_2" class="menu-select" onclick="createdPosts()">
-                 <i class="ri-edit-line"></i>
-                <h2>my posts</h2>
-            </div>
-            <div id="select_3" class="menu-select" onclick="likedPosts()">
-                <i class="ri-heart-line"></i>
-                <h2>liked posts</h2>
-            </div>
+        {{if .}}
+            {{ template "logged_sidebar" . }}
+        {{else}}
+            {{template "guest_sidebar" .}}
+        {{end}}
 
-            <label>categories</label>
-            <ul class="categories">
-                <li><a href="#"><i class="ri-hashtag"></i>Golang</a></li>
-                <li><a href="#"><i class="ri-hashtag"></i>Javascript</a></li>
-                <li><a href="#"><i class="ri-hashtag"></i>Design</a></li>
-                <li><a href="#"><i class="ri-hashtag"></i>Rust</a></li>
-            </ul>
-        </div>
         <div class="main">
         </div>
         <div class="widget">

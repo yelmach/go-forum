@@ -1,0 +1,13 @@
+{{ define "logged_navbar" }}
+<nav class="navbar">
+    <a id="logo" href="/">
+        <img id="logo-img" src="/assets/img/logo.svg" alt="">
+        <span id="logo-name"><b>01</b>Forum</span>
+    </a>
+    <form action="/logout" method="POST">
+        <div class="sign">
+            <button type="submit" id="register"><i class="fa-solid fa-user-plus"></i>logout</button>
+        </div>
+    </form>
+</nav>
+{{end}}

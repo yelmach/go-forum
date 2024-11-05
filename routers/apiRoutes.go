@@ -30,5 +30,5 @@ func SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /reactions", api.AddLikeDislikeHandler)
 
 	// logout
-	mux.HandleFunc("GET /logout", api.LogoutUser)
+	mux.HandleFunc("POST /logout", api.LogoutUser)
 }
