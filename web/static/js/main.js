@@ -38,13 +38,12 @@ fetch("http://localhost:8080/api/posts")
 
 //     return [color, background]
 // }
+// const [color, background] = await generateAvatar();
 
 const createPostElement = (post) => {
     const userId = parseInt(getCookie("user_id"));
     const postDiv = document.createElement("div");
     postDiv.classList.add("post");
-    postDiv.onclick = () => openPost(post.id);
-    // const [color, background] = await generateAvatar();
     const likeActive = post.likes.includes(userId) ? ' liked' : ''
     const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
 
@@ -72,7 +71,7 @@ const createPostElement = (post) => {
                 <i class="ri-thumb-down-line dislike${dislikeActive}"></i><span class="${dislikeActive}">${post.dislikes.length}</span>
             </div>
             <div class="stat">
-                <i class="ri-chat-4-line"></i><span>${post.comments ? post.comments.length : 0}</span>
+                <i class="ri-chat-4-line" onclick="openPost(${post.id})"></i><span>${post.comments ? post.comments.length : 0}</span>
             </div>
         </div>
     </div>
@@ -81,7 +80,11 @@ const createPostElement = (post) => {
 }
 
 const createCommentElement = (comment) => {
+    const userId = parseInt(getCookie("user_id"));
     const commentDiv = document.createElement('div');
+    const likeActive = comment.likes.includes(userId) ? ' liked' : ''
+    const dislikeActive = comment.dislikes.includes(userId) ? ' disliked' : ''
+
     commentDiv.classList.add('comment');
     commentDiv.innerHTML = `
     <div class="user-info">
@@ -97,10 +100,10 @@ const createCommentElement = (comment) => {
     <div class="tags-stats">
         <div class="post-stats">
             <div class="stat">
-                <i class="ri-thumb-up-line"></i><span>${comment.likes.length}</span>
+                <i class="ri-thumb-up-line${likeActive}"></i><span class="${likeActive}">${comment.likes.length}</span>
             </div>
             <div class="stat">
-                <i class="ri-thumb-down-line"></i><span>${comment.dislikes.length}</span>
+                <i class="ri-thumb-down-line dislike${dislikeActive}"></i><span class="${dislikeActive}">${comment.dislikes.length}</span>
             </div>
         </div>
     </div>
@@ -229,6 +232,7 @@ const displayPosts = (posts) => {
     disactive();
     main.innerHTML = ''
     if (!posts.length) {
+        // tmp figure for empty meaning
         main.innerHTML += `
         <img style="display: block; width:300px; margin: 3rem auto;" src="/assets/img/no_data.svg" alt="no result"/>
         <h2 style="text-align:center">Noting Found</h2>

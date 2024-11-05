@@ -71,7 +71,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	AddCookie(w, "session_id", sessionId)
 	AddCookie(w, "user_id", strconv.Itoa(user.Id))
-	AddCookie(w, "user_name", user.Username)
+	AddCookie(w, "username", user.Username)
 
 	w.WriteHeader(200)
 	data, err := json.Marshal(struct {

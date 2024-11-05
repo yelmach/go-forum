@@ -204,7 +204,6 @@ a {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     margin-bottom: 1.75rem;
-    cursor: pointer;
 }
 
 .post-content>h3 {
@@ -270,6 +269,7 @@ a {
 .post-stats i {
     font-size: 18px;
     color: #808080;
+    cursor: pointer;
 }
 
 .post-stats i:hover {
