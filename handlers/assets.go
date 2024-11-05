@@ -14,7 +14,7 @@ func AssetsHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := os.Stat(fp)
 	if err != nil || strings.HasSuffix(r.URL.Path, "/") {
 		// ErrorHandler(w, r, http.StatusNotFound)
-		http.Error(w, "404 Asset Not Fount", http.StatusNotFound)
+		ErrorHandler(w, r, http.StatusNotFound)
 		return
 	}
 	http.ServeFile(w, r, fp)

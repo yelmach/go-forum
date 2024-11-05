@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forum/controllers"
+	"forum/handlers"
 	"forum/models"
 	"forum/utils"
 
@@ -19,7 +20,8 @@ func PostUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
+		return
 	}
 
 	_, err = controllers.CreateUser(user)
@@ -31,7 +33,8 @@ func PostUser(w http.ResponseWriter, r *http.Request) {
 			Msg: err.Error(),
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+			return
 		}
 		w.Write(data)
 	}
@@ -41,7 +44,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
+		return
 	}
 
 	user, err = controllers.LoginUser(user)
@@ -53,7 +57,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 			Msg: err.Error(),
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+			return
 		}
 		w.Write(data)
 	}
@@ -61,14 +66,16 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	// create session
 	id, err := uuid.NewV7()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		return
 	}
 	sessionId := id.String()
 
 	// store session in database
 	err = controllers.StoreSession(sessionId, user)
 	if err != nil {
-		http.Error(w, "You already have a session", http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
+		return
 	}
 
 	AddCookie(w, "session_id", sessionId)
@@ -84,7 +91,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		SessionId: sessionId,
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		return
 	}
 	w.Write(data)
 }
@@ -93,7 +101,7 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 	// get session from database
 	_, err := controllers.GetSession(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
@@ -108,7 +116,7 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		handlers.ErrorHandler(w, r, http.StatusBadGateway)
 		return
 	}
 
@@ -126,7 +134,7 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = controllers.CreatePost(postContent)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	http.ServeFile(w, r, "./web/templates/create_posts.html")
@@ -135,27 +143,27 @@ func CreatePostsHandler(w http.ResponseWriter, r *http.Request) {
 func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		handlers.ErrorHandler(w, r, http.StatusBadGateway)
 		return
 	}
 	fmt.Println(" ? comment ?")
 	postIdStr := r.URL.Path[len("/poste/"):]
 	postId, err := strconv.Atoi(postIdStr)
 	if err != nil || postId <= 0 {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
 		return
 	}
 
 	comment := r.URL.Query().Get("comment")
 	if comment == "" {
-		http.Error(w, "Comment is required", http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
 		return
 	}
 
 	// Decode and clean the comment (URL decode it)
 	decodedComment, err := url.QueryUnescape(comment)
 	if err != nil {
-		http.Error(w, "Failed to decode comment", http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
 		return
 	}
 
@@ -166,12 +174,12 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		Created_at: time.Now().Format("2006-01-02 15:04:05"),
 	}
 	if commentContent.Content == "" {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
 		return
 	}
 	err = controllers.CreateComments(commentContent)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 }
@@ -179,10 +187,11 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 func CreateCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	name_categorie := r.URL.Query().Get("categori_name")
 	if len(name_categorie) == 0 {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
+		return
 	}
 	if err := controllers.CreateCategorie(name_categorie); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 }
@@ -192,7 +201,7 @@ func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		handlers.ErrorHandler(w, r, http.StatusBadGateway)
 		return
 	}
 	postID := r.URL.Query().Get("post_id")
@@ -201,7 +210,7 @@ func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 
 	like, err := strconv.ParseBool(isLike)
 	if err != nil {
-		http.Error(w, "Invalid like value", http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
 		return
 	}
 	reactions := models.Reactions{
@@ -217,13 +226,13 @@ func AddLikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 	} else if commentID != "" {
 		reactions.Comment_id, _ = strconv.Atoi(commentID)
 	} else {
-		http.Error(w, "Either post_id or comment_id must be provided", http.StatusBadRequest)
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
 		return
 	}
 
 	err = controllers.CreateReaction(reactions)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -233,7 +242,8 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	session_id := r.Cookies()[0].Value
 	query := `DELETE FROM sessions WHERE session_id=?`
 	if _, err := utils.DataBase.Exec(query, session_id); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		return
 	}
 
 	DeleteCookie(w, "session_id")

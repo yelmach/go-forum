@@ -29,25 +29,25 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 
 	post.By, err = getUsername(userId)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
 	post.Comments, err = getPostComments(post.Id)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
 	post.Categories, err = getPostCategories(post.Id)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
 	post.Likes, post.Dislikes, err = getReaction(post.Id, true)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
@@ -63,7 +63,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	// Execute the query
 	dbPosts, err := utils.DataBase.Query(query)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	defer dbPosts.Close()
@@ -77,31 +77,31 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		var userId int
 		err := dbPosts.Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			ErrorHandler(w, r, http.StatusInternalServerError)
 			return
 		}
 
 		post.By, err = getUsername(userId)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			ErrorHandler(w, r, http.StatusInternalServerError)
 			return
 		}
 
 		post.Comments, err = getPostComments(post.Id)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			ErrorHandler(w, r, http.StatusInternalServerError)
 			return
 		}
 
 		post.Categories, err = getPostCategories(post.Id)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			ErrorHandler(w, r, http.StatusInternalServerError)
 			return
 		}
 
 		post.Likes, post.Dislikes, err = getReaction(post.Id, true)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			ErrorHandler(w, r, http.StatusInternalServerError)
 			return
 		}
 
@@ -110,7 +110,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 
 	// Check for errors from iterating over rows
 	if err = dbPosts.Err(); err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
