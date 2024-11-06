@@ -111,7 +111,7 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 
 	DeleteCookie(w, "session_id")
 	DeleteCookie(w, "user_id")
-	DeleteCookie(w, "user_name")
+	DeleteCookie(w, "username")
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }

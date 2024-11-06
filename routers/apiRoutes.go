@@ -5,6 +5,7 @@ import (
 
 	"forum/handlers"
 	"forum/handlers/api"
+	"forum/handlers/middleware"
 )
 
 func SetupRoutes(mux *http.ServeMux) {
@@ -12,9 +13,9 @@ func SetupRoutes(mux *http.ServeMux) {
 
 	// pages
 	mux.HandleFunc("GET /", handlers.HomeHandler)
-	mux.HandleFunc("GET /login", handlers.LoginHandler)
-	mux.HandleFunc("GET /register", handlers.RegisterHandler)
-	mux.HandleFunc("GET /createpost", handlers.CreatePostHandler)
+	mux.HandleFunc("GET /login", middleware.RedirectMiddleware(handlers.LoginHandler))
+	mux.HandleFunc("GET /register", middleware.RedirectMiddleware(handlers.RegisterHandler))
+	mux.HandleFunc("GET /createpost", middleware.Middleware(handlers.CreatePostHandler))
 
 	// api
 	mux.HandleFunc("GET /api/posts", handlers.LoadData)
@@ -26,9 +27,9 @@ func SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/users", api.PostUser)
 
 	// user activity
-	mux.HandleFunc("POST /newposts", handlers.NewPostHandler)
-	mux.HandleFunc("POST /", handlers.NewCommentHandler)
-	mux.HandleFunc("POST /reactions", handlers.LikeDislikeHandler)
+	mux.HandleFunc("POST /newposts", middleware.Middleware(handlers.NewPostHandler))
+	mux.HandleFunc("POST /newcomment", middleware.Middleware(handlers.NewCommentHandler))
+	mux.HandleFunc("POST /reactions", middleware.Middleware(handlers.LikeDislikeHandler))
 	mux.HandleFunc("POST /newcategories", handlers.CreateCategoriesHandler)
 
 	// logout
