@@ -27,7 +27,7 @@ func SetupRoutes(mux *http.ServeMux) {
 
 	// user activity
 	mux.HandleFunc("POST /newposts", handlers.NewPostHandler)
-	mux.HandleFunc("POST /newcomment", handlers.NewCommentHandler)
+	mux.HandleFunc("POST /", handlers.NewCommentHandler)
 	mux.HandleFunc("POST /reactions", handlers.LikeDislikeHandler)
 	mux.HandleFunc("POST /newcategories", handlers.CreateCategoriesHandler)
 

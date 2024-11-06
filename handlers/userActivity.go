@@ -80,7 +80,8 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.ServeFile(w, r, "./web/templates/index.html")
+	w.WriteHeader(http.StatusCreated)
+	HomeHandler(w, r)
 }
 
 func LikeDislikeHandler(w http.ResponseWriter, r *http.Request) {

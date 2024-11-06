@@ -32,6 +32,7 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	case http.StatusBadGateway:
 		DetelsError.Title = "Error 502 (Status Bad Gateway)"
 	}
+	
 	DetelsError.Status = status
 	DetelsError.Method = r.Method
 	DetelsError.Path = r.URL.Path
