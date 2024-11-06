@@ -1,11 +1,7 @@
 let POSTS = {};
 const loadData = async (posts) => {
-    POSTS = [...posts]
-    const main = document.querySelector('.main');
-    const postsContainer = document.createElement('div');
+    POSTS = [...posts];
     const categContainer = document.querySelector('.categories');
-    postsContainer.classList.add('posts-container');
-
     const categories = await fetch("http://localhost:8080/api/categories")
         .then(response => response.json())
 
@@ -18,13 +14,7 @@ const loadData = async (posts) => {
         `
         categContainer.append(categoryElem);
     }
-
-    // posts = posts.slice(0, 10);
-    for (const post of posts) {
-        const postDiv = createPostElement(post);
-        postsContainer.append(postDiv);
-    }
-    main.append(postsContainer);
+    recentPosts();
 };
 
 fetch("http://localhost:8080/api/posts")
@@ -138,16 +128,15 @@ const openPost = async (postId) => {
     main.innerHTML = createPostElement(post).outerHTML;
     main.innerHTML += `
     <div class="comment-box">
-        <textarea class="comment-input" placeholder="Type here your wise suggestion"></textarea>
-        <div class="button-group">
-            <button class="btn btn-cancel">Cancel</button>
-            <button class="btn btn-comment">
-                <svg class="comment-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                Comment
-            </button>
-        </div>
+        <form action="/newcomment" method="POST">
+            <textarea class="comment-input" name="content" placeholder="Type here your wise suggestion"></textarea>
+            <div class="button-group">
+                <button class="btn btn-cancel">Cancel</button>
+                <button type="submit" class="btn btn-comment">
+                    <i class="ri-chat-4-line"></i>Comment
+                </button>
+            </div>
+        </form>
     </div>
     `
 
@@ -201,13 +190,43 @@ const disactive = () => {
     }
 }
 
+const widgetBack = () => {
+    const widget = document.querySelector('.widget');
+    widget.innerHTML = `
+    <div class="section">
+        <h2 class="section-title">
+            <i class="ri-star-line"></i>
+            Must-read posts
+        </h2>
+        <ul>
+            <li><a href="#">Please read rules before you start working on a platform</a></li>
+            <li><a href="#">Vision & Strategy of AIemhelp</a></li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2 class="section-title">
+            <i class="ri-links-line"></i>
+            Featured links
+        </h2>
+        <ul>
+            <li><a href="#">AIemhelp source-code on GitHub</a></li>
+            <li><a href="#">Golang best-practices</a></li>
+            <li><a href="#">AIem School dashboard</a></li>
+        </ul>
+    </div>
+    `
+}
+
 const recentPosts = () => {
-    location.reload();
+    widgetBack();
+    displayPosts(POSTS);
+    document.getElementById('select_1').classList.add('active');
 }
 
 const createdPosts = () => {
     const username = getCookie("username");
     const posts = POSTS.filter(post => post.by == username)
+    widgetBack();
     displayPosts(posts);
     document.getElementById('select_2').classList.add('active');
 }
@@ -215,12 +234,14 @@ const createdPosts = () => {
 const likedPosts = () => {
     const userId = parseInt(getCookie("user_id"));
     const posts = POSTS.filter(post => post.likes.includes(userId))
+    widgetBack();
     displayPosts(posts);
     document.getElementById('select_3').classList.add('active');
 }
 
 const filterByCategory = (category) => {
     const posts = POSTS.filter(post => post.categories.includes(category))
+    widgetBack();
     displayPosts(posts);
     document.getElementById(category).classList.add('activeCat');
 }

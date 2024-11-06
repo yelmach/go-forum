@@ -14,25 +14,24 @@ type Session struct {
 	Username  string
 	ExpiresAt time.Time
 }
-type PostContent struct {
+
+type Post struct {
 	User_id     int
 	Title       string
 	Content     string
 	Category_id []string
 	Image_url   string
-	Created_at  string
 }
-type Comments struct {
+
+type Comment struct {
 	Post_id    int
 	User_id    int
 	Content    string
-	Created_at string
 }
 
-type Reactions struct {
+type Reaction struct {
 	User_id    int
 	Post_id    int
 	Comment_id int
 	Is_like    bool
-	Created_at string
 }

@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"forum/models"
+	"forum/handlers/api"
 	"forum/utils"
 )
 
 func LoadPostData(w http.ResponseWriter, r *http.Request) {
-	var post models.Post
+	var post api.Post
 	var userId int
 
 	id, _ := strconv.Atoi(r.PathValue("id"))
@@ -20,7 +20,7 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		w.Header().Set("Content-Type", "application/json")
-		newError := models.Error{}
+		newError := api.Error{}
 		newError.Error.Status = http.StatusNotFound
 		newError.Error.Code = "not_found"
 		json.NewEncoder(w).Encode(newError)
@@ -69,11 +69,11 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	defer dbPosts.Close()
 
 	// Prepare a slice to store the posts
-	posts := []models.Post{}
+	posts := []api.Post{}
 
 	// Iterate through the rows and scan each row into a Post struct
 	for dbPosts.Next() {
-		var post models.Post
+		var post api.Post
 		var userId int
 		err := dbPosts.Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt)
 		if err != nil {
@@ -199,34 +199,34 @@ func getUsername(userId int) (string, error) {
 	return username, nil
 }
 
-func getPostComments(postId int) ([]models.Comment, error) {
-	comments := []models.Comment{}
+func getPostComments(postId int) ([]api.Comment, error) {
+	comments := []api.Comment{}
 
 	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=?`
 	dbComments, err := utils.DataBase.Query(query, postId)
 	if err != nil {
-		return []models.Comment{}, err
+		return []api.Comment{}, err
 	}
 	defer dbComments.Close()
 
 	for dbComments.Next() {
-		var comment models.Comment
+		var comment api.Comment
 		var userId int
 		var commentid int
 
 		err := dbComments.Scan(&commentid, &userId, &comment.Content, &comment.CreatedAt)
 		if err != nil {
-			return []models.Comment{}, err
+			return []api.Comment{}, err
 		}
 
 		comment.Likes, comment.Dislikes, err = getReaction(commentid, false)
 		if err != nil {
-			return []models.Comment{}, err
+			return []api.Comment{}, err
 		}
 
 		comment.By, err = getUsername(userId)
 		if err != nil {
-			return []models.Comment{}, err
+			return []api.Comment{}, err
 		}
 		comments = append(comments, comment)
 	}
