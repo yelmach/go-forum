@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/assets/css/error.css">
+  <title>{{.Title}}</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="error-code">{{ .Status}}</div>
+    <h1>Oops, something went wrong!</h1>
+    <p>
+      <b>{{.Status}}.</b> <ins>That's an error.<img src="/assets/img/icons8-happy.gif" > </ins>
+    </p>
+    <p>
+      {{if eq .Status 404}}
+      The requested URL <code>{{.Path}}</code> was not found on this server.
+      {{else if eq .Status 405}}
+      The request method <code>{{.Method}}</code> is inappropriate for the URL <code>{{.Path}}</code>.
+      {{else}}
+      Ops! Seems An Internal Server Error Occurred.
+      {{end}}
+      <ins>That's all we know.</ins>
+    </p>
+    <a href="http://localhost:8080/" class="btn">Go to Home Page</a>
+  </div>
+</body>
+
+</html>

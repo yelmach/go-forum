@@ -130,6 +130,7 @@ const openPost = async (postId) => {
     <div class="comment-box">
         <form action="/newcomment" method="POST">
             <textarea class="comment-input" name="content" placeholder="Type here your wise suggestion"></textarea>
+            <input type="hidden" name="postId" value="${postId}">
             <div class="button-group">
                 <button class="btn btn-cancel">Cancel</button>
                 <button type="submit" class="btn btn-comment">
@@ -139,6 +140,15 @@ const openPost = async (postId) => {
         </form>
     </div>
     `
+    fetch('/newcomment', {
+        method: 'POST',
+        body: new URLSearchParams({
+            content: content,
+            postId: postId,
+        }),
+    }).catch(error => {
+        console.error('Error posting comment:', error);
+    });
 
     widget.innerHTML = `
     <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">

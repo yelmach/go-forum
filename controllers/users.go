@@ -162,6 +162,30 @@ func CreatePost(postContent models.Post) error {
 	return nil
 }
 
+func CreateCategorie(name_categorie string) error {
+	var count int
+
+	err := utils.DataBase.QueryRow("SELECT COUNT(*) FROM categories WHERE name = ?", name_categorie).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("error checking category existence: %w", err)
+	}
+	if count > 0 {
+		return errors.New("category already exists")
+	}
+
+	C_categories, err := utils.DataBase.Prepare(`INSERT INTO categories (name) VALUES (?)`)
+	if err != nil {
+		return fmt.Errorf("error preparing statement: %w", err)
+	}
+	defer C_categories.Close()
+
+	if _, err := C_categories.Exec(name_categorie); err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+
+	return nil
+}
+
 func CreateComment(comment models.Comment) error {
 	C_comment, err := utils.DataBase.Prepare(`INSERT INTO comments(post_id, user_id, content) VALUES(?, ?, ?)`)
 	if err != nil {
@@ -173,7 +197,6 @@ func CreateComment(comment models.Comment) error {
 	if _, err = C_comment.Exec(comment.Post_id, comment.User_id, comment.Content); err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
-
 	return nil
 }
 

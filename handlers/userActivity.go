@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"fmt"
-	"forum/controllers"
 	"net/http"
 	"strconv"
+
+	"forum/controllers"
 
 	"forum/models"
 )
@@ -24,7 +24,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		Image_url:   r.FormValue("Image_url"),
 	}
 	if postContent.Title == "" || postContent.Content == "" || len(postContent.Category_id) == 0 {
-		http.Error(w, "err.Error()", http.StatusBadRequest)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 	err = controllers.CreatePost(postContent)
@@ -35,25 +35,40 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./web/templates/create_posts.html")
 }
 
+func CreateCategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	name_categorie := r.URL.Query().Get("categori_name")
+	if len(name_categorie) == 0 {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	if err := controllers.CreateCategorie(name_categorie); err != nil {
+		http.Error(w, "Bad Request", http.StatusInternalServerError)
+		return
+
+	}
+}
+
 func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, _:= r.Cookie("user_id")
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	cookie, _ := r.Cookie("user_id")
 	user_id, err := strconv.Atoi(cookie.Value)
 	if err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-
-	err = r.ParseForm()
+	post_id, err := strconv.Atoi(r.FormValue("postId"))
 	if err != nil {
-		http.Error(w, "Unable to parse form", http.StatusBadRequest)
+		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-
-	fmt.Println(r.FormValue("content"))
 	comment := models.Comment{
-		User_id:    user_id,
-		Post_id:    1,
-		Content:    r.FormValue("content"),
+		User_id: user_id,
+		Post_id: post_id,
+		Content: r.FormValue("content"),
 	}
 
 	if comment.Content == "" {
@@ -65,6 +80,7 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	http.ServeFile(w, r, "./web/templates/index.html")
 }
 
 func LikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +100,7 @@ func LikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid like value", http.StatusBadRequest)
 		return
 	}
-	reactions := models.Reaction {
+	reactions := models.Reaction{
 		User_id:    user_id,
 		Post_id:    0,
 		Comment_id: 0,
