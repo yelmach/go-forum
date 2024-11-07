@@ -34,4 +34,8 @@ func SetupRoutes(mux *http.ServeMux) {
 
 	// logout
 	mux.HandleFunc("POST /logout", api.LogoutUser)
+
+
+	//getsession
+	// mux.HandleFunc("GET /", api.SessionHandler)
 }

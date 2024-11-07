@@ -202,7 +202,7 @@ func getUsername(userId int) (string, error) {
 func getPostComments(postId int) ([]api.Comment, error) {
 	comments := []api.Comment{}
 
-	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=?`
+	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=? ORDER BY created_at DESC`
 	dbComments, err := utils.DataBase.Query(query, postId)
 	if err != nil {
 		return []api.Comment{}, err

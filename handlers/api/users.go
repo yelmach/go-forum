@@ -7,6 +7,7 @@ import (
 
 	"forum/controllers"
 	"forum/models"
+	"forum/tools"
 	"forum/utils"
 
 	"github.com/gofrs/uuid"
@@ -63,14 +64,14 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	sessionId := id.String()
 
 	// store session in database
-	err = controllers.StoreSession(sessionId, user)
+	err = controllers.StoreSession(w, sessionId, user)
 	if err != nil {
 		http.Error(w, "You already have a session", http.StatusBadRequest)
 	}
 
-	AddCookie(w, "session_id", sessionId)
-	AddCookie(w, "user_id", strconv.Itoa(user.Id))
-	AddCookie(w, "username", user.Username)
+	tools.AddCookie(w, "session_id", sessionId)
+	tools.AddCookie(w, "user_id", strconv.Itoa(user.Id))
+	tools.AddCookie(w, "username", user.Username)
 
 	w.WriteHeader(200)
 	data, err := json.Marshal(struct {
@@ -109,27 +110,9 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	DeleteCookie(w, "session_id")
-	DeleteCookie(w, "user_id")
-	DeleteCookie(w, "username")
+	tools.DeleteCookie(w, "session_id")
+	tools.DeleteCookie(w, "user_id")
+	tools.DeleteCookie(w, "username")
 
 	http.Redirect(w, r, "/", http.StatusFound)
-}
-
-func AddCookie(w http.ResponseWriter, name, value string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:   name,
-		Value:  value,
-		Path:   "/",
-		MaxAge: 60 * 60 * 24,
-	})
-}
-
-func DeleteCookie(w http.ResponseWriter, session_name string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:   session_name,
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	})
 }

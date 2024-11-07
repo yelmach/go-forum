@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"forum/models"
+	"forum/tools"
 	"forum/utils"
 
 	"golang.org/x/crypto/bcrypt"
@@ -64,31 +65,32 @@ func LoginUser(user models.User) (models.User, error) {
 }
 
 // StoreSession is designed to save a new user session in a database if it doesn't already exist
-func StoreSession(id string, user models.User) error {
+func StoreSession(w http.ResponseWriter, session_id string, user models.User) error {
 	// check for already stored session
 	var count int
-	err := utils.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ? ", id).Scan(&count)
+	err := utils.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ? ", user.Id).Scan(&count)
 	if err != nil {
 		return err
 	}
 
-	if count > 0 {
-		return errors.New("session already exist")
+	query := ``
+	switch {
+	case count > 0:
+		tools.DeleteCookie(w, "session_id")
+
+		query := `UPDATE sessions SET session_id = ?, expired_at = ? WHERE user_id = ?`
+		if _, err := utils.DataBase.Exec(query, session_id, 5, user.Id); err != nil {
+			return err
+		}
+		return nil
+	case count == 0:
+		query = `INSERT INTO sessions (user_id, session_id, expired_at) VALUES (?, ?, ?)`
+		if _, err := utils.DataBase.Exec(query, user.Id, session_id, 5); err != nil {
+			return err
+		}
+		return nil
 	}
 
-	// expiration time for this session
-
-	stmt, err := utils.DataBase.Prepare("INSERT INTO sessions (user_id, session_id) VALUES (?, ?)")
-	if err != nil {
-		return err
-	}
-
-	defer stmt.Close()
-
-	_, err = stmt.Exec(user.Id, id)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
