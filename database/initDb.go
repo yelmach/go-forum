@@ -1,4 +1,4 @@
-package utils
+package database
 
 import (
 	"database/sql"
@@ -19,7 +19,7 @@ func InitDb() error {
 	if err = db.Ping(); err != nil {
 		return err
 	}
-	query, err := os.ReadFile("schema.sql")
+	query, err := os.ReadFile("./database/schema.sql")
 	if err != nil {
 		return err
 	}

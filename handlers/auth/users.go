@@ -1,4 +1,4 @@
-package api
+package auth
 
 import (
 	"encoding/json"
@@ -6,21 +6,21 @@ import (
 	"strconv"
 
 	"forum/controllers"
+	"forum/database"
 	"forum/models"
-	"forum/tools"
 	"forum/utils"
 
 	"github.com/gofrs/uuid"
 )
 
-func PostUser(w http.ResponseWriter, r *http.Request) {
+func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	_, err = controllers.CreateUser(user)
+	_, err = controllers.RegisterUser(user)
 	if err != nil {
 		w.WriteHeader(400)
 		data, err := json.Marshal(struct {
@@ -69,9 +69,9 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "You already have a session", http.StatusBadRequest)
 	}
 
-	tools.AddCookie(w, "session_id", sessionId)
-	tools.AddCookie(w, "user_id", strconv.Itoa(user.Id))
-	tools.AddCookie(w, "username", user.Username)
+	utils.AddCookie(w, "session_id", sessionId)
+	utils.AddCookie(w, "user_id", strconv.Itoa(user.Id))
+	utils.AddCookie(w, "username", user.Username)
 
 	w.WriteHeader(200)
 	data, err := json.Marshal(struct {
@@ -87,32 +87,16 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func SessionHandler(w http.ResponseWriter, r *http.Request) {
-	// get session from database
-	_, err := controllers.GetSession(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(struct {
-		Msg string
-	}{
-		Msg: "You are logged in",
-	})
-}
-
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	session_id := r.Cookies()[0].Value
 	query := `DELETE FROM sessions WHERE session_id=?`
-	if _, err := utils.DataBase.Exec(query, session_id); err != nil {
+	if _, err := database.DataBase.Exec(query, session_id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	tools.DeleteCookie(w, "session_id")
-	tools.DeleteCookie(w, "user_id")
-	tools.DeleteCookie(w, "username")
+	utils.DeleteCookie(w, "session_id")
+	utils.DeleteCookie(w, "user_id")
+	utils.DeleteCookie(w, "username")
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }

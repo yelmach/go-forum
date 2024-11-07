@@ -5,6 +5,7 @@ import (
 
 	"forum/handlers"
 	"forum/handlers/api"
+	"forum/handlers/auth"
 	"forum/handlers/middleware"
 )
 
@@ -18,23 +19,20 @@ func SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /createpost", middleware.Middleware(handlers.CreatePostHandler))
 
 	// api
-	mux.HandleFunc("GET /api/posts", handlers.LoadData)
-	mux.HandleFunc("GET /api/posts/{id}", handlers.LoadPostData)
-	mux.HandleFunc("GET /api/categories", handlers.LoadAllCategories)
+	mux.HandleFunc("GET /api/posts", api.LoadData)
+	mux.HandleFunc("GET /api/posts/{id}", api.LoadPostData)
+	mux.HandleFunc("GET /api/categories", api.LoadAllCategories)
 
 	// auth
-	mux.HandleFunc("POST /api/login", api.LoginUser)
-	mux.HandleFunc("POST /api/users", api.PostUser)
+	mux.HandleFunc("POST /auth/register", auth.RegisterUser)
+	mux.HandleFunc("POST /auth/login", auth.LoginUser)
+	mux.HandleFunc("POST /auth/logout", auth.LogoutUser)
 
 	// user activity
 	mux.HandleFunc("POST /newposts", middleware.Middleware(handlers.NewPostHandler))
 	mux.HandleFunc("POST /newcomment", middleware.Middleware(handlers.NewCommentHandler))
-	mux.HandleFunc("POST /reactions", middleware.Middleware(handlers.LikeDislikeHandler))
+	mux.HandleFunc("POST /reactions", middleware.Middleware(handlers.ReactionHandler))
 	mux.HandleFunc("POST /newcategories", handlers.CreateCategoriesHandler)
-
-	// logout
-	mux.HandleFunc("POST /logout", api.LogoutUser)
-
 
 	//getsession
 	// mux.HandleFunc("GET /", api.SessionHandler)

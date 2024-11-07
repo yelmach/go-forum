@@ -1,4 +1,4 @@
-package tools
+package utils
 
 import "net/http"
 
@@ -7,7 +7,7 @@ func AddCookie(w http.ResponseWriter, name, value string) {
 		Name:   name,
 		Value:  value,
 		Path:   "/",
-		MaxAge: 100,
+		MaxAge: 60*60*24,
 	})
 }
 

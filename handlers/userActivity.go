@@ -84,7 +84,7 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	HomeHandler(w, r)
 }
 
-func LikeDislikeHandler(w http.ResponseWriter, r *http.Request) {
+func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	// id, _ := strconv.Atoi(r.PathValue("id"))
 
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
