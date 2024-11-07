@@ -119,20 +119,25 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
-	dbCategories, err := database.DataBase.Query(`SELECT name FROM categories`)
+	dbCategories, err := database.DataBase.Query(`SELECT id,name FROM categories`)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	defer dbCategories.Close()
 
-	categories := []string{}
+	categories := struct {
+		Id   []int
+		Name []string
+	}{}
 	for dbCategories.Next() {
 		var category string
-		dbCategories.Scan(&category)
-		categories = append(categories, category)
+		var id int
+		dbCategories.Scan(&id, &category)
+		categories.Id = append(categories.Id, id)
+		categories.Name = append(categories.Name, category)
 	}
-
+	
 	if err = dbCategories.Err(); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return

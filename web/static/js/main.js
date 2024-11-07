@@ -4,8 +4,7 @@ const loadData = async (posts) => {
     const categContainer = document.querySelector('.categories');
     const categories = await fetch("http://localhost:8080/api/categories")
         .then(response => response.json())
-
-    for (const category of categories) {
+    for (const category of categories.Name) {
         const categoryElem = document.createElement('li')
         categoryElem.id = category;
         categoryElem.onclick = () => filterByCategory(category);
@@ -21,7 +20,7 @@ fetch("http://localhost:8080/api/posts")
     .then((response) => response.json())
     .then(loadData);
 
-// const generateAvatar = async () => {
+// const generateAvatar = async () => 
 //     const [color, background] = await fetch("https://random-flat-colors.vercel.app/api/random?count=2")
 //         .then(response => response.json())
 //         .then(json => json.colors)

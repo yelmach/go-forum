@@ -57,6 +57,5 @@ func LoginUser(user models.User) (models.User, error) {
 	if err != nil {
 		return models.User{}, err
 	}
-
 	return existUser, nil
 }

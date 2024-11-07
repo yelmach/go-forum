@@ -40,6 +40,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	user, err = controllers.LoginUser(user)
@@ -52,14 +53,17 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		w.Write(data)
+		return
 	}
 
 	// create session
 	id, err := uuid.NewV7()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return	
 	}
 	sessionId := id.String()
 
@@ -67,6 +71,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	err = controllers.StoreSession(w, sessionId, user)
 	if err != nil {
 		http.Error(w, "You already have a session", http.StatusBadRequest)
+		return
 	}
 
 	utils.AddCookie(w, "session_id", sessionId)
@@ -83,6 +88,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	w.Write(data)
 }

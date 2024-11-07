@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"forum/database"
@@ -19,7 +18,6 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 		if err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE session_id=?", cookie.Value).Scan(&count); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-		fmt.Println(cookie.Value, count)
 		if count == 0 {
 			utils.DeleteCookie(w, "session_id")
 			utils.DeleteCookie(w, "user_id")

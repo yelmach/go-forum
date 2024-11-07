@@ -54,14 +54,12 @@
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({ username, password }),
-                    });
-
+                    });                   
                     if (response.ok) {
                         const result = await response.json();
                         localStorage.setItem("sessionId", result.SessionId);
                         window.location.href = "/"; // Redirect to dashboard or home page after successful login
                     } else {
-                        console.log(response);
                         const result = await response.json();
                         console.error("Login failed:", response.statusText);
                         errorMessage.textContent =

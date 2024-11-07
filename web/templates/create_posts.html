@@ -136,18 +136,20 @@
     </form>
 </body>
 <script>
-    category = document.getElementById('categorySelect')
+    categorys = document.getElementById('categorySelect')
 
     async function getDataCategory() {
         const categories = await fetch("http://localhost:8080/api/categories").then(response => response.json())
-        for (const categor of categories) {
+        for (const category of categories.Id) {
             const option = document.createElement('option')
-            option.value = categor
-            option.innerHTML = `<option>${categor}</option>`
-            category.append(option)
+            option.value = category
+            option.innerHTML = `<option>${categories.Name[category - 1]}</option>`
+            categorys.append(option)
         }
     }
     getDataCategory()
+
+
 </script>
 
 </html>
