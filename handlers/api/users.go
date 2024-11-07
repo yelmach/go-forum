@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -146,7 +145,6 @@ func CreateCommentsHandler(w http.ResponseWriter, r *http.Request) {
 		handlers.ErrorHandler(w, r, http.StatusBadGateway)
 		return
 	}
-	fmt.Println(" ? comment ?")
 	postIdStr := r.URL.Path[len("/poste/"):]
 	postId, err := strconv.Atoi(postIdStr)
 	if err != nil || postId <= 0 {

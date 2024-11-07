@@ -62,22 +62,32 @@ a {
 }
 
 #login,
+#logout,
 #register {
     font-size: .8rem;
     text-transform: capitalize;
     letter-spacing: .5px;
     font-weight: 800;
-    color: #1682FD;
-    background-color: #EAEAEA;
     padding: 0.75rem 1.25rem;
     border-radius: 5px;
 }
 
+#login {
+    color: #1682FD;
+    background-color: #EAEAEA;
+}
+
+#logout,
 #register {
     color: #fff;
     background-color: #f48023;
 }
 
+#logout {
+    border: none;
+}
+
+#logout:hover,
 #register:hover {
     background-color: rgba(244, 128, 35, 0.8);
     border-color: transparent;
@@ -88,8 +98,7 @@ a {
     background-color: #1682FD;
 }
 
-#register>i,
-#login>i {
+.sign i {
     margin-right: 8px;
 }
 
@@ -163,11 +172,23 @@ a {
 }
 
 .categories>li {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
     margin-bottom: 0.5rem;
+    cursor: pointer;
 }
 
-.categories li>a {
-    color: #050505;
+.categories li:hover {
+    color: #f48023;
+}
+
+.categories li>i {
+    font-size: 20px;
+}
+
+.activeCat {
+    color: #f48023;
 }
 
 .main {
@@ -192,7 +213,6 @@ a {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     margin-bottom: 1.75rem;
-    cursor: pointer;
 }
 
 .post-content>h3 {
@@ -258,10 +278,15 @@ a {
 .post-stats i {
     font-size: 18px;
     color: #808080;
+    cursor: pointer;
 }
 
 .post-stats i:hover {
     color: #1a73e8;
+}
+
+.post-stats i.dislike:hover {
+    color: #EF476F;
 }
 
 .stat {
@@ -270,9 +295,14 @@ a {
     gap: 5px;
 }
 
-.post .activeThumb, 
-.comment .activeThumb {
+.post .liked, 
+.comment .liked{
     color: #1a73e8;
+}
+
+.post .disliked, 
+.comment .disliked{
+    color: #EF476F;
 }
 
 /********** comments **********/

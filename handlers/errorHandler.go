@@ -11,6 +11,7 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, status int) {
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
 	var DetelsError struct {
 		Title  string
 		Status int
@@ -32,6 +33,8 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, status int) {
 	case http.StatusBadGateway:
 		DetelsError.Title = "Error 502 (Status Bad Gateway)"
 	}
+
+	w.WriteHeader(DetelsError.Status)
 	DetelsError.Status = status
 	DetelsError.Method = r.Method
 	DetelsError.Path = r.URL.Path

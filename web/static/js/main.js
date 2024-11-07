@@ -1,38 +1,40 @@
 let POSTS = {};
-const loadData = (posts) => {
-    POSTS = [...posts]
-    const main = document.querySelector('.main');
-    const postsContainer = document.createElement('div');
-    postsContainer.classList.add('posts-container');
-
-    // posts = posts.slice(0, 10);
-    for (const post of posts) {
-        const postDiv = createPostElement(post);
-        postsContainer.append(postDiv);
+const loadData = async (posts) => {
+    POSTS = [...posts];
+    const categContainer = document.querySelector('.categories');
+    const categories = await fetch("http://localhost:8080/api/categories")
+        .then(response => response.json())
+    for (const category of categories.Name) {
+        const categoryElem = document.createElement('li')
+        categoryElem.id = category;
+        categoryElem.onclick = () => filterByCategory(category);
+        categoryElem.innerHTML = `
+        <i class="ri-hashtag"></i>${category}
+        `
+        categContainer.append(categoryElem);
     }
-    main.append(postsContainer);
+    recentPosts();
 };
 
 fetch("http://localhost:8080/api/posts")
-    .then((response) => response.json()) // parse the response from JSON
-    .then(loadData); // .then will call the `loadData` function with the JSON value.
+    .then((response) => response.json())
+    .then(loadData);
 
-// const generateAvatar = async () => {
+// const generateAvatar = async () => 
 //     const [color, background] = await fetch("https://random-flat-colors.vercel.app/api/random?count=2")
 //         .then(response => response.json())
 //         .then(json => json.colors)
 
 //     return [color, background]
 // }
+// const [color, background] = await generateAvatar();
 
 const createPostElement = (post) => {
     const userId = parseInt(getCookie("user_id"));
     const postDiv = document.createElement("div");
     postDiv.classList.add("post");
-    postDiv.onclick = () => openPost(post.id);
-    // const [color, background] = await generateAvatar();
-    const likeActive = post.likes.includes(userId) ? ' activeThumb' : ''
-    const dislikeActive = post.dislikes.includes(userId) ? ' activeThumb' : ''
+    const likeActive = post.likes.includes(userId) ? ' liked' : ''
+    const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
 
     postDiv.innerHTML = `
     <div class="user-info">
@@ -55,10 +57,10 @@ const createPostElement = (post) => {
                 <i class="ri-thumb-up-line${likeActive}"></i><span class="${likeActive}">${post.likes.length}</span>
             </div>
             <div class="stat">
-                <i class="ri-thumb-down-line${dislikeActive}"></i><span class="${dislikeActive}">${post.dislikes.length}</span>
+                <i class="ri-thumb-down-line dislike${dislikeActive}"></i><span class="${dislikeActive}">${post.dislikes.length}</span>
             </div>
             <div class="stat">
-                <i class="ri-chat-4-line"></i><span>${post.comments ? post.comments.length : 0}</span>
+                <i class="ri-chat-4-line" onclick="openPost(${post.id})"></i><span>${post.comments ? post.comments.length : 0}</span>
             </div>
         </div>
     </div>
@@ -67,7 +69,11 @@ const createPostElement = (post) => {
 }
 
 const createCommentElement = (comment) => {
+    const userId = parseInt(getCookie("user_id"));
     const commentDiv = document.createElement('div');
+    const likeActive = comment.likes.includes(userId) ? ' liked' : ''
+    const dislikeActive = comment.dislikes.includes(userId) ? ' disliked' : ''
+
     commentDiv.classList.add('comment');
     commentDiv.innerHTML = `
     <div class="user-info">
@@ -83,10 +89,10 @@ const createCommentElement = (comment) => {
     <div class="tags-stats">
         <div class="post-stats">
             <div class="stat">
-                <i class="ri-thumb-up-line"></i><span>${comment.likes.length}</span>
+                <i class="ri-thumb-up-line${likeActive}"></i><span class="${likeActive}">${comment.likes.length}</span>
             </div>
             <div class="stat">
-                <i class="ri-thumb-down-line"></i><span>${comment.dislikes.length}</span>
+                <i class="ri-thumb-down-line dislike${dislikeActive}"></i><span class="${dislikeActive}">${comment.dislikes.length}</span>
             </div>
         </div>
     </div>
@@ -121,34 +127,48 @@ const openPost = async (postId) => {
     main.innerHTML = createPostElement(post).outerHTML;
     main.innerHTML += `
     <div class="comment-box">
-        <textarea class="comment-input" placeholder="Type here your wise suggestion"></textarea>
-        <div class="button-group">
-            <button class="btn btn-cancel">Cancel</button>
-            <button class="btn btn-comment">
-                <svg class="comment-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                Comment
-            </button>
-        </div>
+        <form action="/" method="POST">
+            <textarea class="comment-input" name="content" placeholder="Type here your wise suggestion"></textarea>
+            <input type="hidden" name="postId" value="${postId}">
+            <div class="button-group">
+                <button class="btn btn-cancel">Cancel</button>
+                <button type="submit" class="btn btn-comment">
+                    <i class="ri-chat-4-line"></i>Comment
+                </button>
+            </div>
+        </form>
     </div>
     `
+
+
 
     widget.innerHTML = `
     <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">
     <p class="username">@${post.by}</p>
     `
 
+
     document.querySelector('.btn-cancel').addEventListener('click', function () {
         document.querySelector('.comment-input').value = '';
     });
 
     document.querySelector('.btn-comment').addEventListener('click', function () {
+        fetch('/', {
+            method: 'POST',
+            body: new URLSearchParams({
+                content: content,
+                postId: postId,
+            }),
+        }).catch(error => {
+            console.error('Error posting comment:', error);
+        });
+
         const comment = document.querySelector('.comment-input').value;
         console.log('Comment submitted:', comment);
         document.querySelector('.comment-input').value = '';
     });
     main.append(comments);
+
 }
 
 const timeAgo = (time) => {
@@ -176,49 +196,78 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-const disactive = (elems) => {
+const disactive = () => {
+    const elems = [...document.querySelectorAll('.menu-select'), ...document.querySelectorAll('.categories>li')]
     for (const elem of elems) {
         elem.classList.remove('active');
+        elem.classList.remove('activeCat');
     }
 }
 
+const widgetBack = () => {
+    const widget = document.querySelector('.widget');
+    widget.innerHTML = `
+    <div class="section">
+        <h2 class="section-title">
+            <i class="ri-star-line"></i>
+            Must-read posts
+        </h2>
+        <ul>
+            <li><a href="#">Please read rules before you start working on a platform</a></li>
+            <li><a href="#">Vision & Strategy of AIemhelp</a></li>
+        </ul>
+    </div>
+    <div class="section">
+        <h2 class="section-title">
+            <i class="ri-links-line"></i>
+            Featured links
+        </h2>
+        <ul>
+            <li><a href="#">AIemhelp source-code on GitHub</a></li>
+            <li><a href="#">Golang best-practices</a></li>
+            <li><a href="#">AIem School dashboard</a></li>
+        </ul>
+    </div>
+    `
+}
+
 const recentPosts = () => {
-    location.reload();
+    widgetBack();
+    displayPosts(POSTS);
+    document.getElementById('select_1').classList.add('active');
 }
 
 const createdPosts = () => {
     const username = getCookie("username");
     const posts = POSTS.filter(post => post.by == username)
-    const main = document.querySelector('.main');
-    const postsContainer = document.createElement('div');
-    postsContainer.classList.add('posts-container');
-    disactive(document.querySelectorAll('.menu-select'))
-    document.getElementById('select_2').classList.add('active')
-    main.innerHTML = ''
-    if (!posts.length) {
-        main.innerHTML += `
-        <img style="display: block; width:300px; margin: 3rem auto;" src="/assets/img/no_data.svg" alt="no result"/>
-        <h2 style="text-align:center">Noting Found</h2>
-        `
-    } else {
-        for (const post of posts) {
-            const postDiv = createPostElement(post);
-            postsContainer.append(postDiv);
-        }
-        main.append(postsContainer)
-    }
+    widgetBack();
+    displayPosts(posts);
+    document.getElementById('select_2').classList.add('active');
 }
 
 const likedPosts = () => {
     const userId = parseInt(getCookie("user_id"));
     const posts = POSTS.filter(post => post.likes.includes(userId))
+    widgetBack();
+    displayPosts(posts);
+    document.getElementById('select_3').classList.add('active');
+}
+
+const filterByCategory = (category) => {
+    const posts = POSTS.filter(post => post.categories.includes(category))
+    widgetBack();
+    displayPosts(posts);
+    document.getElementById(category).classList.add('activeCat');
+}
+
+const displayPosts = (posts) => {
     const main = document.querySelector('.main');
     const postsContainer = document.createElement('div');
     postsContainer.classList.add('posts-container');
-    disactive(document.querySelectorAll('.menu-select'))
-    document.getElementById('select_3').classList.add('active')
+    disactive();
     main.innerHTML = ''
     if (!posts.length) {
+        // tmp figure for empty meaning
         main.innerHTML += `
         <img style="display: block; width:300px; margin: 3rem auto;" src="/assets/img/no_data.svg" alt="no result"/>
         <h2 style="text-align:center">Noting Found</h2>

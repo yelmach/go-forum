@@ -5,18 +5,18 @@ import (
 	"log"
 	"net/http"
 
+	"forum/database"
 	"forum/routers"
-	"forum/utils"
 )
 
 func main() {
-	err := utils.InitDb()
+	err := database.InitDb()
 	if err != nil {
 		log.Fatalln(err)
 		return
 	}
 
-	defer utils.DataBase.Close()
+	defer database.DataBase.Close()
 	mux := http.NewServeMux()
 	routers.SetupRoutes(mux)
 
