@@ -11,12 +11,14 @@ import (
 )
 
 // StoreSession is designed to save a new user session in a database if it doesn't already exist
-func StoreSession(w http.ResponseWriter, session_id string, user models.User) error {
+func StoreSession(w http.ResponseWriter, session_id string, user models.User) (error, int) {
 	// check for already stored session
 	var count int
 	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ? ", user.Id).Scan(&count)
-	if err != nil {
-		return err
+	if err == sql.ErrNoRows {
+		return errors.New("user not found"), http.StatusNotFound
+	} else if err != nil {
+		return fmt.Errorf("error scanning row: %w", err), http.StatusInternalServerError
 	}
 
 	query := ``
@@ -24,18 +26,18 @@ func StoreSession(w http.ResponseWriter, session_id string, user models.User) er
 	case count > 0:
 		query := `UPDATE sessions SET session_id = ? WHERE user_id = ?`
 		if _, err := database.DataBase.Exec(query, session_id, user.Id); err != nil {
-			return err
+			return err, http.StatusInternalServerError
 		}
-		return nil
+		return nil, http.StatusOK
 	case count == 0:
 		query = `INSERT INTO sessions (user_id, session_id) VALUES (?, ?)`
 		if _, err := database.DataBase.Exec(query, user.Id, session_id); err != nil {
-			return err
+			return err, http.StatusInternalServerError
 		}
-		return nil
+		return nil, http.StatusOK
 	}
 
-	return nil
+	return nil, http.StatusOK
 }
 
 func GetSession(r *http.Request) (models.User, error) {

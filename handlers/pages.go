@@ -10,6 +10,11 @@ import (
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		ErrorHandler(w, r, http.StatusNotFound)
+		return
+	}
+
 	IsLoggedIn := false
 
 	tmpl, err := template.ParseFiles("./web/templates/index.html",
@@ -18,7 +23,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		"./web/templates/components/logged_navbar.html",
 		"./web/templates/components/logged_sidebar.html")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 	}
 
 	cookie, err := r.Cookie("session_id")
@@ -30,7 +35,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		count := 0
 
 		if err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE session_id=?", cookie.Value).Scan(&count); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		}
 
 		if count == 0 {
@@ -39,7 +44,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			utils.DeleteCookie(w, "username")
 			IsLoggedIn = false
 			if err = tmpl.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
-				http.Error(w, "failled to execute temp", http.StatusInternalServerError)
+				utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 			}
 
 		}
@@ -50,35 +55,47 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "failled to execute template", http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 	}
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/register" {
+		ErrorHandler(w, r, http.StatusNotFound)
+		return
+	}
+
 	tmpl, err := template.ParseFiles("./web/templates/register.html")
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 	}
 
 	tmpl.Execute(w, nil)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/login" {
+		ErrorHandler(w, r, http.StatusNotFound)
+		return
+	}
+
 	tmpl, err := template.ParseFiles("./web/templates/login.html")
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 	}
 
 	tmpl.Execute(w, nil)
 }
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/createpost" {
+		ErrorHandler(w, r, http.StatusNotFound)
+		return
+	}
+
 	tmpl, err := template.ParseFiles("./web/templates/create_posts.html")
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 	}
 
 	tmpl.Execute(w, nil)

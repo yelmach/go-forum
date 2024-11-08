@@ -3,9 +3,11 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"forum/database"
 	"forum/models"
-	"strconv"
 )
 
 func CreatePost(postContent models.Post) error {
@@ -41,28 +43,28 @@ func CreatePost(postContent models.Post) error {
 	return nil
 }
 
-func CreateCategorie(name_categorie string) error {
+func CreateCategorie(name_categorie string) (error, int) {
 	var count int
 
 	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM categories WHERE name = ?", name_categorie).Scan(&count)
 	if err != nil {
-		return fmt.Errorf("error checking category existence: %w", err)
+		return fmt.Errorf("error checking category existence: %w", err), http.StatusInternalServerError
 	}
 	if count > 0 {
-		return errors.New("category already exists")
+		return errors.New("category already exists"), http.StatusNotFound
 	}
 
 	C_categories, err := database.DataBase.Prepare(`INSERT INTO categories (name) VALUES (?)`)
 	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err)
+		return fmt.Errorf("error preparing statement: %w", err), http.StatusInternalServerError
 	}
 	defer C_categories.Close()
 
 	if _, err := C_categories.Exec(name_categorie); err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
+		return fmt.Errorf("error executing statement: %w", err), http.StatusInternalServerError
 	}
 
-	return nil
+	return nil, http.StatusOK
 }
 
 func CreateComment(comment models.Comment) error {

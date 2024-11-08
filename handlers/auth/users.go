@@ -13,25 +13,18 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+// this func responsible for writing responses to me for debbuging
+
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+		return
 	}
 
-	_, err = controllers.RegisterUser(user)
-	if err != nil {
-		w.WriteHeader(400)
-		data, err := json.Marshal(struct {
-			Msg string
-		}{
-			Msg: err.Error(),
-		})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		w.Write(data)
+	if err := controllers.RegisterUser(user); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+		return
 	}
 }
 
@@ -39,38 +32,28 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
-	user, err = controllers.LoginUser(user)
+	user, err, statuscode := controllers.LoginUser(user)
 	if err != nil {
-		w.WriteHeader(400)
-		data, err := json.Marshal(struct {
-			Msg string
-		}{
-			Msg: err.Error(),
-		})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Write(data)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
 	}
 
 	// create session
 	id, err := uuid.NewV7()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return	
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
 	}
 	sessionId := id.String()
 
 	// store session in database
-	err = controllers.StoreSession(w, sessionId, user)
+	err, statuscode = controllers.StoreSession(w, sessionId, user)
 	if err != nil {
-		http.Error(w, "You already have a session", http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
 	}
 
@@ -78,26 +61,20 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	utils.AddCookie(w, "user_id", strconv.Itoa(user.Id))
 	utils.AddCookie(w, "username", user.Username)
 
-	w.WriteHeader(200)
-	data, err := json.Marshal(struct {
-		Msg       string
-		SessionId string
-	}{
-		Msg:       "Logged in",
-		SessionId: sessionId,
-	})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(data)
+	utils.ResponseJSON(w, utils.Resp{Msg: "Logged in", Code: http.StatusOK, SessionId: sessionId})
 }
 
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
-	session_id := r.Cookies()[0].Value
+	session_id, err := r.Cookie("session_id")
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
+	}
+
 	query := `DELETE FROM sessions WHERE session_id=?`
-	if _, err := database.DataBase.Exec(query, session_id); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if _, err := database.DataBase.Exec(query, session_id.Value); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
 	}
 
 	utils.DeleteCookie(w, "session_id")

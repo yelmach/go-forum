@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"forum/controllers"
+	"forum/utils"
 
 	"forum/models"
 )
@@ -12,7 +13,7 @@ import (
 func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
 		return
 	}
 
@@ -23,13 +24,18 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		Category_id: r.Form["categories"],
 		Image_url:   r.FormValue("Image_url"),
 	}
+
 	if postContent.Title == "" || postContent.Content == "" || len(postContent.Category_id) == 0 {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: "can't be empty", Code: http.StatusBadRequest})
+		return
+	} else if len(postContent.Title) >= 61 || len(postContent.Content) >= 2001 {
+		utils.ResponseJSON(w, utils.Resp{Msg: "can't process, input to long", Code: http.StatusBadRequest})
 		return
 	}
+
 	err = controllers.CreatePost(postContent)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
 	http.ServeFile(w, r, "./web/templates/create_posts.html")
@@ -37,34 +43,43 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func CreateCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	name_categorie := r.URL.Query().Get("categori_name")
+
 	if len(name_categorie) == 0 {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: "categorie name should be provided", Code: http.StatusBadRequest})
 		return
 	}
-	if err := controllers.CreateCategorie(name_categorie); err != nil {
-		http.Error(w, "Bad Request", http.StatusInternalServerError)
-		return
 
+	err, statuscode := controllers.CreateCategorie(name_categorie)
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
+		return
 	}
 }
 
 func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed) // reprocess after
 		return
 	}
 
-	cookie, _ := r.Cookie("user_id")
+	cookie, err := r.Cookie("user_id")
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
+	}
+
 	user_id, err := strconv.Atoi(cookie.Value)
 	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
 		return
 	}
+
 	post_id, err := strconv.Atoi(r.FormValue("postId"))
 	if err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
 		return
 	}
+
 	comment := models.Comment{
 		User_id: user_id,
 		Post_id: post_id,
@@ -72,35 +87,40 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if comment.Content == "" {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: "can't be empty", Code: http.StatusBadRequest})
+		return
+	} else if len(comment.Content) >= 501 {
+		utils.ResponseJSON(w, utils.Resp{Msg: "cat't process, input to long", Code: http.StatusBadRequest})
 		return
 	}
+
 	err = controllers.CreateComment(comment)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
+
 	w.WriteHeader(http.StatusCreated)
 	HomeHandler(w, r)
 }
 
 func ReactionHandler(w http.ResponseWriter, r *http.Request) {
-	// id, _ := strconv.Atoi(r.PathValue("id"))
-
 	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
+
 	postID := r.URL.Query().Get("post_id")
 	commentID := r.URL.Query().Get("comment_id")
 	isLike := r.URL.Query().Get("is_like")
 
 	like, err := strconv.ParseBool(isLike)
 	if err != nil {
-		http.Error(w, "Invalid like value", http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
+
 	reactions := models.Reaction{
 		User_id:    user_id,
 		Post_id:    0,
@@ -109,18 +129,23 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if postID != "" {
-		reactions.Post_id, _ = strconv.Atoi(postID)
+		reactions.Post_id, err = strconv.Atoi(postID)
 	} else if commentID != "" {
-		reactions.Comment_id, _ = strconv.Atoi(commentID)
+		reactions.Comment_id, err = strconv.Atoi(commentID)
 	} else {
-		http.Error(w, "Either post_id or comment_id must be provided", http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: "Either post_id or comment_id must be provided", Code: http.StatusBadRequest})
+		return
+	}
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
 	err = controllers.CreateReaction(reactions)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 }
