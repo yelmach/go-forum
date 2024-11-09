@@ -73,39 +73,38 @@ func getUsername(userId int) (string, int, error) {
 	return username, http.StatusOK, nil
 }
 
-func getPostComments(postId int) ([]models.CommentsApi, int, error) {
-	comments := []models.CommentsApi{}
+func getPostComments(postId int) ([]models.CommentApi, int, error) {
+	comments := []models.CommentApi{}
 
 	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=? ORDER BY created_at DESC`
 	dbComments, err := database.DataBase.Query(query, postId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return []models.CommentsApi{}, http.StatusNotFound, err
+			return []models.CommentApi{}, http.StatusNotFound, err
 		} else {
-			return []models.CommentsApi{}, http.StatusInternalServerError, err
+			return []models.CommentApi{}, http.StatusInternalServerError, err
 		}
 	}
 	defer dbComments.Close()
 
 	for dbComments.Next() {
-		var comment models.CommentsApi
+		var comment models.CommentApi
 		var userId int
-		var commentid int
 		var statuscode int
 
-		err := dbComments.Scan(&commentid, &userId, &comment.Content, &comment.CreatedAt)
+		err := dbComments.Scan(&comment.Id, &userId, &comment.Content, &comment.CreatedAt)
 		if err != nil {
-			return []models.CommentsApi{}, http.StatusInternalServerError, err
+			return []models.CommentApi{}, http.StatusInternalServerError, err
 		}
 
-		comment.Likes, comment.Dislikes, statuscode, err = getReaction(commentid, false)
+		comment.Likes, comment.Dislikes, statuscode, err = getReaction(comment.Id, false)
 		if err != nil {
-			return []models.CommentsApi{}, statuscode, err
+			return []models.CommentApi{}, statuscode, err
 		}
 
 		comment.By, statuscode, err = getUsername(userId)
 		if err != nil {
-			return []models.CommentsApi{}, statuscode, err
+			return []models.CommentApi{}, statuscode, err
 		}
 		comments = append(comments, comment)
 	}

@@ -9,22 +9,23 @@ type User struct {
 }
 
 type Post struct {
-	User_id     int
-	Title       string
-	Content     string
-	Category_id []string
-	Image_url   string
+	UserId     int
+	Title      string
+	Content    string
+	CategoryId []string
+	ImageUrl   string
 }
 
 type Comment struct {
-	Post_id    int
-	User_id    int
-	Content    string
+	PostId  int
+	UserId  int
+	Content string
 }
 
 type Reaction struct {
-	User_id    int
-	Post_id    int
-	Comment_id int
-	Is_like    bool
+	UserId    int
+	PostId    int
+	CommentId int
+	IsLike    bool
+	IsDislike bool
 }

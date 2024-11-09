@@ -36,7 +36,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err, statuscode := controllers.LoginUser(user)
+	user, statuscode, err := controllers.LoginUser(user)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
@@ -51,7 +51,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	sessionId := id.String()
 
 	// store session in database
-	err, statuscode = controllers.StoreSession(w, sessionId, user)
+	statuscode, err = controllers.StoreSession(w, sessionId, user)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return

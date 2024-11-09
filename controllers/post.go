@@ -17,7 +17,7 @@ func CreatePost(postContent models.Post) error {
 	}
 	defer C_post.Close()
 
-	res, err := C_post.Exec(postContent.User_id, postContent.Title, postContent.Content, postContent.Image_url)
+	res, err := C_post.Exec(postContent.UserId, postContent.Title, postContent.Content, postContent.ImageUrl)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func CreatePost(postContent models.Post) error {
 	}
 	defer C_postCategories.Close()
 
-	for _, categoryID := range postContent.Category_id {
+	for _, categoryID := range postContent.CategoryId {
 		Category_id, _ := strconv.Atoi(categoryID)
 		if _, err := C_postCategories.Exec(postID, Category_id); err != nil {
 			return fmt.Errorf("error linking post to category %s: %w", categoryID, err)
@@ -43,28 +43,28 @@ func CreatePost(postContent models.Post) error {
 	return nil
 }
 
-func CreateCategorie(name_categorie string) (error, int) {
+func CreateCategorie(name_categorie string) (int, error) {
 	var count int
 
 	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM categories WHERE name = ?", name_categorie).Scan(&count)
 	if err != nil {
-		return fmt.Errorf("error checking category existence: %w", err), http.StatusInternalServerError
+		return http.StatusInternalServerError, fmt.Errorf("error checking category existence: %w", err)
 	}
 	if count > 0 {
-		return errors.New("category already exists"), http.StatusNotFound
+		return http.StatusNotFound, errors.New("category already exists")
 	}
 
 	C_categories, err := database.DataBase.Prepare(`INSERT INTO categories (name) VALUES (?)`)
 	if err != nil {
-		return fmt.Errorf("error preparing statement: %w", err), http.StatusInternalServerError
+		return http.StatusInternalServerError, fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer C_categories.Close()
 
 	if _, err := C_categories.Exec(name_categorie); err != nil {
-		return fmt.Errorf("error executing statement: %w", err), http.StatusInternalServerError
+		return http.StatusInternalServerError, fmt.Errorf("error executing statement: %w", err)
 	}
 
-	return nil, http.StatusOK
+	return http.StatusOK, nil
 }
 
 func CreateComment(comment models.Comment) error {
@@ -75,29 +75,55 @@ func CreateComment(comment models.Comment) error {
 
 	defer C_comment.Close()
 
-	if _, err = C_comment.Exec(comment.Post_id, comment.User_id, comment.Content); err != nil {
+	if _, err = C_comment.Exec(comment.PostId, comment.UserId, comment.Content); err != nil {
 		return fmt.Errorf("error executing statement: %w", err)
 	}
 	return nil
 }
 
-func CreateReaction(reactions models.Reaction) error {
-	var query string
-	var id int
-	isPost := reactions.Post_id != 0
+func CreateReaction(r models.Reaction) error {
+	liked, disliked := false, false
+	isPost := r.PostId != 0
+
 	if isPost {
-		query = `INSERT INTO reactions (user_id, post_id, is_like) VALUES (?, ?, ?)`
-		id = reactions.Post_id
+		if err := database.DataBase.QueryRow(`SELECT EXISTS(SELECT is_like FROM reactions WHERE user_id=? AND post_id=? AND is_like=1)`, r.UserId, r.PostId).Scan(&liked); err != nil {
+			return err
+		}
+		if err := database.DataBase.QueryRow(`SELECT EXISTS(SELECT is_like FROM reactions WHERE user_id=? AND post_id=? AND is_like=0)`, r.UserId, r.PostId).Scan(&disliked); err != nil {
+			return err
+		}
+
+		if liked || disliked {
+			if _, err := database.DataBase.Exec(`DELETE FROM reactions WHERE user_id=? AND post_id=?`, r.UserId, r.PostId); err != nil {
+				return fmt.Errorf("error executing statement: %w", err)
+			}
+		}
+
+		if liked != r.IsLike || disliked != r.IsDislike {
+			if _, err := database.DataBase.Exec(`INSERT INTO reactions (user_id, post_id, is_like) VALUES (?, ?, ?)`, r.UserId, r.PostId, r.IsLike); err != nil {
+				return fmt.Errorf("error executing statement: %w", err)
+			}
+		}
+
 	} else {
-		query = `INSERT INTO reactions (user_id, comment_id, is_like) VALUES (?, ?, ?)`
-		id = reactions.Comment_id
-	}
-	C_reaction, err := database.DataBase.Prepare(query)
-	if err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
-	}
-	if _, err = C_reaction.Exec(reactions.User_id, id, reactions.Is_like); err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
+		if err := database.DataBase.QueryRow(`SELECT EXISTS(SELECT is_like FROM reactions WHERE user_id=? AND comment_id=? AND is_like=1)`, r.UserId, r.CommentId).Scan(&liked); err != nil {
+			return err
+		}
+		if err := database.DataBase.QueryRow(`SELECT EXISTS(SELECT is_like FROM reactions WHERE user_id=? AND comment_id=? AND is_like=0)`, r.UserId, r.CommentId).Scan(&disliked); err != nil {
+			return err
+		}
+
+		if liked || disliked {
+			if _, err := database.DataBase.Exec(`DELETE FROM reactions WHERE user_id=? AND comment_id=?`, r.UserId, r.CommentId); err != nil {
+				return fmt.Errorf("error executing statement: %w", err)
+			}
+		}
+
+		if liked != r.IsLike || disliked != r.IsDislike {
+			if _, err := database.DataBase.Exec(`INSERT INTO reactions (user_id, comment_id, is_like) VALUES (?, ?, ?)`, r.UserId, r.CommentId, r.IsLike); err != nil {
+				return fmt.Errorf("error executing statement: %w", err)
+			}
+		}
 	}
 
 	return nil

@@ -12,7 +12,7 @@ import (
 )
 
 func LoadPostData(w http.ResponseWriter, r *http.Request) {
-	var post models.PostsApi
+	var post models.PostApi
 	var userId int
 	statuscode := 0
 
@@ -80,11 +80,11 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	defer dbPosts.Close()
 
 	// Prepare a slice to store the posts
-	posts := []models.PostsApi{}
+	posts := []models.PostApi{}
 
 	// Iterate through the rows and scan each row into a Post struct
 	for dbPosts.Next() {
-		var post models.PostsApi
+		var post models.PostApi
 		var userId int
 		var statuscode int
 
@@ -145,8 +145,8 @@ func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 	defer dbCategories.Close()
 
 	categories := struct {
-		Id   []int
-		Name []string
+		Id   []int    `json:"id"`
+		Name []string `json:"name"`
 	}{}
 
 	for dbCategories.Next() {

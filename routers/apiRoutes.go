@@ -31,9 +31,6 @@ func SetupRoutes(mux *http.ServeMux) {
 	// user activity
 	mux.HandleFunc("POST /newposts", middleware.Middleware(handlers.NewPostHandler))
 	mux.HandleFunc("POST /newcomment", middleware.Middleware(handlers.NewCommentHandler))
-	mux.HandleFunc("POST /reactions", middleware.Middleware(handlers.ReactionHandler))
+	mux.HandleFunc("POST /reaction", middleware.Middleware(handlers.ReactionHandler))
 	mux.HandleFunc("POST /newcategories", handlers.CreateCategoriesHandler)
-
-	//getsession
-	// mux.HandleFunc("GET /", api.SessionHandler)
 }

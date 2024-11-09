@@ -11,14 +11,14 @@ import (
 )
 
 // StoreSession is designed to save a new user session in a database if it doesn't already exist
-func StoreSession(w http.ResponseWriter, session_id string, user models.User) (error, int) {
+func StoreSession(w http.ResponseWriter, session_id string, user models.User) (int, error) {
 	// check for already stored session
 	var count int
 	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ? ", user.Id).Scan(&count)
 	if err == sql.ErrNoRows {
-		return errors.New("user not found"), http.StatusNotFound
+		return http.StatusNotFound, errors.New("user not found")
 	} else if err != nil {
-		return fmt.Errorf("error scanning row: %w", err), http.StatusInternalServerError
+		return http.StatusInternalServerError, fmt.Errorf("error scanning row: %w", err)
 	}
 
 	query := ``
@@ -26,18 +26,18 @@ func StoreSession(w http.ResponseWriter, session_id string, user models.User) (e
 	case count > 0:
 		query := `UPDATE sessions SET session_id = ? WHERE user_id = ?`
 		if _, err := database.DataBase.Exec(query, session_id, user.Id); err != nil {
-			return err, http.StatusInternalServerError
+			return http.StatusInternalServerError, err
 		}
-		return nil, http.StatusOK
+		return http.StatusOK, nil
 	case count == 0:
 		query = `INSERT INTO sessions (user_id, session_id) VALUES (?, ?)`
 		if _, err := database.DataBase.Exec(query, user.Id, session_id); err != nil {
-			return err, http.StatusInternalServerError
+			return http.StatusInternalServerError, err
 		}
-		return nil, http.StatusOK
+		return http.StatusOK, nil
 	}
 
-	return nil, http.StatusOK
+	return http.StatusOK, nil
 }
 
 func GetSession(r *http.Request) (models.User, error) {
