@@ -16,7 +16,7 @@ func SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /", handlers.HomeHandler)
 	mux.HandleFunc("GET /login", middleware.RedirectMiddleware(handlers.LoginHandler))
 	mux.HandleFunc("GET /register", middleware.RedirectMiddleware(handlers.RegisterHandler))
-	mux.HandleFunc("GET /createpost", middleware.Middleware(handlers.CreatePostHandler))
+	mux.HandleFunc("GET /createpost", middleware.GetCookiesId(handlers.CreatePostHandler))
 
 	// api
 	mux.HandleFunc("GET /api/posts", api.LoadData)
@@ -29,11 +29,8 @@ func SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /auth/logout", auth.LogoutUser)
 
 	// user activity
-	mux.HandleFunc("POST /newposts", middleware.Middleware(handlers.NewPostHandler))
-	mux.HandleFunc("POST /newcomment", middleware.Middleware(handlers.NewCommentHandler))
-	mux.HandleFunc("POST /reactions", middleware.Middleware(handlers.ReactionHandler))
+	mux.HandleFunc("POST /newposts", middleware.GetCookiesId(handlers.NewPostHandler))
+	mux.HandleFunc("POST /newcomment", middleware.GetCookiesId(handlers.NewCommentHandler))
+	mux.HandleFunc("POST /reaction", middleware.GetCookiesId(handlers.ReactionHandler))
 	mux.HandleFunc("POST /newcategories", handlers.CreateCategoriesHandler)
-
-	//getsession
-	// mux.HandleFunc("GET /", api.SessionHandler)
 }

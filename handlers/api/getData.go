@@ -1,12 +1,15 @@
 package api
 
 import (
+	"database/sql"
+	"fmt"
+	"net/http"
+
 	"forum/database"
 	"forum/models"
-	"log"
 )
 
-func getReaction(Id int, ispost bool) ([]int, []int, error) {
+func getReaction(Id int, ispost bool) ([]int, []int, int, error) {
 	var queryLikes, queryDislikes string
 
 	switch ispost {
@@ -17,24 +20,28 @@ func getReaction(Id int, ispost bool) ([]int, []int, error) {
 		queryLikes = `SELECT user_id FROM reactions WHERE comment_id=? AND is_like=1`
 		queryDislikes = `SELECT user_id FROM reactions WHERE comment_id=? AND is_like=0`
 	}
-	userlikes, err := getUsersIds(queryLikes, Id)
+	userlikes, statuscode, err := getUsersIds(queryLikes, Id)
 	if err != nil {
-		return []int{}, []int{}, err
+		return []int{}, []int{}, statuscode, err
 	}
 
-	userdislikes, err := getUsersIds(queryDislikes, Id)
+	userdislikes, statuscode, err := getUsersIds(queryDislikes, Id)
 	if err != nil {
-		return []int{}, []int{}, err
+		return []int{}, []int{}, statuscode, err
 	}
 
-	return userlikes, userdislikes, nil
+	return userlikes, userdislikes, http.StatusOK, nil
 }
 
-func getUsersIds(query string, Id int) ([]int, error) {
+func getUsersIds(query string, Id int) ([]int, int, error) {
 	usersIds := []int{}
 	rows, err := database.DataBase.Query(query, Id)
 	if err != nil {
-		return []int{}, err
+		if err == sql.ErrNoRows {
+			return []int{}, http.StatusNotFound, err
+		} else {
+			return []int{}, http.StatusInternalServerError, err
+		}
 	}
 	defer rows.Close()
 
@@ -42,84 +49,103 @@ func getUsersIds(query string, Id int) ([]int, error) {
 		var userid int
 
 		if err := rows.Scan(&userid); err != nil {
-			return []int{}, err
+			return []int{}, http.StatusInternalServerError, err
 		}
 		usersIds = append(usersIds, userid)
 	}
 
-	return usersIds, nil
+	return usersIds, http.StatusOK, nil
 }
 
-func getUsername(userId int) (string, error) {
+func getUsername(userId int) (string, int, error) {
 	var username string
 	query := `SELECT username FROM users WHERE id=?`
+
 	err := database.DataBase.QueryRow(query, userId).Scan(&username)
 	if err != nil {
-		return "", err
+		if err == sql.ErrNoRows {
+			return "", http.StatusNotFound, fmt.Errorf("no rows found: %v", err)
+		} else {
+			return "", http.StatusInternalServerError, fmt.Errorf("internal Server Error")
+		}
 	}
 
-	return username, nil
+	return username, http.StatusOK, nil
 }
 
-func getPostComments(postId int) ([]models.CommentsApi, error) {
-	comments := []models.CommentsApi{}
+func getPostComments(postId int) ([]models.CommentApi, int, error) {
+	comments := []models.CommentApi{}
 
 	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=? ORDER BY created_at DESC`
 	dbComments, err := database.DataBase.Query(query, postId)
 	if err != nil {
-		return []models.CommentsApi{}, err
+		if err == sql.ErrNoRows {
+			return []models.CommentApi{}, http.StatusNotFound, err
+		} else {
+			return []models.CommentApi{}, http.StatusInternalServerError, err
+		}
 	}
 	defer dbComments.Close()
 
 	for dbComments.Next() {
-		var comment models.CommentsApi
+		var comment models.CommentApi
 		var userId int
-		var commentid int
+		var statuscode int
 
-		err := dbComments.Scan(&commentid, &userId, &comment.Content, &comment.CreatedAt)
+		err := dbComments.Scan(&comment.Id, &userId, &comment.Content, &comment.CreatedAt)
 		if err != nil {
-			return []models.CommentsApi{}, err
+			return []models.CommentApi{}, http.StatusInternalServerError, err
 		}
 
-		comment.Likes, comment.Dislikes, err = getReaction(commentid, false)
+		comment.Likes, comment.Dislikes, statuscode, err = getReaction(comment.Id, false)
 		if err != nil {
-			return []models.CommentsApi{}, err
+			return []models.CommentApi{}, statuscode, err
 		}
 
-		comment.By, err = getUsername(userId)
+		comment.By, statuscode, err = getUsername(userId)
 		if err != nil {
-			return []models.CommentsApi{}, err
+			return []models.CommentApi{}, statuscode, err
 		}
 		comments = append(comments, comment)
 	}
 
-	return comments, nil
+	return comments, http.StatusOK, nil
 }
 
-func getPostCategories(postId int) ([]string, error) {
+func getPostCategories(postId int) ([]string, int, error) {
 	categories := []string{}
-
 	query := `SELECT category_id FROM post_categories WHERE post_id=?`
+
 	queryRow, err := database.DataBase.Query(query, postId)
 	if err != nil {
-		return []string{}, err
+		if err == sql.ErrNoRows {
+			return []string{}, http.StatusNotFound, err
+		} else {
+			return []string{}, http.StatusInternalServerError, err
+		}
 	}
 	defer queryRow.Close()
 
 	for queryRow.Next() {
 		var category_id int
 		var content string
+
 		if err := queryRow.Scan(&category_id); err != nil {
-			log.Fatal(err)
+			return []string{}, http.StatusInternalServerError, err
 		}
 
 		query = `SELECT name FROM categories WHERE id=?`
 		err = database.DataBase.QueryRow(query, category_id).Scan(&content)
 		if err != nil {
-			return []string{}, err
+			if err == sql.ErrNoRows {
+				return []string{}, http.StatusNotFound, err
+			} else {
+				return []string{}, http.StatusInternalServerError, err
+			}
 		}
+
 		categories = append(categories, content)
 	}
 
-	return categories, nil
+	return categories, http.StatusOK, err
 }
