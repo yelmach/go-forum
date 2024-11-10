@@ -1,18 +1,20 @@
 const data = {
-    allPosts: []
+    allPosts: [],
+    allCategories: []
 }
 
 const loadData = async () => {
-    data.allPosts = await fetch("http://localhost:8080/api/posts")
+    data.allPosts = await fetch("/api/posts")
         .then((response) => response.json())
+    data.allCategories = await fetch("/api/categories")
+        .then(response => response.json());
 };
 
 const init = async () => {
-    const categories = await fetch("http://localhost:8080/api/categories")
-        .then(response => response.json())
+    await loadData();
     const categContainer = document.querySelector('.categories');
 
-    for (const category of categories) {
+    for (const category of data.allCategories) {
         const categoryElem = document.createElement('li')
         categoryElem.id = category;
         categoryElem.onclick = () => filterByCategory(category);
@@ -22,7 +24,6 @@ const init = async () => {
         categContainer.append(categoryElem);
     }
 
-    await loadData();
     displayPosts(data.allPosts);
     document.getElementById('select_1').classList.add('active');
 }
@@ -102,7 +103,7 @@ const createCommentElement = (comment) => {
 
 const getPostData = async (postId) => {
     try {
-        const response = await fetch(`http://localhost:8080/api/posts/${postId}`);
+        const response = await fetch(`/api/posts/${postId}`);
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
         }
@@ -156,7 +157,7 @@ const openPost = async (postId) => {
             return
         }
         try {
-            await fetch("http://localhost:8080/newcomment", {
+            await fetch("/newcomment", {
                 method: "POST",
                 body: JSON.stringify({ postId, content })
             })
@@ -189,7 +190,7 @@ const displayPosts = (posts) => {
 const likeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isLike: true } : { commentId: id, isLike: true }
     try {
-        await fetch("http://localhost:8080/reaction", {
+        await fetch("/reaction", {
             method: "POST",
             body: JSON.stringify(reqData)
         })
@@ -211,7 +212,7 @@ const likeAction = async (id, isPost) => {
 const dislikeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isDislike: true } : { commentId: id, isDislike: true }
     try {
-        await fetch("http://localhost:8080/reaction", {
+        await fetch("/reaction", {
             method: "POST",
             body: JSON.stringify(reqData)
         })
@@ -323,9 +324,113 @@ const filterByCategory = async (category) => {
     document.getElementById(category).classList.add('activeCat');
 }
 
-// setInterval(loadData, 5000);
-init();
+const logout = () => {
+    try {
+        fetch('/auth/logout', {
+            method: 'POST'
+        });
+        location.href = "/";
+    } catch (err) {
+        console.error(err);
+    }
+}
 
+const newPost = () => {
+    document.querySelector('.main').innerHTML = `
+    <div class="form-container">
+        <div class="multi-select">
+            <div class="selected-tags" id="selectedTags"></div>
+            <div class="dropdown" id="dropdown">
+                <input type="text" class="search-box" placeholder="Search categories..." id="searchBox">
+                <div class="select-all" id="selectAll">Select All</div>
+                <div class="options" id="options"></div>
+            </div>
+        </div>
+        <input type="text" name="title" placeholder="Type catching attention title" required>
+        <textarea name="content" placeholder="Type some content" required></textarea>
+        <div class="button-container">
+            <button class="btn btn-add-image">
+                <i class="ri-image-add-line"></i>Add Image
+            </button>
+            <button class="btn btn-publish">
+            <i class="fa-regular fa-paper-plane"></i>Publish
+            </button>
+        </div>
+    </div>
+    `
+    const tags = data.allCategories;
+    let selectedTags = [];
+
+    const selectedTagsContainer = document.getElementById('selectedTags');
+    const dropdown = document.getElementById('dropdown');
+    const searchBox = document.getElementById('searchBox');
+    const optionsContainer = document.getElementById('options');
+    const selectAllBtn = document.getElementById('selectAll');
+
+    function renderTags() {
+        selectedTagsContainer.innerHTML = selectedTags.map(tag => `
+            <span class="tag">
+                ${tag}
+                <button class="tag-remove" data-tag="${tag}">×</button>
+            </span>
+        `).join('');
+
+        const filteredTags = tags.filter(tag => 
+            tag.toLowerCase().includes(searchBox.value.toLowerCase())
+        );
+        
+        optionsContainer.innerHTML = filteredTags.map(tag => `
+            <div class="dropdown-item ${selectedTags.includes(tag) ? 'selected' : ''}" data-tag="${tag}">
+                ${tag}
+            </div>
+        `).join('');
+    }
+
+    selectedTagsContainer.addEventListener('click', () => {
+        dropdown.classList.add('show');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && !selectedTagsContainer.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+
+    selectedTagsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tag-remove')) {
+            const tag = e.target.dataset.tag;
+            selectedTags = selectedTags.filter(t => t !== tag);
+            renderTags();
+        }
+    });
+
+    optionsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('dropdown-item')) {
+            const tag = e.target.dataset.tag;
+            if (selectedTags.includes(tag)) {
+                selectedTags = selectedTags.filter(t => t !== tag);
+            } else {
+                selectedTags.push(tag);
+            }
+            renderTags();
+        }
+    });
+
+    searchBox.addEventListener('input', renderTags);
+
+    selectAllBtn.addEventListener('click', () => {
+        if (selectedTags.length === tags.length) {
+            selectedTags = [];
+        } else {
+            selectedTags = [...tags];
+        }
+        renderTags();
+    });
+
+    renderTags();
+}
+
+init();
 console.log(`
 ╱╱╱╱╱╱╱╱╱╱╱╱╱╭━━━╮╭╮
 ╱╱╱╱╱╱╱╱╱╱╱╱╱┃╭━╮┣╯┃
