@@ -133,7 +133,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
-	dbCategories, err := database.DataBase.Query(`SELECT id,name FROM categories`)
+	dbCategories, err := database.DataBase.Query(`SELECT name FROM categories`)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
@@ -144,22 +144,15 @@ func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 	}
 	defer dbCategories.Close()
 
-	categories := struct {
-		Id   []int    `json:"id"`
-		Name []string `json:"name"`
-	}{}
+	categories := []string{}
 
 	for dbCategories.Next() {
 		var category string
-		var id int
-
-		if err := dbCategories.Scan(&id, &category); err != nil {
+		if err := dbCategories.Scan(&category); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 			return
 		}
-
-		categories.Id = append(categories.Id, id)
-		categories.Name = append(categories.Name, category)
+		categories = append(categories, category)
 	}
 
 	if err = dbCategories.Err(); err != nil {

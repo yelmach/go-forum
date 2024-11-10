@@ -12,7 +12,7 @@ const init = async () => {
         .then(response => response.json())
     const categContainer = document.querySelector('.categories');
 
-    for (const category of categories.name) {
+    for (const category of categories) {
         const categoryElem = document.createElement('li')
         categoryElem.id = category;
         categoryElem.onclick = () => filterByCategory(category);
