@@ -141,10 +141,10 @@
 
     async function getDataCategory() {
         const categories = await fetch("http://localhost:8080/api/categories").then(response => response.json())
-        for (const category of categories.Id) {
+        for (const category of categories.id) {
             const option = document.createElement('option')
             option.value = category
-            option.innerHTML = `<option>${categories.Name[category - 1]}</option>`
+            option.innerHTML = `<option>${categories.name[category - 1]}</option>`
             categorys.append(option)
         }
     }
