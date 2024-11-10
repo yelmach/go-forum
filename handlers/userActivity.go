@@ -12,7 +12,12 @@ import (
 )
 
 func NewPostHandler(w http.ResponseWriter, r *http.Request) {
-	user_id, err := strconv.Atoi(r.Cookies()[1].Value)
+	Cookie_user_id, err := r.Cookie("user_id")
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
+		return
+	}
+	user_id, err := strconv.Atoi(Cookie_user_id.Value)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
 		return
@@ -26,7 +31,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		ImageUrl:   r.FormValue("Image_url"),
 	}
 
-	if postContent.Title == "" || postContent.Content == "" || len(postContent.CategoryId) == 0 {
+	if postContent.Title == "" || postContent.Content == "" {
 		utils.ResponseJSON(w, utils.Resp{Msg: "can't be empty", Code: http.StatusBadRequest})
 		return
 	} else if len(postContent.Title) >= 61 || len(postContent.Content) >= 2001 {
@@ -39,6 +44,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
+	w.WriteHeader(http.StatusCreated)
 	http.ServeFile(w, r, "./web/templates/create_posts.html")
 }
 

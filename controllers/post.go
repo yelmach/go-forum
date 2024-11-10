@@ -21,23 +21,23 @@ func CreatePost(postContent models.Post) error {
 	if err != nil {
 		return err
 	}
+	if len(postContent.CategoryId) != 0 {
+		// Get the ID of the newly created post
+		postID, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+		C_postCategories, err := database.DataBase.Prepare(`INSERT INTO post_categories(post_id, category_id) VALUES(?, ?)`)
+		if err != nil {
+			return fmt.Errorf("error preparing statement for post_categories: %w", err)
+		}
+		defer C_postCategories.Close()
 
-	// Get the ID of the newly created post
-	postID, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	C_postCategories, err := database.DataBase.Prepare(`INSERT INTO post_categories(post_id, category_id) VALUES(?, ?)`)
-	if err != nil {
-		return fmt.Errorf("error preparing statement for post_categories: %w", err)
-	}
-	defer C_postCategories.Close()
-
-	for _, categoryID := range postContent.CategoryId {
-		Category_id, _ := strconv.Atoi(categoryID)
-		if _, err := C_postCategories.Exec(postID, Category_id); err != nil {
-			return fmt.Errorf("error linking post to category %s: %w", categoryID, err)
+		for _, categoryID := range postContent.CategoryId {
+			Category_id, _ := strconv.Atoi(categoryID)
+			if _, err := C_postCategories.Exec(postID, Category_id); err != nil {
+				return fmt.Errorf("error linking post to category %s: %w", categoryID, err)
+			}
 		}
 	}
 	return nil
