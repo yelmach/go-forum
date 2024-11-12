@@ -12,55 +12,40 @@ import (
 )
 
 func NewPostHandler(w http.ResponseWriter, r *http.Request) {
-	Cookie_user_id, err := r.Cookie("user_id")
+	post := models.Post{}
+	err := json.NewDecoder(r.Body).Decode(&post)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+	}
+
+	cookie, err := r.Cookie("user_id")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
 		return
 	}
-	user_id, err := strconv.Atoi(Cookie_user_id.Value)
+	post.UserId, err = strconv.Atoi(cookie.Value)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
 		return
 	}
 
-	postContent := models.Post{
-		UserId:     user_id,
-		Title:      r.FormValue("Title"),
-		Content:    r.FormValue("Content"),
-		CategoryId: r.Form["categories"],
-		ImageUrl:   r.FormValue("Image_url"),
-	}
+	// handle repeated category
+	// and not exists categories
 
-	if postContent.Title == "" || postContent.Content == "" {
+	if post.Title == "" || post.Content == "" {
 		utils.ResponseJSON(w, utils.Resp{Msg: "can't be empty", Code: http.StatusBadRequest})
 		return
-	} else if len(postContent.Title) >= 61 || len(postContent.Content) >= 2001 {
+	} else if len(post.Title) >= 61 || len(post.Content) >= 2001 {
 		utils.ResponseJSON(w, utils.Resp{Msg: "can't process, input to long", Code: http.StatusBadRequest})
 		return
 	}
 
-	err = controllers.CreatePost(postContent)
+	err = controllers.CreatePost(post)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	http.ServeFile(w, r, "./web/templates/create_posts.html")
-}
-
-func CreateCategoriesHandler(w http.ResponseWriter, r *http.Request) {
-	name_categorie := r.URL.Query().Get("categori_name")
-
-	if len(name_categorie) == 0 {
-		utils.ResponseJSON(w, utils.Resp{Msg: "categorie name should be provided", Code: http.StatusBadRequest})
-		return
-	}
-
-	statuscode, err := controllers.CreateCategorie(name_categorie)
-	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
-		return
-	}
 }
 
 func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +71,7 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: "can't be empty", Code: http.StatusBadRequest})
 		return
 	} else if len(comment.Content) >= 501 {
-		utils.ResponseJSON(w, utils.Resp{Msg: "cat't process, input to long", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: "cat't process, comment to long", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -116,6 +101,11 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	if reaction.CommentId == 0 && reaction.PostId == 0 {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Either post_id or comment_id must be provided", Code: http.StatusBadRequest})
+		return
+	}
+
+	if !reaction.IsLike && !reaction.IsDislike {
+		utils.ResponseJSON(w, utils.Resp{Msg: "new reaction must be provided", Code: http.StatusBadRequest})
 		return
 	}
 

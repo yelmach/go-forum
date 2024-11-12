@@ -64,11 +64,7 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoadData(w http.ResponseWriter, r *http.Request) {
-	// Query to get all posts from the posts table
-	query := `SELECT id, user_id, title, content, image_url, created_at FROM posts ORDER BY created_at DESC`
-
-	// Execute the query
-	dbPosts, err := database.DataBase.Query(query)
+	dbPosts, err := database.DataBase.Query(`SELECT id, user_id, title, content, image_url, created_at FROM posts ORDER BY created_at DESC`)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
@@ -79,10 +75,8 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	}
 	defer dbPosts.Close()
 
-	// Prepare a slice to store the posts
 	posts := []models.PostApi{}
 
-	// Iterate through the rows and scan each row into a Post struct
 	for dbPosts.Next() {
 		var post models.PostApi
 		var userId int
@@ -121,7 +115,6 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 
-	// Check for errors from iterating over rows
 	if err = dbPosts.Err(); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 		return

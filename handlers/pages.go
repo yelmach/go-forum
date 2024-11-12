@@ -86,17 +86,3 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl.Execute(w, nil)
 }
-
-func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/createpost" {
-		ErrorHandler(w, r, http.StatusNotFound)
-		return
-	}
-
-	tmpl, err := template.ParseFiles("./web/templates/create_posts.html")
-	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
-	}
-
-	tmpl.Execute(w, nil)
-}

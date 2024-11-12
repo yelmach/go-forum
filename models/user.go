@@ -12,7 +12,7 @@ type Post struct {
 	UserId     int
 	Title      string
 	Content    string
-	CategoryId []string
+	Categories []string
 	ImageUrl   string
 }
 

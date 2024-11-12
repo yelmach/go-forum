@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"forum/database"
+	"forum/handlers"
 	"forum/utils"
 )
 
@@ -13,23 +14,23 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 		is_valid := false
 		cookie_session, err := r.Cookie("session_id")
 		if err != nil {
-			http.Error(w, "not allowed", http.StatusBadRequest)
+			handlers.ErrorHandler(w, r, http.StatusBadRequest)
 			return
 		}
 		session_id := cookie_session.Value
 		cookie_user, err := r.Cookie("user_id")
 		if err != nil {
-			http.Error(w, "not allowed", http.StatusBadRequest)
+			handlers.ErrorHandler(w, r, http.StatusBadRequest)
 			return
 		}
 		user_id, err := strconv.Atoi(cookie_user.Value)
 		if err != nil {
-			http.Error(w, "not allowed", http.StatusBadRequest)
+			handlers.ErrorHandler(w, r, http.StatusBadRequest)
 			return
 		}
 		cookie_username, err := r.Cookie("username")
 		if err != nil {
-			http.Error(w, "not allowed", http.StatusBadRequest)
+			handlers.ErrorHandler(w, r, http.StatusBadRequest)
 			return
 		}
 		user_username := cookie_username.Value

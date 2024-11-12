@@ -337,12 +337,12 @@ const logout = () => {
 
 const newPost = () => {
     document.querySelector('.main').innerHTML = `
-    <div class="form-container">
+    <form id="newPostForm">
         <div class="multi-select">
-            <div class="selected-tags" id="selectedTags"></div>
+            <div class="selected-tags" id="selectedTags" data-placeholder='Select categories (optional)'></div>
             <div class="dropdown" id="dropdown">
                 <input type="text" class="search-box" placeholder="Search categories..." id="searchBox">
-                <div class="select-all" id="selectAll">Select All</div>
+                <div class="select-all" id="selectAll">select all</div>
                 <div class="options" id="options"></div>
             </div>
         </div>
@@ -356,7 +356,7 @@ const newPost = () => {
             <i class="fa-regular fa-paper-plane"></i>Publish
             </button>
         </div>
-    </div>
+    </form>
     `
     const tags = data.allCategories;
     let selectedTags = [];
@@ -366,6 +366,7 @@ const newPost = () => {
     const searchBox = document.getElementById('searchBox');
     const optionsContainer = document.getElementById('options');
     const selectAllBtn = document.getElementById('selectAll');
+    const newPostForm = document.getElementById('newPostForm');
 
     function renderTags() {
         selectedTagsContainer.innerHTML = selectedTags.map(tag => `
@@ -425,6 +426,24 @@ const newPost = () => {
             selectedTags = [...tags];
         }
         renderTags();
+    });
+
+    newPostForm.addEventListener("submit", async () => {
+        const title = document.querySelector('input[name="title"]').value;
+        const content = document.querySelector('textarea[name="content"]').value;
+        try {
+            await fetch('/newpost', {
+                method: 'POST',
+                body: JSON.stringify({
+                    Title: title,
+                    Content: content,
+                    Categories: selectedTags
+                })
+            })
+            // location.href = "/";
+        } catch (err) {
+            console.error(err);
+        }
     });
 
     renderTags();

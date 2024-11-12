@@ -493,57 +493,32 @@ a:hover {
 
 
 /* new post */
-.form-container {
+#newPostForm {
     padding: 20px;
     background: white;
     border-radius: 8px;
-    /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.select-container {
-    position: relative;
-    margin-bottom: 16px;
-}
-
-.select-container select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    appearance: none;
-    background: white;
-    cursor: pointer;
-    color: #666;
-}
-
-.select-container::after {
-    content: '';
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #666;
-    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 30px 40px;
 }
 
 input[type="text"],
 textarea {
+    font-size: 1rem;
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
     border-radius: 5px;
-    margin-bottom: 16px;
-    font-size: 14px;
+    outline: none;
+    resize: none;
+    padding: 12px;
+    letter-spacing: 1px;
+    transition: border-color .4s ease;
 }
 
-textarea {
+#newPostForm textarea {
     min-height: 300px;
-    resize: none;
 }
 
 .button-container {
@@ -554,9 +529,9 @@ textarea {
 
 .btn {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 900;
     color: white;
-    padding: 8px 16px;
+    padding: 12px 20px;
     border-radius: 5px;
     border: none;
     cursor: pointer;
@@ -579,19 +554,20 @@ textarea {
 }
 
 ::placeholder {
+    font-size: .9rem;
+    letter-spacing: 1px;
     color: #999;
 }
 
 .multi-select {
     position: relative;
-    margin-bottom: 1rem;
 }
 
 .selected-tags {
-    min-height: 38px;
-    padding: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 2px solid #ddd;
+    min-height: 32px;
+    padding: 5px;
+    border-radius: 5px;
     background: white;
     display: flex;
     flex-wrap: wrap;
@@ -599,27 +575,16 @@ textarea {
     cursor: pointer;
 }
 
-.tag {
-    background: #f3f4f6;
-    padding: 2px 8px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 14px;
-}
-
 .tag-remove {
     border: none;
     background: none;
     color: #666;
     cursor: pointer;
-    font-size: 16px;
     padding: 0 2px;
 }
 
 .tag-remove:hover {
-    color: #333;
+    color: #f24a4f;
 }
 
 .dropdown {
@@ -629,7 +594,7 @@ textarea {
     right: 0;
     background: white;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 5px;
     margin-top: 4px;
     display: none;
     z-index: 1000;
@@ -644,8 +609,8 @@ textarea {
 .search-box {
     width: 100%;
     padding: 8px;
-    border: none;
-    border-bottom: 1px solid #eee;
+    border: none !important;
+    border-bottom: 1px solid #eee !important;
     outline: none;
 }
 
@@ -670,4 +635,22 @@ textarea {
 
 .select-all:hover {
     background: #f3f4f6;
+}
+
+#selectedTags:empty::before {
+    color: #999;
+    font-size: .9rem;
+    letter-spacing: 1px;
+    padding: 5px;
+}
+
+#selectedTags[data-placeholder]:not([data-placeholder=""]):empty::before {
+  content: attr(data-placeholder);
+}
+
+input[type="text"]:focus,
+input[type="text"]:hover,
+textarea:focus, 
+textarea:hover {
+    border-color: #F48023;
 }
