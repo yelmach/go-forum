@@ -23,7 +23,7 @@ const init = async () => {
         `
         categContainer.append(categoryElem);
     }
-
+    // console.log(data.allPosts)
     displayPosts(data.allPosts);
     document.getElementById('select_1').classList.add('active');
 }
@@ -35,7 +35,8 @@ const createPostElement = (post) => {
     const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
     postDiv.dataset.id = post.id;
     postDiv.classList.add("post");
-
+    let splitedContent = post.content.split("\n")
+    console.log(post.content)
     postDiv.innerHTML = `
     <div class="user-info">
         <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
@@ -46,7 +47,7 @@ const createPostElement = (post) => {
     </div>
     <div class="post-content">
         <h3 onclick="openPost(${post.id})">${post.title}</h3>
-        <p>${post.content}</p>
+        <p>${post.content.replace(/\n/g, "</br>")}</p>
     </div>
     <div class="tags-stats">
         <div class="tags">
@@ -180,6 +181,7 @@ const displayPosts = (posts) => {
         `
     } else {
         for (const post of posts) {
+            // console.log(post.content)
             const postDiv = createPostElement(post);
             postsContainer.append(postDiv);
         }
