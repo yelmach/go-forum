@@ -12,8 +12,12 @@ type Post struct {
 	UserId     int
 	Title      string
 	Content    string
-	CategoryId []string
+	Categories []string
 	ImageUrl   string
+}
+
+type Category struct {
+	Name string
 }
 
 type Comment struct {

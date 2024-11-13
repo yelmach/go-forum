@@ -21,10 +21,13 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
-
-	if err := controllers.RegisterUser(user); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
-		return
+	isValidEmail := utils.CheckEmailFormat(user.Email)
+	isValidPassword := utils.CheckPasswordFormat(user.Password)
+	if isValidEmail && isValidPassword {
+		if err := controllers.RegisterUser(user); err != nil {
+			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+			return
+		}
 	}
 }
 

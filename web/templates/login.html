@@ -23,7 +23,7 @@
             <h2>We've missed you!</h2>
             <p>More than 120 questions are waiting for your wise suggestions!</p>
             <form id="loginForm">
-                <input type="text" name="username" placeholder="Username" required />
+                <input type="text" name="username" placeholder="Username or Email" required />
                 <input type="password" name="password" placeholder="Password" required />
 
                 <button id="submit" type="submit">login</button>
@@ -48,7 +48,7 @@
                 const errorMessage = document.getElementById("errorMessage");
 
                 try {
-                    const response = await fetch("http://localhost:8080/auth/login", {
+                    const response = await fetch("/auth/login", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

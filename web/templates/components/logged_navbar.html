@@ -5,13 +5,8 @@
         <span id="logo-name"><b>01</b>Forum</span>
     </a>
     <div class="sign">
-        <a href="/createpost" id="create"><i class="fa-solid fa-plus"></i>create post</a>
-
-        <form action="/auth/logout" method="POST">
-            <div class="sign">
-                <button id="logout" type="submit"><i class="fa-solid fa-power-off"></i>logout</button>
-            </div>
-        </form>
+        <button id="create" onclick="newPost()"><i class="fa-solid fa-plus"></i>new post</button>
+        <button id="logout" onclick="logout()"><i class="fa-solid fa-power-off"></i>logout</button>
     </div>
 </nav>
 {{end}}

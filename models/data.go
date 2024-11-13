@@ -11,7 +11,7 @@ type PostApi struct {
 	Content    string         `json:"content"`
 	ImageURL   sql.NullString `json:"imageUrl"`
 	CreatedAt  string         `json:"createdAt"`
-	Comments   []CommentApi  `json:"comments"`
+	Comments   []CommentApi   `json:"comments"`
 	Categories []string       `json:"categories"`
 	Likes      []int          `json:"likes"`
 	Dislikes   []int          `json:"dislikes"`
@@ -24,6 +24,10 @@ type CommentApi struct {
 	CreatedAt string `json:"createdAt"`
 	Likes     []int  `json:"likes"`
 	Dislikes  []int  `json:"dislikes"`
+}
+
+type CategoriApi struct {
+	Name string `json:"name"`
 }
 
 type Error struct {

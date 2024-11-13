@@ -24,6 +24,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		"./web/templates/components/logged_sidebar.html")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
 	}
 
 	cookie, err := r.Cookie("session_id")
@@ -36,6 +37,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 		if err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE session_id=?", cookie.Value).Scan(&count); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+			return
 		}
 
 		if count == 0 {
@@ -45,6 +47,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			IsLoggedIn = false
 			if err = tmpl.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
 				utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+				return
 			}
 
 		}
@@ -56,6 +59,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
 	}
 }
 
@@ -68,6 +72,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("./web/templates/register.html")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
 	}
 
 	tmpl.Execute(w, nil)
@@ -82,20 +87,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("./web/templates/login.html")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
-	}
-
-	tmpl.Execute(w, nil)
-}
-
-func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/createpost" {
-		ErrorHandler(w, r, http.StatusNotFound)
 		return
-	}
-
-	tmpl, err := template.ParseFiles("./web/templates/create_posts.html")
-	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 	}
 
 	tmpl.Execute(w, nil)
