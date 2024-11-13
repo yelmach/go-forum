@@ -14,14 +14,11 @@ import (
 func StoreSession(w http.ResponseWriter, session_id string, user models.User) (int, error) {
 	// check for already stored session
 	var count int
-	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ? ", user.Id).Scan(&count)
-	if err == sql.ErrNoRows {
-		return http.StatusNotFound, errors.New("user not found")
-	} else if err != nil {
+	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ?", user.Id).Scan(&count)
+	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("error scanning row: %w", err)
 	}
 
-	query := ``
 	switch {
 	case count > 0:
 		query := `UPDATE sessions SET session_id = ? WHERE user_id = ?`
@@ -30,7 +27,7 @@ func StoreSession(w http.ResponseWriter, session_id string, user models.User) (i
 		}
 		return http.StatusOK, nil
 	case count == 0:
-		query = `INSERT INTO sessions (user_id, session_id) VALUES (?, ?)`
+		query := `INSERT INTO sessions (user_id, session_id) VALUES (?, ?)`
 		if _, err := database.DataBase.Exec(query, user.Id, session_id); err != nil {
 			return http.StatusInternalServerError, err
 		}

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -12,50 +11,49 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// RegisterUser insert user information to user table
 func RegisterUser(user models.User) error {
-	var count int
-	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM users WHERE email = ? OR username = ? ", user.Email, user.Username).Scan(&count)
-	if err != nil {
+	// check if data provided exists
+	if user.Username == "" || user.Email == "" || user.Password == "" {
+		return fmt.Errorf("email, username and password are required")
+	}
+
+	// check if user already registred
+	var isExist bool
+	if err := database.DataBase.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?)",
+		user.Email, user.Username).Scan(&isExist); err != nil {
 		return err
 	}
-
-	if count > 0 {
-		return errors.New("user already exist")
+	if isExist {
+		return fmt.Errorf("user already exist")
 	}
 
-	cryptedPass, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPass, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
-	stmt, err := database.DataBase.Prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")
-	if err != nil {
-		return err
+	// insert data
+	if _, err := database.DataBase.Exec("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+		user.Username, user.Email, string(hashedPass)); err != nil {
+		return fmt.Errorf("error creating user: %v", err)
 	}
-	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Username, user.Email, string(cryptedPass))
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
+// LoginUser checks if the user info are exists, and correct in user table database
 func LoginUser(user models.User) (models.User, int, error) {
 	existUser := models.User{}
-	stmt, err := database.DataBase.Prepare("SELECT id, username, email, password FROM users WHERE username = ?")
-	if err != nil {
-		return models.User{}, http.StatusInternalServerError, fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close() // Ensure statement is closed
-
-	err = stmt.QueryRow(user.Username).Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
+	// check if username already exist
+	err := database.DataBase.QueryRow("SELECT id, username, email, password FROM users WHERE username = ? OR email = ?", user.Username, user.Username).
+		Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
 	if err == sql.ErrNoRows {
-		return models.User{}, http.StatusNotFound, errors.New("user not found")
+		return models.User{}, http.StatusUnauthorized, fmt.Errorf("user not found")
 	} else if err != nil {
 		return models.User{}, http.StatusInternalServerError, fmt.Errorf("error scanning row: %w", err)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(existUser.Password), []byte(user.Password))
 	if err != nil {
-		return models.User{}, http.StatusInternalServerError, err
+		return models.User{}, http.StatusUnauthorized, err
 	}
 	return existUser, http.StatusOK, nil
 }
