@@ -13,8 +13,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// this func responsible for writing responses to me for debbuging
-
+// RegisterUser it handles regestration request
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -22,20 +21,24 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// store user in database
 	if err := controllers.RegisterUser(user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
+
+	utils.ResponseJSON(w, utils.Resp{Msg: "registered", Code: http.StatusOK})
 }
 
+// LoginUser it handles login request
 func LoginUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
+	// check if user exist
 	user, statuscode, err := controllers.LoginUser(user)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
@@ -57,6 +60,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// add cookies
 	utils.AddCookie(w, "session_id", sessionId)
 	utils.AddCookie(w, "user_id", strconv.Itoa(user.Id))
 	utils.AddCookie(w, "username", user.Username)
@@ -64,7 +68,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseJSON(w, utils.Resp{Msg: "Logged in", Code: http.StatusOK, SessionId: sessionId})
 }
 
-func LogoutUser(w http.ResponseWriter, r *http.Request) {
+// LogOutUser it handles log out request
+func LogOutUser(w http.ResponseWriter, r *http.Request) {
 	session_id, err := r.Cookie("session_id")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})

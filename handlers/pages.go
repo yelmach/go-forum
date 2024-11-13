@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -9,14 +8,17 @@ import (
 	"forum/utils"
 )
 
+// HomeHandler it handles requests to home page "/"
+// parse the home page and show it to the user
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		ErrorHandler(w, r, http.StatusNotFound)
 		return
 	}
 
-	IsLoggedIn := false
+	var IsLoggedIn bool
 
+	// parse all index template with its components
 	tmpl, err := template.ParseFiles("./web/templates/index.html",
 		"./web/templates/components/guest_navbar.html",
 		"./web/templates/components/guest_sidebar.html",
@@ -26,14 +28,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 	}
 
+	// check if user already logged in from another browser
 	cookie, err := r.Cookie("session_id")
-
 	if err != nil {
 		IsLoggedIn = false
 		err = tmpl.ExecuteTemplate(w, "index.html", IsLoggedIn)
 	} else {
 		count := 0
-
 		if err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE session_id=?", cookie.Value).Scan(&count); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		}
@@ -46,7 +47,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			if err = tmpl.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
 				utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 			}
-
 		}
 
 		IsLoggedIn = true
@@ -54,17 +54,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		fmt.Println(err)
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 	}
 }
 
+// RegisterHandler it handles requests to register page "/register"
+// parse the register page and show it to the user
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/register" {
-		ErrorHandler(w, r, http.StatusNotFound)
-		return
-	}
-
 	tmpl, err := template.ParseFiles("./web/templates/register.html")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
@@ -73,12 +69,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
+// RegisterHandler it handles requests to login page "/login"
+// parse the login page and show it to the user
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/login" {
-		ErrorHandler(w, r, http.StatusNotFound)
-		return
-	}
-
 	tmpl, err := template.ParseFiles("./web/templates/login.html")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
