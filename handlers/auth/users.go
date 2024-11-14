@@ -23,20 +23,27 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isValidPassword := utils.CheckPasswordFormat(user.Password)
+	if err := utils.CheckUserExist(user); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+		return
+	}
+
 	isValidEmail, err := utils.CheckEmailFormat(user.Email)
 	if err != nil {
 		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
+	} else if !isValidEmail {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid email format", Code: http.StatusBadRequest})
+		return
 	}
 
-	if isValidEmail && isValidPassword {
-		if err := controllers.RegisterUser(user); err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
-			return
-		}
-	} else {
-		utils.ResponseJSON(w, utils.Resp{Msg: "invalid format", Code: http.StatusBadRequest})
+	if isValidPassword := utils.CheckPasswordFormat(user.Password); !isValidPassword {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid password format", Code: http.StatusBadRequest})
+		return
+	}
+
+	if err := controllers.RegisterUser(user); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 }

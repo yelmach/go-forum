@@ -13,16 +13,6 @@ import (
 )
 
 func RegisterUser(user models.User) error {
-	var count int
-	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM users WHERE email = ? OR username = ? ", user.Email, user.Username).Scan(&count)
-	if err != nil {
-		return err
-	}
-
-	if count > 0 {
-		return errors.New("user already exist")
-	}
-
 	cryptedPass, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	stmt, err := database.DataBase.Prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")

@@ -1,7 +1,11 @@
 package utils
 
 import (
+	"errors"
 	"regexp"
+
+	"forum/database"
+	"forum/models"
 )
 
 func CheckEmailFormat(email string) (bool, error) {
@@ -23,4 +27,18 @@ func CheckPasswordFormat(password string) bool {
 	isUpper := regexp.MustCompile(`[A-Z]`)
 	isDigit := regexp.MustCompile(`[0-9]`)
 	return isLower.MatchString(password) && isUpper.MatchString(password) && isDigit.MatchString(password) && isSpecial.MatchString(password)
+}
+
+func CheckUserExist(user models.User) error {
+	var count int
+
+	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM users WHERE email = ? OR username = ? ", user.Email, user.Username).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return errors.New("credentials already exists")
+	}
+	return nil
 }
