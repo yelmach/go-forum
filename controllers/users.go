@@ -40,13 +40,13 @@ func RegisterUser(user models.User) error {
 
 func LoginUser(user models.User) (models.User, int, error) {
 	existUser := models.User{}
-	stmt, err := database.DataBase.Prepare("SELECT id, username, email, password FROM users WHERE username = ?")
+	stmt, err := database.DataBase.Prepare("SELECT id, username, email, password FROM users WHERE username = ? OR email = ?")
 	if err != nil {
 		return models.User{}, http.StatusInternalServerError, fmt.Errorf("error preparing statement: %w", err)
 	}
 	defer stmt.Close() // Ensure statement is closed
 
-	err = stmt.QueryRow(user.Username).Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
+	err = stmt.QueryRow(user.Username, user.Username).Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
 	if err == sql.ErrNoRows {
 		return models.User{}, http.StatusNotFound, errors.New("user not found")
 	} else if err != nil {

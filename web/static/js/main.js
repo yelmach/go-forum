@@ -87,11 +87,11 @@ const createCommentElement = (comment) => {
     </div>
     <div class="tags-stats">
         <div class="post-stats">
-            <div class="stat">
-                <i class="ri-thumb-up-line${likeActive}" onclick="likeAction(${comment.id}, false)"></i><span class="${likeActive}">${comment.likes.length}</span>
+            <div class="stat${likeActive}">
+                <i class="like-icon" onclick="likeAction(${comment.id}, false)"></i><span>${comment.likes.length}</span>
             </div>
-            <div class="stat">
-                <i class="ri-thumb-down-line dislike${dislikeActive}" onclick="dislikeAction(${comment.id}, false)"></i><span class="${dislikeActive}">${comment.dislikes.length}</span>
+            <div class="stat${dislikeActive}">
+                <i class="dislike-icon dislike" onclick="dislikeAction(${comment.id}, false)"></i><span>${comment.dislikes.length}</span>
             </div>
         </div>
     </div>
@@ -323,12 +323,12 @@ const filterByCategory = async (category) => {
     document.getElementById(category).classList.add('activeCat');
 }
 
-const logout = () => {
+const logout = async () => {
     try {
-        fetch('/auth/logout', {
+        const response = await fetch('/auth/logout', {
             method: 'POST'
         });
-        location.href = "/";
+        if (response.ok) location.href = "/";
     } catch (err) {
         console.error(err);
     }

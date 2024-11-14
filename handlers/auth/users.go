@@ -94,5 +94,9 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	utils.DeleteCookie(w, "user_id")
 	utils.DeleteCookie(w, "username")
 
-	http.Redirect(w, r, "/", http.StatusFound)
+	if r.Header.Get("Accept") == "application/json" {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Logdout successfly", Code: http.StatusOK})
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
 }

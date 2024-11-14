@@ -26,7 +26,10 @@
             <p>More than 120 questions are waiting for your wise suggestions!</p>
             <form id="loginForm">
                 <input type="text" name="username" placeholder="Username or Email" required />
-                <input type="password" name="password" placeholder="Password" required />
+                <div>
+                    <input type="password" name="password" placeholder="Password" required/>
+                    <i class="eye-icon" onclick="togglePassword()"></i>
+                </div>
 
                 <button id="submit" type="submit">login</button>
             </form>
@@ -72,6 +75,18 @@
                         "An error occurred. Please try again later.";
                 }
             });
+
+        const togglePassword = () => {
+            fieldPw = document.querySelector("input[name='password']");
+            eye = document.querySelector('#loginForm i');
+            if (fieldPw.type === 'password') {
+                fieldPw.type = 'text';
+                eye.classList = ['eye-off-icon'];
+            } else {
+                fieldPw.type = 'password';
+                eye.classList = ['eye-icon'];
+            }
+        }
     </script>
 </body>
 
