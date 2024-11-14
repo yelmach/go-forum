@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"forum/database"
 	"forum/models"
@@ -21,7 +22,7 @@ func RegisterUser(user models.User) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Username, user.Email, string(cryptedPass))
+	_, err = stmt.Exec(strings.ToLower(user.Username), strings.ToLower(user.Email), string(cryptedPass))
 	if err != nil {
 		return err
 	}
@@ -36,7 +37,7 @@ func LoginUser(user models.User) (models.User, int, error) {
 	}
 	defer stmt.Close() // Ensure statement is closed
 
-	err = stmt.QueryRow(user.Username, user.Username).Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
+	err = stmt.QueryRow(strings.ToLower(user.Username), strings.ToLower(user.Email)).Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
 	if err == sql.ErrNoRows {
 		return models.User{}, http.StatusNotFound, errors.New("user not found")
 	} else if err != nil {

@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"regexp"
+	"strings"
 
 	"forum/database"
 	"forum/models"
@@ -32,7 +33,7 @@ func CheckPasswordFormat(password string) bool {
 func CheckUserExist(user models.User) error {
 	var count int
 
-	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM users WHERE email = ? OR username = ? ", user.Email, user.Username).Scan(&count)
+	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM users WHERE email = ? OR username = ? ", strings.ToLower(user.Email), strings.ToLower(user.Username)).Scan(&count)
 	if err != nil {
 		return err
 	}
