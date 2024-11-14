@@ -44,7 +44,7 @@ const createPostElement = (post) => {
     </div>
     <div class="post-content">
         <h3 onclick="openPost(${post.id})">${post.title}</h3>
-        <p>${post.content.replace(/\n/g, "<br>")}</p>
+        <p>${post.content.split('\n')[0].slice(0, 200)}${((post.content.match(/\n/g) && post.content.match(/\n/g).length > 2) || post.content.length > 200) ? `... <span class="read-more" onclick="openPost(${post.id})">Read-More</span>` : ''}</p>
     </div>
     <div class="tags-stats">
         <div class="tags">
@@ -117,14 +117,42 @@ const openPost = async (postId) => {
     const main = document.querySelector('.main');
     const widget = document.querySelector('.widget');
     const comments = document.createElement('div');
+    const userId = parseInt(getCookie("user_id"));
+    const likeActive = post.likes.includes(userId) ? ' liked' : ''
+    const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
+    
     comments.classList.add('comments');
+    main.innerHTML = `
+    <div class="post" data-id="${postId}">
+        <div class="user-info">
+            <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
+            <div>
+                <div class="username">${post.by}</div>
+                <div class="timestamp">${timeAgo(new Date(post.createdAt).getTime())}</div>
+            </div>
+        </div>
+        <div class="post-content">
+            <h3 onclick="openPost(${post.id})">${post.title}</h3>
+            <p>${post.content.replace(/\n/g, "<br>")}</p>
+        </div>
+        <div class="tags-stats">
+            <div class="tags">
+                ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('\n')}
+            </div>
+            <div class="post-stats">
+                <div class="stat${likeActive}">
+                    <i class="like-icon" onclick="likeAction(${post.id}, true)"></i><span>${post.likes.length}</span>
+                </div>
+                <div class="stat${dislikeActive}">
+                    <i class="dislike-icon dislike" onclick="dislikeAction(${post.id}, true)"></i><span>${post.dislikes.length}</span>
+                </div>
+                <div class="stat">
+                    <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    for (const comment of post.comments) {
-        const commentDiv = createCommentElement(comment);
-        comments.append(commentDiv);
-    }
-    main.innerHTML = createPostElement(post).outerHTML;
-    main.innerHTML += `
     <div class="comment-box">
         <textarea class="comment-input" placeholder="Type here your wise suggestion"></textarea>
         <div class="button-group">
@@ -135,10 +163,16 @@ const openPost = async (postId) => {
         </div>
     </div>
     `
+
     widget.innerHTML = `
     <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">
     <p class="username">@${post.by}</p>
     `
+
+    for (const comment of post.comments) {
+        const commentDiv = createCommentElement(comment);
+        comments.append(commentDiv);
+    }
     main.append(comments);
 
     document.querySelector('.btn-cancel').onclick = () => {
@@ -178,8 +212,8 @@ const displayPosts = (posts) => {
         `
     } else {
         for (const post of posts) {
-            // console.log(post.content)
             const postDiv = createPostElement(post);
+            // postDiv.
             postsContainer.append(postDiv);
         }
         main.append(postsContainer)
