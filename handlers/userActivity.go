@@ -75,6 +75,12 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 	}
 
+	postId := utils.IspostId(comment.PostId)
+	if !postId {
+		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
+		return
+	}
+
 	cookie, err := r.Cookie("user_id")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})

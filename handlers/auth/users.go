@@ -51,6 +51,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
+	HandleLoginAndSession(w, user)
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request) {
@@ -65,13 +66,15 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
+	HandleLoginAndSession(w, user)
+}
 
+func HandleLoginAndSession(w http.ResponseWriter, user models.User) {
 	user, statuscode, err := controllers.LoginUser(user)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
 	}
-
 	// create session
 	id, err := uuid.NewV7()
 	if err != nil {
