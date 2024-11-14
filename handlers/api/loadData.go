@@ -7,11 +7,17 @@ import (
 	"strconv"
 
 	"forum/database"
+	"forum/handlers"
 	"forum/models"
 	"forum/utils"
 )
 
 func LoadPostData(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	var post models.PostApi
 	var userId int
 	statuscode := 0
@@ -64,6 +70,11 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoadData(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	dbPosts, err := database.DataBase.Query(`SELECT id, user_id, title, content, image_url, created_at FROM posts ORDER BY created_at DESC`)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -126,6 +137,11 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	dbCategories, err := database.DataBase.Query(`SELECT name FROM categories`)
 	if err != nil {
 		if err == sql.ErrNoRows {

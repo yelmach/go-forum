@@ -12,6 +12,11 @@ import (
 )
 
 func NewPostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	post := models.Post{}
 	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
@@ -59,6 +64,11 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	comment := models.Comment{}
 	err := json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
@@ -95,6 +105,11 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReactionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	reaction := models.Reaction{}
 	err := json.NewDecoder(r.Body).Decode(&reaction)
 	if err != nil {

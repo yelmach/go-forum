@@ -14,6 +14,11 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Method != http.MethodGet {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	IsLoggedIn := false
 
 	tmpl, err := template.ParseFiles("./web/templates/index.html",
@@ -61,8 +66,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/register" {
-		ErrorHandler(w, r, http.StatusNotFound)
+	if r.Method != http.MethodGet {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -75,8 +80,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/login" {
-		ErrorHandler(w, r, http.StatusNotFound)
+	if r.Method != http.MethodGet {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed)
 		return
 	}
 

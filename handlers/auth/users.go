@@ -17,6 +17,11 @@ import (
 // this func responsible for writing responses to me for debbuging
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	user := models.User{}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
@@ -49,6 +54,11 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	user := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -85,6 +95,11 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	session_id, err := r.Cookie("session_id")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
