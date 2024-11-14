@@ -137,15 +137,15 @@ func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 	}
 	defer dbCategories.Close()
 
-	Categories := []models.CategoriApi{}
+	categories := []string{}
 
 	for dbCategories.Next() {
-		var category models.CategoriApi
-		if err := dbCategories.Scan(&category.Name); err != nil {
+		var category string
+		if err := dbCategories.Scan(&category); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 			return
 		}
-		Categories = append(Categories, category)
+		categories = append(categories, category)
 	}
 
 	if err = dbCategories.Err(); err != nil {
@@ -155,7 +155,7 @@ func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(Categories); err != nil {
+	if err := json.NewEncoder(w).Encode(categories); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 		return
 	}

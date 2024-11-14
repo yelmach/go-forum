@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -23,7 +22,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		"./web/templates/components/logged_navbar.html",
 		"./web/templates/components/logged_sidebar.html")
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
@@ -36,7 +35,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		count := 0
 
 		if err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE session_id=?", cookie.Value).Scan(&count); err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+			ErrorHandler(w, r, http.StatusInternalServerError)
 			return
 		}
 
@@ -47,7 +46,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			IsLoggedIn = false
 			if err = tmpl.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
 				utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
-				return
 			}
 
 		}
@@ -57,7 +55,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		fmt.Println(err)
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
@@ -72,7 +69,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("./web/templates/register.html")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
-		return
 	}
 
 	tmpl.Execute(w, nil)
@@ -87,7 +83,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("./web/templates/login.html")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
-		return
 	}
 
 	tmpl.Execute(w, nil)

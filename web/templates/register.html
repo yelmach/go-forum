@@ -15,9 +15,11 @@
             <img id="logo-img" src="/assets/img/logo.svg" alt="">
             <span id="logo-name"><b>01</b>Forum</span>
         </a>
-        <a href="/login" id="login"><i class="fa-solid fa-right-to-bracket"></i>login</a>
+        <div class="sign">
+            <a href="/login" id="login"><i class="login-icon"></i>login</a>
+        </div>
     </nav>
-
+   
     <div class="login-register grid_3-7">
         <div class="form-container">
             <h2>Join 01Forum community</h2>
@@ -60,7 +62,7 @@
 
                     if (response.ok) {
                         console.log(response);
-                        window.location.href = "/login";
+                        window.location.href = "/";
                     } else {
                         const result = await response.json();
                         console.log(result);

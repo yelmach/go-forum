@@ -1,8 +1,6 @@
 /* Import Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css');
-@import url('https://cdn.jsdelivr.net/npm/remixicon@4.4.0/fonts/remixicon.min.css');
 
 /* Reset Default Styles */
 *,
@@ -79,6 +77,17 @@ a {
 #login {
     color: #1682FD;
     background-color: #EAEAEA;
+    i {
+        background-color: #1682FD;
+    }
+}
+
+#login:hover {
+    color: #EAEAEA;
+    background-color: #1682FD; 
+    i {
+        background-color: #fff;
+    }
 }
 
 #create,
@@ -97,11 +106,6 @@ a {
 #logout:hover {
     background-color: rgba(250, 60, 34, 0.8);
     border-color: transparent;
-}
-
-#login:hover {
-    color: #EAEAEA;
-    background-color: #1682FD;
 }
 
 .sign i {
@@ -163,6 +167,9 @@ a {
     color: #f48023;
     border-color: #f48023;
     background-color: #FCF4EC;
+    i {
+        background-color: #f48023;
+    }
 }
 
 .disable {
@@ -188,6 +195,9 @@ a {
 
 .categories li:hover {
     color: #f48023;
+    i {
+        background-color: #f48023;
+    }
 }
 
 .categories li>i {
@@ -196,6 +206,9 @@ a {
 
 .activeCat {
     color: #f48023;
+    .activeCat i {
+        background-color:#f48023;
+    }
 }
 
 .main {
@@ -223,7 +236,7 @@ a {
 }
 
 .post-content>h3 {
-    font-size: 1rem;
+    font-size: 1.15rem;
     cursor: pointer;
     margin-bottom: 0.65rem;
 }
@@ -288,17 +301,15 @@ a {
 }
 
 .post-stats i {
-    font-size: 18px;
-    color: #808080;
     cursor: pointer;
 }
 
 .post-stats i:hover {
-    color: #1a73e8;
+    background-color: #1a73e8;
 }
 
 .post-stats i.dislike:hover {
-    color: #EF476F;
+    background-color: #EF476F;
 }
 
 .stat {
@@ -309,12 +320,22 @@ a {
 
 .post .liked, 
 .comment .liked{
-    color: #1a73e8;
+    i {
+        background-color: #1a73e8;
+    }
+    span {
+        color: #1a73e8;
+    }
 }
 
 .post .disliked, 
 .comment .disliked{
-    color: #EF476F;
+    i {
+        background-color: #EF476F;
+    }
+    span {
+        color: #EF476F;
+    }
 }
 
 /********** comments **********/
@@ -380,7 +401,7 @@ a {
     background-color: #f97316;
 }
 
-.comment-icon {
+.btn-comment i {
     width: 16px;
     height: 16px;
 }
@@ -527,7 +548,7 @@ textarea {
     gap: 12px;
 }
 
-.btn {
+#newPostForm .btn {
     font-size: 14px;
     font-weight: 900;
     color: white;
@@ -551,6 +572,12 @@ textarea {
 
 .btn-publish:hover {
     background-color: rgba(244, 128, 35, .8);
+}
+
+.btn-add-image i,
+.btn-publish i {
+    width: 18px;
+    height: 18px;
 }
 
 ::placeholder {
@@ -653,4 +680,101 @@ input[type="text"]:hover,
 textarea:focus, 
 textarea:hover {
     border-color: #F48023;
+}
+
+/* icons */
+i { 
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.post i {
+    width: 18px;
+    height: 18px;
+    background-color: #808080;
+}
+
+.sidebar i, 
+.widget i {
+    background-color: #000;
+}
+
+.widget i {
+    width: 20px;
+    height: 20px;
+}
+
+/* .icon {
+    width: 20px;
+    height: 20px;
+    background-color: #808080;
+    -webkit-mask: url('/assets/img/icons/send.svg') no-repeat center;
+    mask: url('/assets/img/icons/send.svg') no-repeat center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+} */
+
+.comment-icon {
+    mask: url('/assets/img/icons/message-square.svg');
+}
+
+.like-icon {
+    mask: url('/assets/img/icons/thumbs-up.svg');
+}
+
+.dislike-icon {
+    mask: url('/assets/img/icons/thumbs-down.svg');
+}
+
+.logout-icon {
+    mask: url('/assets/img/icons/power.svg');
+}
+
+.plus-icon {
+    mask: url('/assets/img/icons/plus.svg');
+}
+
+.clock-icon {
+    mask: url('/assets/img/icons/clock.svg');
+}
+
+.edit-icon {
+    mask: url('/assets/img/icons/edit.svg');
+}
+
+.heart-icon {
+    mask: url('/assets/img/icons/heart.svg');
+}
+
+.hash-icon {
+    mask: url('/assets/img/icons/hash.svg');
+}
+
+.login-icon {
+    mask: url('/assets/img/icons/log-in.svg');
+}
+
+.register-icon {
+    mask: url('/assets/img/icons/user-plus.svg');
+}
+
+.send-icon {
+    mask: url('/assets/img/icons/send.svg');
+}
+
+.link-icon {
+    mask: url('/assets/img/icons/link.svg');
+}
+
+.star-icon {
+    mask: url('/assets/img/icons/star.svg');
+}
+
+.image-icon {
+    mask: url('/assets/img/icons/photo-plus.svg');
 }

@@ -16,10 +16,6 @@ type Post struct {
 	ImageUrl   string
 }
 
-type Category struct {
-	Name string
-}
-
 type Comment struct {
 	PostId  int
 	UserId  int

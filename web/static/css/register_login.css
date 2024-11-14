@@ -39,11 +39,15 @@ a {
     padding: 1rem 3.5rem;
 }
 
+.navbar a {
+    text-decoration: none !important;
+}
+
 #logo {
-    color: #000;
     display: flex;
     align-items: center;
     gap: 5px;
+    color: #000;
 }
 
 #logo-img {
@@ -56,39 +60,58 @@ a {
     font-size: 1.3rem;
 }
 
+.sign {
+    display: flex;
+    gap: 0.75rem;
+}
 
+#login,
+#register {
+    font-size: .8rem;
+    text-transform: capitalize;
+    letter-spacing: .5px;
+    font-weight: 800;
+    padding: 0.75rem 1.25rem;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    border: none;
+}
 
 #login {
-    font-size: 0.75rem;
-    text-transform: capitalize;
-    font-weight: 1000;
     color: #1682FD;
     background-color: #EAEAEA;
-    padding: 0.75rem 1.5rem;
-    border-radius: 5px;
+    i {
+        background-color: #1682FD;
+    }
 }
 
 #login:hover {
     color: #EAEAEA;
-    background-color: #1682FD;
+    background-color: #1682FD; 
+    i {
+        background-color: #fff;
+    }
 }
 
 #register {
-    font-size: 0.75rem;
-    text-transform: capitalize;
-    font-weight: 1000;
-    color: #FFF;
-    background-color: #F48023;
-    padding: 0.75rem 1.5rem;
-    border-radius: 5px;
+    color: #fff;
+    background-color: #f48023;
 }
 
-#register>i,
-#login>i {
+#register:hover {
+    background-color: rgba(244, 128, 35, 0.8);
+    border-color: transparent;
+}
+
+.sign i {
+    font-size: 1rem;
     margin-right: 8px;
 }
 
-/********** Navbar **********/
+.navbar {
+    border-bottom: 1px solid #f0f0f0;
+}
 
 /********** Register **********/
 .grid_3-7 {
@@ -146,7 +169,6 @@ input::placeholder {
 input:focus,
 input:hover {
     border: 2px solid #F48023;
-    /* transition: border-color 0.3s ease; */
 }
 
 #submit {
@@ -182,4 +204,22 @@ input:hover {
     .grid_3-7 {
         grid-template-columns: 1fr;
     }
+}
+
+i { 
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.login-icon {
+    mask: url('/assets/img/icons/log-in.svg');
+}
+
+.register-icon {
+    mask: url('/assets/img/icons/user-plus.svg');
 }
