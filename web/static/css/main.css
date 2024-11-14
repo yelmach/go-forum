@@ -536,7 +536,7 @@ textarea {
     border-radius: 5px;
     outline: none;
     resize: none;
-    padding: 12px;
+    padding: 7px 12px;
     letter-spacing: 1px;
     transition: border-color .4s ease;
 }
@@ -605,6 +605,10 @@ textarea {
     cursor: pointer;
 }
 
+/* #newPostForm .tag {
+    padding: 7px 10px;
+} */
+
 .tag-remove {
     border: none;
     background: none;
@@ -671,7 +675,7 @@ textarea {
     color: #999;
     font-size: .9rem;
     letter-spacing: 1px;
-    padding: 5px;
+    padding: 3px;
 }
 
 #selectedTags[data-placeholder]:not([data-placeholder=""]):empty::before {
