@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -23,7 +22,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		"./web/templates/components/logged_navbar.html",
 		"./web/templates/components/logged_sidebar.html")
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		ErrorHandler(w, r, http.StatusInternalServerError)
+		return
 	}
 
 	cookie, err := r.Cookie("session_id")
@@ -35,7 +35,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		count := 0
 
 		if err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE session_id=?", cookie.Value).Scan(&count); err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+			ErrorHandler(w, r, http.StatusInternalServerError)
+			return
 		}
 
 		if count == 0 {
@@ -54,8 +55,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		fmt.Println(err)
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
 	}
 }
 

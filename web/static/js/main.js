@@ -19,11 +19,10 @@ const init = async () => {
         categoryElem.id = category;
         categoryElem.onclick = () => filterByCategory(category);
         categoryElem.innerHTML = `
-        <i class="ri-hashtag"></i>${category}
+        <i class="hash-icon"></i>${category}
         `
         categContainer.append(categoryElem);
     }
-    // console.log(data.allPosts)
     displayPosts(data.allPosts);
     document.getElementById('select_1').classList.add('active');
 }
@@ -35,8 +34,6 @@ const createPostElement = (post) => {
     const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
     postDiv.dataset.id = post.id;
     postDiv.classList.add("post");
-    let splitedContent = post.content.split("\n")
-    console.log(post.content)
     postDiv.innerHTML = `
     <div class="user-info">
         <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
@@ -47,21 +44,21 @@ const createPostElement = (post) => {
     </div>
     <div class="post-content">
         <h3 onclick="openPost(${post.id})">${post.title}</h3>
-        <p>${post.content.replace(/\n/g, "</br>")}</p>
+        <p>${post.content.replace(/\n/g, "<br>")}</p>
     </div>
     <div class="tags-stats">
         <div class="tags">
             ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('\n')}
         </div>
         <div class="post-stats">
-            <div class="stat">
-                <i class="ri-thumb-up-line${likeActive}" onclick="likeAction(${post.id}, true)"></i><span class="${likeActive}">${post.likes.length}</span>
+            <div class="stat${likeActive}">
+                <i class="like-icon" onclick="likeAction(${post.id}, true)"></i><span>${post.likes.length}</span>
+            </div>
+            <div class="stat${dislikeActive}">
+                <i class="dislike-icon dislike" onclick="dislikeAction(${post.id}, true)"></i><span>${post.dislikes.length}</span>
             </div>
             <div class="stat">
-                <i class="ri-thumb-down-line dislike${dislikeActive}" onclick="dislikeAction(${post.id}, true)"></i><span class="${dislikeActive}">${post.dislikes.length}</span>
-            </div>
-            <div class="stat">
-                <i class="ri-chat-4-line" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
+                <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
             </div>
         </div>
     </div>
@@ -133,7 +130,7 @@ const openPost = async (postId) => {
         <div class="button-group">
             <button class="btn btn-cancel">Cancel</button>
             <button class="btn btn-comment">
-                <i class="ri-chat-new-line"></i>Comment
+                <i class="comment-icon"></i>Comment
             </button>
         </div>
     </div>
@@ -271,7 +268,7 @@ const widgetBack = () => {
     widget.innerHTML = `
     <div class="section">
         <h2 class="section-title">
-            <i class="ri-star-line"></i>
+            <i class="star-icon"></i>
             Must-read posts
         </h2>
         <ul>
@@ -281,7 +278,7 @@ const widgetBack = () => {
     </div>
     <div class="section">
         <h2 class="section-title">
-            <i class="ri-links-line"></i>
+            <i class="link-icon"></i>
             Featured links
         </h2>
         <ul>
@@ -352,10 +349,10 @@ const newPost = () => {
         <textarea name="content" placeholder="Type some content" required></textarea>
         <div class="button-container">
             <button class="btn btn-add-image">
-                <i class="ri-image-add-line"></i>Add Image
+                <i class="image-icon"></i>Add Image
             </button>
             <button class="btn btn-publish">
-            <i class="fa-regular fa-paper-plane"></i>Publish
+            <i class="send-icon"></i>Publish
             </button>
         </div>
     </form>

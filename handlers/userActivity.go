@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"forum/controllers"
+	"forum/database"
 	"forum/utils"
 
 	"forum/models"
@@ -30,7 +33,17 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// handle repeated category
+	if !HasUniqueCategories(post.Categories) {
+		utils.ResponseJSON(w, utils.Resp{Msg: "repeted category", Code: http.StatusBadRequest})
+		return
+	}
+
 	// and not exists categories
+	if err = VerifyCategoriesMatch(post.Categories); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "category not found", Code: http.StatusBadRequest})
+		return
+	}
+	//
 
 	if post.Title == "" || post.Content == "" {
 		utils.ResponseJSON(w, utils.Resp{Msg: "can't be empty", Code: http.StatusBadRequest})
@@ -46,6 +59,45 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+}
+
+func VerifyCategoriesMatch(categories []string) error {
+	dbCategories, err := database.DataBase.Query(`SELECT name FROM categories`)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return err
+		}
+		return err
+	}
+	defer dbCategories.Close()
+
+	categoriesFromDb := make(map[string]bool)
+
+	for dbCategories.Next() {
+		var category string
+		if err := dbCategories.Scan(&category); err != nil {
+			return err
+		}
+		categoriesFromDb[category] = true
+	}
+
+	for _, category := range categories {
+		if !categoriesFromDb[category] {
+			return fmt.Errorf("category '%s' not found in the database", category)
+		}
+	}
+	return nil
+}
+
+func HasUniqueCategories(categories []string) bool {
+	isDouble := make(map[string]bool)
+	for _, category := range categories {
+		if isDouble[category] {
+			return false
+		}
+		isDouble[category] = true
+	}
+	return true
 }
 
 func NewCommentHandler(w http.ResponseWriter, r *http.Request) {

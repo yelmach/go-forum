@@ -7,6 +7,7 @@ import (
 
 	"forum/controllers"
 	"forum/database"
+	"forum/handlers"
 	"forum/models"
 	"forum/utils"
 
@@ -21,13 +22,22 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
-	isValidEmail := utils.CheckEmailFormat(user.Email)
+
 	isValidPassword := utils.CheckPasswordFormat(user.Password)
+	isValidEmail, err := utils.CheckEmailFormat(user.Email)
+	if err != nil {
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		return
+	}
+
 	if isValidEmail && isValidPassword {
 		if err := controllers.RegisterUser(user); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 			return
 		}
+	} else {
+		utils.ResponseJSON(w, utils.Resp{Msg: "invalid format", Code: http.StatusBadRequest})
+		return
 	}
 }
 
