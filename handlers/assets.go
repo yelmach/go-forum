@@ -7,7 +7,13 @@ import (
 	"strings"
 )
 
+// AssetsHandler serves static files
 func AssetsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	fp, _ := strings.CutPrefix(filepath.Clean(r.URL.Path), "/assets")
 	fp = filepath.Join("web/static", fp)
 
