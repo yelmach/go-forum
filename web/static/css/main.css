@@ -605,10 +605,6 @@ textarea {
     cursor: pointer;
 }
 
-/* #newPostForm .tag {
-    padding: 7px 10px;
-} */
-
 .tag-remove {
     border: none;
     background: none;
@@ -716,18 +712,9 @@ i {
     height: 20px;
 }
 
-/* .icon {
-    width: 20px;
-    height: 20px;
-    background-color: #808080;
-    -webkit-mask: url('/assets/img/icons/send.svg') no-repeat center;
-    mask: url('/assets/img/icons/send.svg') no-repeat center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
-} */
-
 .read-more {
     font-size: .85rem;
+    cursor: pointer;
 }
 
 .read-more:hover {

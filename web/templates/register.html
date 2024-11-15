@@ -64,19 +64,20 @@
                     });
 
                     if (response.ok) {
-                        console.log(response);
-                        window.location.href = "/login";
+                        location.href = "/"
                     } else {
                         const result = await response.json();
-                        console.log(result);
-                        console.error("Registration failed:", response.statusText);
-                        errorMessage.textContent = result.Msg;
+                        console.error("Registration failed:", result.msg);
+                        errorMessage.innerHTML = result.msg === 'credentials already exists' ? 'User exists with that Username of Email' : `Your password needs to:
+                        <ul>
+                            <li>include both lower and upper case characters.</li>
+                            <li>include at least one number and symbol.</li>
+                            <li>be at least 8 characters long.</li>
+                        </ul>`
                     }
-                } catch (error) {
-                    console.error("Error during registration:", error);
-                    errorMessage.textContent =
-                        "An error occurred. Please try again later.";
-                }
+                } catch (err) {
+                    console.error("Error during registration:", err);
+                 }
             });
 
     const togglePassword = () => {

@@ -115,6 +115,7 @@ a {
 
 /********** Register **********/
 .grid_3-7 {
+    height: 92vh;
     display: grid;
     grid-template-columns: 40% 60%;
     background-color: #FAFAFA;
@@ -192,6 +193,21 @@ input:hover {
 #errorMessage {
     color: #f00;
     font-weight: 400;
+    font-size: .95rem;
+}
+
+#errorMessage ul {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    list-style: square;
+    list-style-position: inside;
+    margin-top: 1rem;
+}
+
+
+#errorMessage a:hover {
+    color: #f48023
 }
 
 /********** Register **********/

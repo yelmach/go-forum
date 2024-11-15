@@ -48,7 +48,7 @@ const createPostElement = (post) => {
     </div>
     <div class="tags-stats">
         <div class="tags">
-            ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('\n')}
+            ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('')}
         </div>
         <div class="post-stats">
             <div class="stat${likeActive}">
@@ -137,7 +137,7 @@ const openPost = async (postId) => {
         </div>
         <div class="tags-stats">
             <div class="tags">
-                ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('\n')}
+                ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('')}
             </div>
             <div class="post-stats">
                 <div class="stat${likeActive}">
