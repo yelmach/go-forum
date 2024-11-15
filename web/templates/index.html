@@ -46,13 +46,36 @@
                 <ul>
                     <li><a href="https://github.com/ANAS-OU/go_forum" target="_blank">01Forum source-code on GitHub</a></li>
                     <li><a href="https://medium.com/@golangda/golang-quick-reference-top-20-best-coding-practices-c0cea6a43f20" target="_blank">Golang best-practices</a></li>
-                    <li><a href="https://docs.docker.com/build/building/best-practices/" target="_blank">Docker best-practices</a></li>
                     <li><a href="https://zone01oujda.ma/" target="_blank">Zone01-Oujda Company</a></li>
                 </ul>
             </div>
         </div>
     </div>
 
+    <div id="loginPopup" class="popup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h2>sorry! your need to register first</h2>
+            <div class="sign">
+                <a href="/register" id="register"><i class="register-icon"></i>register</a>
+                <a href="/login" id="login"><i class="login-icon"></i>login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var loginPopup = document.getElementById("loginPopup");
+        var closeBtn = document.querySelector(".close");
+        closeBtn.onclick = function() {
+            loginPopup.style.display = "none";
+        };
+
+        window.onclick = function(event) {
+            if (event.target == loginPopup) {
+            loginPopup.style.display = "none";
+            }
+        };
+    </script>
 </body>
 
 </html>

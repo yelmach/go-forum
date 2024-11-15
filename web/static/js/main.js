@@ -132,7 +132,7 @@ const openPost = async (postId) => {
             </div>
         </div>
         <div class="post-content">
-            <h3 onclick="openPost(${post.id})">${post.title}</h3>
+            <h3>${post.title}</h3>
             <p>${post.content.replace(/\n/g, "<br>")}</p>
         </div>
         <div class="tags-stats">
@@ -157,7 +157,7 @@ const openPost = async (postId) => {
         <textarea class="comment-input" placeholder="Type here your wise suggestion"></textarea>
         <div class="button-group">
             <button class="btn btn-cancel">Cancel</button>
-            <button class="btn btn-comment">
+            <button class="btn btn-comment" onclick="newComment(${postId})">
                 <i class="comment-icon"></i>Comment
             </button>
         </div>
@@ -175,28 +175,9 @@ const openPost = async (postId) => {
     }
     main.append(comments);
 
+    // document.querySelector('.btn-comment').onclick = ; 
     document.querySelector('.btn-cancel').onclick = () => {
         document.querySelector('.comment-input').value = '';
-    };
-    document.querySelector('.btn-comment').onclick = async () => {
-        const commentArea = document.querySelector('.comment-input');
-        const content = commentArea.value;
-        commentArea.value = '';
-
-        if (content.trim() == "") {
-            commentArea.placeholder = 'Please type a valid comment ⚠'
-            commentArea.style.setProperty('--placeholder-color', 'red');
-            return
-        }
-        try {
-            await fetch("/newcomment", {
-                method: "POST",
-                body: JSON.stringify({ postId, content })
-            })
-            openPost(postId);
-        } catch (err) {
-            console.error(err)
-        }
     };
 }
 
@@ -213,29 +194,36 @@ const displayPosts = (posts) => {
     } else {
         for (const post of posts) {
             const postDiv = createPostElement(post);
-            // postDiv.
             postsContainer.append(postDiv);
         }
         main.append(postsContainer)
     }
 }
 
+const getPostId = () => {
+    return document.querySelector('.post').dataset.id
+}
+
 const likeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isLike: true } : { commentId: id, isLike: true }
     try {
-        await fetch("/reaction", {
+        const response = await fetch("/reaction", {
             method: "POST",
             body: JSON.stringify(reqData)
         })
-        if (isPost) {
-            const post = await getPostData(id);
-            const postDiv = document.querySelector(`.post[data-id="${id}"]`)
-            postDiv.innerHTML = createPostElement(post).innerHTML;
+        if (response.ok) {
+            if (isPost) {
+                const post = await getPostData(id);
+                const postDiv = document.querySelector(`.post[data-id="${id}"]`)
+                postDiv.innerHTML = createPostElement(post).innerHTML;
+            } else {
+                const postId = getPostId();
+                openPost(postId);
+            }
         } else {
-            const postId = function(){
-                return document.querySelector('.post').dataset.id
-            }();
-            openPost(postId);
+            const res = await response.json();
+            console.error(res);
+            document.getElementById("loginPopup").style.display = "block";
         }
     } catch (err) {
         console.error(err)
@@ -245,19 +233,53 @@ const likeAction = async (id, isPost) => {
 const dislikeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isDislike: true } : { commentId: id, isDislike: true }
     try {
-        await fetch("/reaction", {
+        const response = await fetch("/reaction", {
             method: "POST",
             body: JSON.stringify(reqData)
         })
-        if (isPost) {
-            const post = await getPostData(id);
-            const postDiv = document.querySelector(`.post[data-id="${id}"]`)
-            postDiv.innerHTML = createPostElement(post).innerHTML;
+        if (response.ok) {
+            if (isPost) {
+                const post = await getPostData(id);
+                const postDiv = document.querySelector(`.post[data-id="${id}"]`)
+                postDiv.innerHTML = createPostElement(post).innerHTML;
+            } else {
+                const postId = getPostId();
+                openPost(postId);
+            }
         } else {
-            const postId = function(){
-                return document.querySelector('.post').dataset.id
-            }();
+            const res = await response.json();
+            console.error(res);
+            document.getElementById("loginPopup").style.display = "block";
+        }
+
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const newComment = async (postId) => {
+    const commentArea = document.querySelector('.comment-input');
+    const content = commentArea.value;
+    commentArea.value = '';
+
+    if (content.trim() == "") {
+        commentArea.placeholder = 'Please type a valid comment ⚠'
+        commentArea.style.setProperty('--placeholder-color', 'red');
+        return
+    }
+
+    try {
+        const response = await fetch("/newcomment", {
+            method: "POST",
+            body: JSON.stringify({ postId, content })
+        })
+        
+        if (response.ok) {
             openPost(postId);
+        } else {
+            const res = await response.json();
+            console.error(res);
+            document.getElementById("loginPopup").style.display = "block";
         }
     } catch (err) {
         console.error(err)
@@ -306,8 +328,8 @@ const widgetBack = () => {
             Must-read posts
         </h2>
         <ul>
-            <li><a href="#">Please read rules before you start working on a platform</a></li>
-            <li><a href="#">Vision & Strategy of AIemhelp</a></li>
+            <li><a href="#" target="_blank">Please read rules before you start using our platform</a></li>
+            <li><a href="https://www.paypal.com/paypalme/outiskteanas" target="_blank">Donate for 01Forum</a></li>
         </ul>
     </div>
     <div class="section">
@@ -316,9 +338,9 @@ const widgetBack = () => {
             Featured links
         </h2>
         <ul>
-            <li><a href="#">AIemhelp source-code on GitHub</a></li>
-            <li><a href="#">Golang best-practices</a></li>
-            <li><a href="#">AIem School dashboard</a></li>
+            <li><a href="https://github.com/ANAS-OU/go_forum" target="_blank">01Forum source-code on GitHub</a></li>
+            <li><a href="https://medium.com/@golangda/golang-quick-reference-top-20-best-coding-practices-c0cea6a43f20" target="_blank">Golang best-practices</a></li>
+            <li><a href="https://zone01oujda.ma/" target="_blank">Zone01-Oujda Company</a></li>
         </ul>
     </div>
     `
