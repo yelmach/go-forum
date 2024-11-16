@@ -8,6 +8,7 @@ import (
 	"forum/handlers"
 	"forum/utils"
 )
+
 // Middleware allows only users that authenticated to use next handler(add reaction, comment or post)
 func Middleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +19,6 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		session_id := cookie_session.Value
-		
 		cookie_user, err := r.Cookie("user_id")
 		if err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
