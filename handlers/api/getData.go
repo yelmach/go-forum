@@ -9,12 +9,12 @@ import (
 	"forum/models"
 )
 
-// getReaction gets user ids of users that do like or dislike from
-// reactions table by (post/comment id)
-func getReaction(Id int, ispost bool) ([]int, []int, int, error) {
+// getReaction gets user id of users that do like or dislike action
+// from reactions table by (post/comment id)
+func getReaction(Id int, isPost bool) ([]int, []int, int, error) {
 	var queryLikes, queryDislikes string
 
-	switch ispost {
+	switch isPost {
 	case true:
 		queryLikes = `SELECT user_id FROM reactions WHERE post_id=? AND is_like=1`
 		queryDislikes = `SELECT user_id FROM reactions WHERE post_id=? AND is_like=0`
@@ -36,7 +36,7 @@ func getReaction(Id int, ispost bool) ([]int, []int, int, error) {
 	return userlikes, userdislikes, http.StatusOK, nil
 }
 
-// getUsersIds gets user ids of users that do like or dislike on a post or comment
+// getUsersIds gets user id of users that do like or dislike action on a post or comment
 func getUsersIds(query string, Id int) ([]int, int, error) {
 	usersIds := []int{}
 	rows, err := database.DataBase.Query(query, Id)
@@ -118,8 +118,8 @@ func getPostComments(postId int) ([]models.CommentApi, int, error) {
 // getPostCategories gets all categories that assosiated to a post by post id
 func getPostCategories(postId int) ([]string, int, error) {
 	categories := []string{}
-	query := `SELECT category_id FROM post_categories WHERE post_id=?`
 
+	query := `SELECT category_id FROM post_categories WHERE post_id=?`
 	queryRow, err := database.DataBase.Query(query, postId)
 	if err != nil {
 		if err == sql.ErrNoRows {
