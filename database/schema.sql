@@ -67,20 +67,10 @@ CREATE TABLE IF NOT EXISTS reactions (
     UNIQUE(user_id, post_id, comment_id)
 );
 
-    -- Sessions
+-- Sessions table - manage user authentication
 CREATE TABLE IF NOT EXISTS sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     session_id TEXT NOT NULL UNIQUE,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
--- Sessions table - manage user authentication
--- CREATE TABLE IF NOT EXISTS sessions (
---     id TEXT PRIMARY KEY,
---     -- UUID
---     user_id INTEGER NOT NULL,
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     expires_at DATETIME NOT NULL,
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
--- );
