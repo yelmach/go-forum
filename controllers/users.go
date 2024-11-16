@@ -13,26 +13,11 @@ import (
 
 // RegisterUser insert user information to user table
 func RegisterUser(user models.User) error {
-	// check if data provided exists
-	if user.Username == "" || user.Email == "" || user.Password == "" {
-		return fmt.Errorf("email, username and password are required")
-	}
-
-	// check if user already registred
-	var isExist bool
-	if err := database.DataBase.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?)",
-		user.Email, user.Username).Scan(&isExist); err != nil {
-		return err
-	}
-	if isExist {
-		return fmt.Errorf("user already exist")
-	}
-
 	hashedPass, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	// insert data
-	if _, err := database.DataBase.Exec("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-		user.Username, user.Email, string(hashedPass)); err != nil {
+	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
+	if _, err := database.DataBase.Exec(query, user.Username, user.Email, string(hashedPass)); err != nil {
 		return fmt.Errorf("error creating user: %v", err)
 	}
 
@@ -56,4 +41,31 @@ func LoginUser(user models.User) (models.User, int, error) {
 		return models.User{}, http.StatusUnauthorized, err
 	}
 	return existUser, http.StatusOK, nil
+}
+
+// StoreSession is designed to save a new user session in a database if it doesn't already exist
+func StoreSession(w http.ResponseWriter, session_id string, user models.User) (int, error) {
+	// check session if already stored
+	var count int
+	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ?", user.Id).Scan(&count)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	switch {
+	case count > 0:
+		query := `UPDATE sessions SET session_id = ? WHERE user_id = ?`
+		if _, err := database.DataBase.Exec(query, session_id, user.Id); err != nil {
+			return http.StatusInternalServerError, err
+		}
+		return http.StatusOK, nil
+	case count == 0:
+		query := `INSERT INTO sessions (user_id, session_id) VALUES (?, ?)`
+		if _, err := database.DataBase.Exec(query, user.Id, session_id); err != nil {
+			return http.StatusInternalServerError, err
+		}
+		return http.StatusOK, nil
+	}
+
+	return http.StatusOK, nil
 }
