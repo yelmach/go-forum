@@ -11,11 +11,6 @@ import (
 // CheckUserExist checks user if already registered
 func CheckUserExist(user models.User) error {
 	var isExist bool
-	// check if data provided exists
-	if user.Username == "" || user.Email == "" || user.Password == "" {
-		return errors.New("email, username and password are required")
-	}
-
 	query := "SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?)"
 	if err := database.DataBase.QueryRow(query, user.Email, user.Username).Scan(&isExist); err != nil {
 		return err

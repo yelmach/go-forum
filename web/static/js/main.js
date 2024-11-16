@@ -19,11 +19,10 @@ const init = async () => {
         categoryElem.id = category;
         categoryElem.onclick = () => filterByCategory(category);
         categoryElem.innerHTML = `
-        <i class="ri-hashtag"></i>${category}
+        <i class="hash-icon"></i>${category}
         `
         categContainer.append(categoryElem);
     }
-
     displayPosts(data.allPosts);
     document.getElementById('select_1').classList.add('active');
 }
@@ -35,7 +34,6 @@ const createPostElement = (post) => {
     const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
     postDiv.dataset.id = post.id;
     postDiv.classList.add("post");
-
     postDiv.innerHTML = `
     <div class="user-info">
         <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
@@ -46,21 +44,21 @@ const createPostElement = (post) => {
     </div>
     <div class="post-content">
         <h3 onclick="openPost(${post.id})">${post.title}</h3>
-        <p>${post.content}</p>
+        <p>${post.content.split('\n')[0].slice(0, 200)}${((post.content.match(/\n/g) && post.content.match(/\n/g).length > 2) || post.content.length > 200) ? `... <span class="read-more" onclick="openPost(${post.id})">Read-More</span>` : ''}</p>
     </div>
     <div class="tags-stats">
         <div class="tags">
-            ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('\n')}
+            ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('')}
         </div>
         <div class="post-stats">
-            <div class="stat">
-                <i class="ri-thumb-up-line${likeActive}" onclick="likeAction(${post.id}, true)"></i><span class="${likeActive}">${post.likes.length}</span>
+            <div class="stat${likeActive}">
+                <i class="like-icon" onclick="likeAction(${post.id}, true)"></i><span>${post.likes.length}</span>
+            </div>
+            <div class="stat${dislikeActive}">
+                <i class="dislike-icon dislike" onclick="dislikeAction(${post.id}, true)"></i><span>${post.dislikes.length}</span>
             </div>
             <div class="stat">
-                <i class="ri-thumb-down-line dislike${dislikeActive}" onclick="dislikeAction(${post.id}, true)"></i><span class="${dislikeActive}">${post.dislikes.length}</span>
-            </div>
-            <div class="stat">
-                <i class="ri-chat-4-line" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
+                <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
             </div>
         </div>
     </div>
@@ -89,11 +87,11 @@ const createCommentElement = (comment) => {
     </div>
     <div class="tags-stats">
         <div class="post-stats">
-            <div class="stat">
-                <i class="ri-thumb-up-line${likeActive}" onclick="likeAction(${comment.id}, false)"></i><span class="${likeActive}">${comment.likes.length}</span>
+            <div class="stat${likeActive}">
+                <i class="like-icon" onclick="likeAction(${comment.id}, false)"></i><span>${comment.likes.length}</span>
             </div>
-            <div class="stat">
-                <i class="ri-thumb-down-line dislike${dislikeActive}" onclick="dislikeAction(${comment.id}, false)"></i><span class="${dislikeActive}">${comment.dislikes.length}</span>
+            <div class="stat${dislikeActive}">
+                <i class="dislike-icon dislike" onclick="dislikeAction(${comment.id}, false)"></i><span>${comment.dislikes.length}</span>
             </div>
         </div>
     </div>
@@ -119,52 +117,67 @@ const openPost = async (postId) => {
     const main = document.querySelector('.main');
     const widget = document.querySelector('.widget');
     const comments = document.createElement('div');
+    const userId = parseInt(getCookie("user_id"));
+    const likeActive = post.likes.includes(userId) ? ' liked' : ''
+    const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
+    
     comments.classList.add('comments');
+    main.innerHTML = `
+    <div class="post" data-id="${postId}">
+        <div class="user-info">
+            <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
+            <div>
+                <div class="username">${post.by}</div>
+                <div class="timestamp">${timeAgo(new Date(post.createdAt).getTime())}</div>
+            </div>
+        </div>
+        <div class="post-content">
+            <h3>${post.title}</h3>
+            <p>${post.content.replace(/\n/g, "<br>")}</p>
+        </div>
+        <div class="tags-stats">
+            <div class="tags">
+                ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>
+            <div class="post-stats">
+                <div class="stat${likeActive}">
+                    <i class="like-icon" onclick="likeAction(${post.id}, true)"></i><span>${post.likes.length}</span>
+                </div>
+                <div class="stat${dislikeActive}">
+                    <i class="dislike-icon dislike" onclick="dislikeAction(${post.id}, true)"></i><span>${post.dislikes.length}</span>
+                </div>
+                <div class="stat">
+                    <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="comment-box">
+        <textarea class="comment-input" placeholder="Type here your wise suggestion"></textarea>
+        <div class="button-group">
+            <button class="btn btn-cancel">Cancel</button>
+            <button class="btn btn-comment" onclick="newComment(${postId})">
+                <i class="comment-icon"></i>Comment
+            </button>
+        </div>
+    </div>
+    `
+
+    widget.innerHTML = `
+    <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">
+    <p class="username">@${post.by}</p>
+    `
 
     for (const comment of post.comments) {
         const commentDiv = createCommentElement(comment);
         comments.append(commentDiv);
     }
-    main.innerHTML = createPostElement(post).outerHTML;
-    main.innerHTML += `
-    <div class="comment-box">
-        <textarea class="comment-input" placeholder="Type here your wise suggestion"></textarea>
-        <div class="button-group">
-            <button class="btn btn-cancel">Cancel</button>
-            <button class="btn btn-comment">
-                <i class="ri-chat-new-line"></i>Comment
-            </button>
-        </div>
-    </div>
-    `
-    widget.innerHTML = `
-    <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">
-    <p class="username">@${post.by}</p>
-    `
     main.append(comments);
 
+    // document.querySelector('.btn-comment').onclick = ; 
     document.querySelector('.btn-cancel').onclick = () => {
         document.querySelector('.comment-input').value = '';
-    };
-    document.querySelector('.btn-comment').onclick = async () => {
-        const commentArea = document.querySelector('.comment-input');
-        const content = commentArea.value;
-        commentArea.value = '';
-
-        if (content.trim() == "") {
-            commentArea.placeholder = 'Please type a valid comment ⚠'
-            commentArea.style.setProperty('--placeholder-color', 'red');
-            return
-        }
-        try {
-            await fetch("/newcomment", {
-                method: "POST",
-                body: JSON.stringify({ postId, content })
-            })
-            openPost(postId);
-        } catch (err) {
-            console.error(err)
-        }
     };
 }
 
@@ -187,22 +200,30 @@ const displayPosts = (posts) => {
     }
 }
 
+const getPostId = () => {
+    return document.querySelector('.post').dataset.id
+}
+
 const likeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isLike: true } : { commentId: id, isLike: true }
     try {
-        await fetch("/reaction", {
+        const response = await fetch("/reaction", {
             method: "POST",
             body: JSON.stringify(reqData)
         })
-        if (isPost) {
-            const post = await getPostData(id);
-            const postDiv = document.querySelector(`.post[data-id="${id}"]`)
-            postDiv.innerHTML = createPostElement(post).innerHTML;
+        if (response.ok) {
+            if (isPost) {
+                const post = await getPostData(id);
+                const postDiv = document.querySelector(`.post[data-id="${id}"]`)
+                postDiv.innerHTML = createPostElement(post).innerHTML;
+            } else {
+                const postId = getPostId();
+                openPost(postId);
+            }
         } else {
-            const postId = function(){
-                return document.querySelector('.post').dataset.id
-            }();
-            openPost(postId);
+            const res = await response.json();
+            console.error(res);
+            document.getElementById("loginPopup").style.display = "block";
         }
     } catch (err) {
         console.error(err)
@@ -212,19 +233,53 @@ const likeAction = async (id, isPost) => {
 const dislikeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isDislike: true } : { commentId: id, isDislike: true }
     try {
-        await fetch("/reaction", {
+        const response = await fetch("/reaction", {
             method: "POST",
             body: JSON.stringify(reqData)
         })
-        if (isPost) {
-            const post = await getPostData(id);
-            const postDiv = document.querySelector(`.post[data-id="${id}"]`)
-            postDiv.innerHTML = createPostElement(post).innerHTML;
+        if (response.ok) {
+            if (isPost) {
+                const post = await getPostData(id);
+                const postDiv = document.querySelector(`.post[data-id="${id}"]`)
+                postDiv.innerHTML = createPostElement(post).innerHTML;
+            } else {
+                const postId = getPostId();
+                openPost(postId);
+            }
         } else {
-            const postId = function(){
-                return document.querySelector('.post').dataset.id
-            }();
+            const res = await response.json();
+            console.error(res);
+            document.getElementById("loginPopup").style.display = "block";
+        }
+
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const newComment = async (postId) => {
+    const commentArea = document.querySelector('.comment-input');
+    const content = commentArea.value;
+    commentArea.value = '';
+
+    if (content.trim() == "") {
+        commentArea.placeholder = 'Please type a valid comment ⚠'
+        commentArea.style.setProperty('--placeholder-color', 'red');
+        return
+    }
+
+    try {
+        const response = await fetch("/newcomment", {
+            method: "POST",
+            body: JSON.stringify({ postId, content })
+        })
+        
+        if (response.ok) {
             openPost(postId);
+        } else {
+            const res = await response.json();
+            console.error(res);
+            document.getElementById("loginPopup").style.display = "block";
         }
     } catch (err) {
         console.error(err)
@@ -269,23 +324,23 @@ const widgetBack = () => {
     widget.innerHTML = `
     <div class="section">
         <h2 class="section-title">
-            <i class="ri-star-line"></i>
+            <i class="star-icon"></i>
             Must-read posts
         </h2>
         <ul>
-            <li><a href="#">Please read rules before you start working on a platform</a></li>
-            <li><a href="#">Vision & Strategy of AIemhelp</a></li>
+            <li><a href="#" target="_blank">Please read rules before you start using our platform</a></li>
+            <li><a href="https://www.paypal.com/paypalme/outiskteanas" target="_blank">Donate for 01Forum</a></li>
         </ul>
     </div>
     <div class="section">
         <h2 class="section-title">
-            <i class="ri-links-line"></i>
+            <i class="link-icon"></i>
             Featured links
         </h2>
         <ul>
-            <li><a href="#">AIemhelp source-code on GitHub</a></li>
-            <li><a href="#">Golang best-practices</a></li>
-            <li><a href="#">AIem School dashboard</a></li>
+            <li><a href="https://github.com/ANAS-OU/go_forum" target="_blank">01Forum source-code on GitHub</a></li>
+            <li><a href="https://medium.com/@golangda/golang-quick-reference-top-20-best-coding-practices-c0cea6a43f20" target="_blank">Golang best-practices</a></li>
+            <li><a href="https://zone01oujda.ma/" target="_blank">Zone01-Oujda Company</a></li>
         </ul>
     </div>
     `
@@ -324,12 +379,12 @@ const filterByCategory = async (category) => {
     document.getElementById(category).classList.add('activeCat');
 }
 
-const logout = () => {
+const logout = async () => {
     try {
-        fetch('/auth/logout', {
+        const response = await fetch('/auth/logout', {
             method: 'POST'
         });
-        location.href = "/";
+        if (response.ok) location.href = "/";
     } catch (err) {
         console.error(err);
     }
@@ -350,10 +405,10 @@ const newPost = () => {
         <textarea name="content" placeholder="Type some content" required></textarea>
         <div class="button-container">
             <button class="btn btn-add-image">
-                <i class="ri-image-add-line"></i>Add Image
+                <i class="image-icon"></i>Add Image
             </button>
             <button class="btn btn-publish">
-            <i class="fa-regular fa-paper-plane"></i>Publish
+            <i class="send-icon"></i>Publish
             </button>
         </div>
     </form>

@@ -15,7 +15,9 @@
             <img id="logo-img" src="/assets/img/logo.svg" alt="">
             <span id="logo-name"><b>01</b>Forum</span>
         </a>
-        <a href="/login" id="login"><i class="fa-solid fa-right-to-bracket"></i>login</a>
+        <div class="sign">
+            <a href="/login" id="login"><i class="login-icon"></i>login</a>
+        </div>
     </nav>
 
     <div class="login-register grid_3-7">
@@ -25,54 +27,69 @@
             <form id="registerForm">
                 <input type="text" name="username" placeholder="Username" required />
                 <input type="email" name="email" placeholder="Email" required />
-                <input type="password" name="password" placeholder="Password" required />
+                <div>
+                    <input type="password" name="password" placeholder="Password" required />
+                    <i class="eye-icon" onclick="togglePassword()"></i>
+                </div>
 
                 <button id="submit" type="submit">register</button>
             </form>
             <p id="errorMessage" class="error"></p>
         </div>
-        <img class="showcase-img" src="/assets/img/Image01.png" alt="">
+        <div class="register showcase-img"></div>
     </div>
 
     <script>
         document
-            .getElementById("registerForm")
-            .addEventListener("submit", async function (e) {
+            .getElementById("registerForm").addEventListener("submit", async function (e) {
                 e.preventDefault();
 
                 const email = document.querySelector("input[name='email']").value;
-                const username = document.querySelector(
-                    "input[name='username']"
-                ).value;
-                const password = document.querySelector(
-                    "input[name='password']"
-                ).value;
+                const username = document.querySelector("input[name='username']").value;
+                const password = document.querySelector("input[name='password']").value;
                 const errorMessage = document.getElementById("errorMessage");
 
                 try {
                     const response = await fetch("/auth/register", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
+                        headers: {"Content-Type": "application/json",},
                         body: JSON.stringify({ email, username, password }),
                     });
 
                     if (response.ok) {
-                        console.log(response);
-                        window.location.href = "/login";
+                        location.href = "/"
                     } else {
                         const result = await response.json();
-                        console.log(result);
-                        console.error("Registration failed:", response.statusText);
-                        errorMessage.textContent = result.Msg;
+                        console.error("Registration failed:", result.msg);
+                        if (result.msg === 'credentials already exists') {
+                            errorMessage.innerHTML = 'email or username already registered'
+                        } else if (result.msg === 'Invalid email format') {
+                            errorMessage.innerHTML = 'Invalid email format'
+                        } else {
+                            errorMessage.innerHTML = `Your password needs to:
+                        <ul>
+                            <li>include both lower and upper case characters.</li>
+                            <li>include at least one number and symbol.</li>
+                            <li>be at least 8 characters long.</li>
+                        </ul>`
+                        }
                     }
-                } catch (error) {
-                    console.error("Error during registration:", error);
-                    errorMessage.textContent =
-                        "An error occurred. Please try again later.";
+                } catch (err) {
+                    console.error("Error during registration:", err);
                 }
             });
+
+        const togglePassword = () => {
+            fieldPw = document.querySelector("input[name='password']");
+            eye = document.querySelector('#registerForm i');
+            if (fieldPw.type === 'password') {
+                fieldPw.type = 'text';
+                eye.classList = ['eye-off-icon'];
+            } else {
+                fieldPw.type = 'password';
+                eye.classList = ['eye-icon'];
+            }
+        }
     </script>
 </body>
 

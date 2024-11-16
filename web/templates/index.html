@@ -30,28 +30,52 @@
         <div class="widget">
             <div class="section">
                 <h2 class="section-title">
-                    <i class="ri-star-line"></i>
+                    <i class="star-icon"></i>
                     Must-read posts
                 </h2>
                 <ul>
-                    <li><a href="#">Please read rules before you start working on a platform</a></li>
-                    <li><a href="#">Vision & Strategy of AIemhelp</a></li>
+                    <li><a href="#" target="_blank">Please read rules before you start using our platform</a></li>
+                    <li><a href="https://www.paypal.com/paypalme/outiskteanas" target="_blank">Donate for 01Forum</a></li>
                 </ul>
             </div>
             <div class="section">
                 <h2 class="section-title">
-                    <i class="ri-links-line"></i>
+                    <i class="link-icon"></i>
                     Featured links
                 </h2>
                 <ul>
-                    <li><a href="#">AIemhelp source-code on GitHub</a></li>
-                    <li><a href="#">Golang best-practices</a></li>
-                    <li><a href="#">AIem School dashboard</a></li>
+                    <li><a href="https://github.com/ANAS-OU/go_forum" target="_blank">01Forum source-code on GitHub</a></li>
+                    <li><a href="https://medium.com/@golangda/golang-quick-reference-top-20-best-coding-practices-c0cea6a43f20" target="_blank">Golang best-practices</a></li>
+                    <li><a href="https://zone01oujda.ma/" target="_blank">Zone01-Oujda Company</a></li>
                 </ul>
             </div>
         </div>
     </div>
 
+    <div id="loginPopup" class="popup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h2>sorry! your need to register first</h2>
+            <div class="sign">
+                <a href="/register" id="register"><i class="register-icon"></i>register</a>
+                <a href="/login" id="login"><i class="login-icon"></i>login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var loginPopup = document.getElementById("loginPopup");
+        var closeBtn = document.querySelector(".close");
+        closeBtn.onclick = function() {
+            loginPopup.style.display = "none";
+        };
+
+        window.onclick = function(event) {
+            if (event.target == loginPopup) {
+            loginPopup.style.display = "none";
+            }
+        };
+    </script>
 </body>
 
 </html>

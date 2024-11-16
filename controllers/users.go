@@ -18,7 +18,7 @@ func RegisterUser(user models.User) error {
 	// insert data
 	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
 	if _, err := database.DataBase.Exec(query, user.Username, user.Email, string(hashedPass)); err != nil {
-		return fmt.Errorf("error creating user: %v", err)
+		return err
 	}
 
 	return nil

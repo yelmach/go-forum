@@ -27,6 +27,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check if data provided exists
+	if user.Username == "" || user.Email == "" || user.Password == "" {
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
 	// check user if exist
 	if err := utils.CheckUserExist(user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
@@ -51,10 +57,9 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	// store user in database
 	if err := controllers.RegisterUser(user); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
-
 	loginToForum(w, user)
 }
 
