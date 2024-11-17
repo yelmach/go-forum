@@ -34,6 +34,7 @@
 
                 <button id="submit" type="submit">register</button>
             </form>
+            <p id="success"></p>
             <p id="errorMessage" class="error"></p>
         </div>
         <div class="register showcase-img"></div>
@@ -64,7 +65,9 @@
                     });
 
                     if (response.ok) {
-                        location.href = "/"
+                        document.getElementById('errorMessage')?.remove();
+                        document.getElementById('success').textContent = 'Registered Successfully'
+                        setTimeout(() => location.href = "/", 700);
                     } else {
                         const result = await response.json();
                         console.error("Registration failed:", result.msg);

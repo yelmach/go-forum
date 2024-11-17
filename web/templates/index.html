@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/assets/css/main.css">
-    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/main.js" defer></script>
     <title>Home Page</title>
 </head>
 
@@ -54,28 +54,18 @@
 
     <div id="loginPopup" class="popup">
         <div class="popup-content">
-            <span class="close">&times;</span>
-            <h2>sorry! your need to register first</h2>
-            <div class="sign">
-                <a href="/register" id="register"><i class="register-icon"></i>register</a>
-                <a href="/login" id="login"><i class="login-icon"></i>login</a>
+            <div>
+                <div class="figure"></div>
+                <div>
+                    <h2>sorry! your need to register first</h2>
+                    <div class="sign">
+                        <a href="/register" id="register"><i class="register-icon"></i>register</a>
+                        <a href="/login" id="login"><i class="login-icon"></i>login</a>
+                    </div>
+                    </div>
+                </div>
             </div>
-        </div>
     </div>
-
-    <script>
-        var loginPopup = document.getElementById("loginPopup");
-        var closeBtn = document.querySelector(".close");
-        closeBtn.onclick = function() {
-            loginPopup.style.display = "none";
-        };
-
-        window.onclick = function(event) {
-            if (event.target == loginPopup) {
-            loginPopup.style.display = "none";
-            }
-        };
-    </script>
 </body>
 
 </html>
