@@ -60,7 +60,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		count := 0
 		if err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE session_id=?", cookie.Value).Scan(&count); err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+			ErrorHandler(w, r, http.StatusInternalServerError)
+			return
 		}
 
 		if count == 0 {
@@ -69,7 +70,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			utils.DeleteCookie(w, "username")
 			IsLoggedIn = false
 			if err = templates.Root.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
-				utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+				ErrorHandler(w, r, http.StatusInternalServerError)
+				return
 			}
 		}
 
@@ -78,7 +80,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		ErrorHandler(w, r, http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -96,7 +99,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := templates.Register.Execute(w, nil); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		ErrorHandler(w, r, http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -114,6 +118,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := templates.Login.Execute(w, nil); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		ErrorHandler(w, r, http.StatusInternalServerError)
+		return
 	}
 }

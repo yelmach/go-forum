@@ -34,7 +34,7 @@ func CreatePost(post models.Post) error {
 // CreateComment stores the comment in the database
 func CreateComment(comment models.Comment) error {
 	if _, err := database.DataBase.Exec(`INSERT INTO comments(post_id, user_id, content) VALUES(?, ?, ?)`, comment.PostId, comment.UserId, comment.Content); err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
+		return err
 	}
 	return nil
 }

@@ -20,7 +20,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	post := models.Post{}
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
@@ -58,7 +58,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := controllers.CreatePost(post); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -73,10 +73,10 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 	comment := models.Comment{}
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
-	
+
 	if postId := utils.IspostId(comment.PostId); !postId {
 		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
 		return
@@ -84,13 +84,13 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie("user_id")
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
 		return
 	}
 
 	comment.UserId, err = strconv.Atoi(cookie.Value)
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
 		return
 	}
 
@@ -104,7 +104,7 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := controllers.CreateComment(comment); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -125,7 +125,7 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie("user_id")
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
 		return
 	}
 
@@ -145,7 +145,7 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := controllers.CreateReaction(reaction); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
