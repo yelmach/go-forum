@@ -33,6 +33,7 @@
 
                 <button id="submit" type="submit">login</button>
             </form>
+            <p id="success"></p>
             <p id="errorMessage" class="error"></p>
         </div>
         <div class="login showcase-img"></div>
@@ -56,7 +57,9 @@
                         body: JSON.stringify({ username, password }),
                     });                   
                     if (response.ok) {
-                        location.href = "/"; // Redirect to home page after successful login
+                        document.getElementById('errorMessage')?.remove();
+                        document.getElementById('success').textContent = 'Logged in Successfully'
+                        setTimeout(() => location.href = "/", 700);
                     } else {
                         const result = await response.json();
                         console.error("Login failed:", result.msg);

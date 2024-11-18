@@ -194,6 +194,11 @@ input:hover {
     border-color: transparent;
 }
 
+#success {
+    color: #1a8754;
+    font-weight: 400;
+}
+
 #errorMessage {
     color: #f00;
     font-weight: 400;

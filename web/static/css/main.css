@@ -55,6 +55,7 @@ a {
     gap: 0.75rem;
 }
 
+.navbar a,
 .sign a {
     text-decoration: none !important;
 }
@@ -77,6 +78,7 @@ a {
 #login {
     color: #1682FD;
     background-color: #EAEAEA;
+
     i {
         background-color: #1682FD;
     }
@@ -84,7 +86,8 @@ a {
 
 #login:hover {
     color: #EAEAEA;
-    background-color: #1682FD; 
+    background-color: #1682FD;
+
     i {
         background-color: #fff;
     }
@@ -167,6 +170,7 @@ a {
     color: #f48023;
     border-color: #f48023;
     background-color: #FCF4EC;
+
     i {
         background-color: #f48023;
     }
@@ -196,6 +200,7 @@ a {
 
 .categories li:hover {
     color: #f48023;
+
     i {
         background-color: #f48023;
     }
@@ -208,8 +213,9 @@ a {
 
 li.activeCat {
     color: #f48023;
+
     i {
-        background-color:#f48023;
+        background-color: #f48023;
     }
 }
 
@@ -237,10 +243,14 @@ li.activeCat {
     margin-bottom: 1.75rem;
 }
 
+.post-content>h2,
 .post-content>h3 {
     font-size: 1.15rem;
-    cursor: pointer;
     margin-bottom: 0.65rem;
+}
+
+.post-content>h3 {
+    cursor: pointer;
 }
 
 .post-content>h3:hover {
@@ -321,21 +331,23 @@ li.activeCat {
     gap: 5px;
 }
 
-.post .liked, 
-.comment .liked{
+.post .liked,
+.comment .liked {
     i {
         background-color: #1a73e8;
     }
+
     span {
         color: #1a73e8;
     }
 }
 
-.post .disliked, 
-.comment .disliked{
+.post .disliked,
+.comment .disliked {
     i {
         background-color: #EF476F;
     }
+
     span {
         color: #EF476F;
     }
@@ -450,14 +462,14 @@ li.activeCat {
     margin-left: 0;
 }
 
-.widget > img {
+.widget>img {
     width: 230px;
     height: 230px;
     border-radius: 50%;
     margin: .5rem auto;
 }
 
-.widget > p {
+.widget>p {
     font-size: 1.25rem;
     text-align: center;
     padding: 1rem 0;
@@ -503,17 +515,6 @@ li.activeCat {
 a:hover {
     text-decoration: underline;
 }
-
-@media (max-width: 1200px) {
-    .container {
-        grid-template-columns: 1fr 3fr;
-    }
-
-    .widget {
-        display: none;
-    }
-}
-
 
 /* new post */
 #newPostForm {
@@ -675,18 +676,18 @@ textarea {
 }
 
 #selectedTags[data-placeholder]:not([data-placeholder=""]):empty::before {
-  content: attr(data-placeholder);
+    content: attr(data-placeholder);
 }
 
 input[type="text"]:focus,
 input[type="text"]:hover,
-textarea:focus, 
+textarea:focus,
 textarea:hover {
     border-color: #F48023;
 }
 
 /* icons */
-i { 
+i {
     width: 20px;
     height: 20px;
     background-color: #fff;
@@ -702,7 +703,7 @@ i {
     background-color: #808080;
 }
 
-.sidebar i, 
+.sidebar i,
 .widget i {
     background-color: #000;
 }
@@ -734,13 +735,38 @@ i {
     background-color: rgba(0, 0, 0, 0.4);
 }
 
-.popup-content {
+.popup-content { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 80%;
-    max-width: 600px;
-    background-color: #fefefe;
-    margin: 15% auto;
+    max-width: 800px;
+    background-color: #fefefe; 
+    margin: 12% auto;
     padding: 20px;
     border-radius: 5px;
+}
+
+.figure {
+    width: 400px;
+    height: 350px;
+    background-image: url('/assets/img/sign-up-form.svg');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.popup-content > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+}
+
+.popup-content > div > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -25px;
 }
 
 .popup-content h2 {
@@ -749,18 +775,20 @@ i {
     margin-bottom: 1.25rem;
 }
 
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+pre {
+    overflow: hidden;
+    font-size: .85rem;
+    font-family : monospace;
+    font-weight : 400;
+    text-align  : left;
+    line-height : 1.2rem;
+    color: #111;
+    background-color: #f1f1f1;
+    border-left: solid 5px #ccc; 
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 10px 20px;
+    margin-top: 1rem;
 }
 
 /* icons */
@@ -822,4 +850,22 @@ i {
 
 .image-icon {
     mask: url('/assets/img/icons/photo-plus.svg');
+}
+
+/* responsive */
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 1fr 3fr;
+    }
+
+    .widget {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .popup-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
 }

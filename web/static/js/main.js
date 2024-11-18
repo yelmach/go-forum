@@ -102,13 +102,14 @@ const createCommentElement = (comment) => {
 const getPostData = async (postId) => {
     try {
         const response = await fetch(`/api/posts/${postId}`);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
+        if (response.ok) {
+            return response.json();
+        } else {
+            const res = await response.json();
+            console.error(res.msg)
         }
-
-        return response.json();
-    } catch (error) {
-        console.error(error.message);
+    } catch (err) {
+        console.error(err);
     }
 }
 
@@ -120,7 +121,7 @@ const openPost = async (postId) => {
     const userId = parseInt(getCookie("user_id"));
     const likeActive = post.likes.includes(userId) ? ' liked' : ''
     const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
-    
+
     comments.classList.add('comments');
     main.innerHTML = `
     <div class="post" data-id="${postId}">
@@ -132,7 +133,7 @@ const openPost = async (postId) => {
             </div>
         </div>
         <div class="post-content">
-            <h3>${post.title}</h3>
+            <h2>${post.title}</h2>
             <p>${post.content.replace(/\n/g, "<br>")}</p>
         </div>
         <div class="tags-stats">
@@ -153,11 +154,11 @@ const openPost = async (postId) => {
         </div>
     </div>
 
-    <div class="comment-box">
-        <textarea class="comment-input" placeholder="Type here your wise suggestion"></textarea>
+    <form id="commentForm" class="comment-box">
+        <textarea class="comment-input" placeholder="Type here your wise suggestion" required></textarea>
         <div class="button-group">
             <button class="btn btn-cancel">Cancel</button>
-            <button class="btn btn-comment" onclick="newComment(${postId})">
+            <button class="btn btn-comment">
                 <i class="comment-icon"></i>Comment
             </button>
         </div>
@@ -175,10 +176,39 @@ const openPost = async (postId) => {
     }
     main.append(comments);
 
-    // document.querySelector('.btn-comment').onclick = ; 
     document.querySelector('.btn-cancel').onclick = () => {
         document.querySelector('.comment-input').value = '';
     };
+    document.getElementById('commentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const commentArea = document.querySelector('.comment-input');
+        const content = commentArea.value;
+        commentArea.value = '';
+
+        if (content.trim() == "") {
+            commentArea.placeholder = 'Please type a valid comment ⚠'
+            commentArea.style.setProperty('--placeholder-color', 'red');
+            return
+        }
+
+        try {
+            const response = await fetch("/newcomment", {
+                method: "POST",
+                body: JSON.stringify({ postId, content })
+            })
+
+            if (response.ok) {
+                openPost(postId);
+            } else {
+                const res = await response.json();
+                console.error(res.msg);
+                document.getElementById("loginPopup").style.display = "block";
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    })
 }
 
 const displayPosts = (posts) => {
@@ -204,6 +234,10 @@ const getPostId = () => {
     return document.querySelector('.post').dataset.id
 }
 
+const closedPost = () => {
+    return document.querySelector('.comment-box') == undefined
+}
+
 const likeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isLike: true } : { commentId: id, isLike: true }
     try {
@@ -212,7 +246,7 @@ const likeAction = async (id, isPost) => {
             body: JSON.stringify(reqData)
         })
         if (response.ok) {
-            if (isPost) {
+            if (isPost && closedPost()) {
                 const post = await getPostData(id);
                 const postDiv = document.querySelector(`.post[data-id="${id}"]`)
                 postDiv.innerHTML = createPostElement(post).innerHTML;
@@ -238,7 +272,7 @@ const dislikeAction = async (id, isPost) => {
             body: JSON.stringify(reqData)
         })
         if (response.ok) {
-            if (isPost) {
+            if (isPost && closedPost()) {
                 const post = await getPostData(id);
                 const postDiv = document.querySelector(`.post[data-id="${id}"]`)
                 postDiv.innerHTML = createPostElement(post).innerHTML;
@@ -252,35 +286,6 @@ const dislikeAction = async (id, isPost) => {
             document.getElementById("loginPopup").style.display = "block";
         }
 
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const newComment = async (postId) => {
-    const commentArea = document.querySelector('.comment-input');
-    const content = commentArea.value;
-    commentArea.value = '';
-
-    if (content.trim() == "") {
-        commentArea.placeholder = 'Please type a valid comment ⚠'
-        commentArea.style.setProperty('--placeholder-color', 'red');
-        return
-    }
-
-    try {
-        const response = await fetch("/newcomment", {
-            method: "POST",
-            body: JSON.stringify({ postId, content })
-        })
-        
-        if (response.ok) {
-            openPost(postId);
-        } else {
-            const res = await response.json();
-            console.error(res);
-            document.getElementById("loginPopup").style.display = "block";
-        }
     } catch (err) {
         console.error(err)
     }
@@ -423,7 +428,7 @@ const newPost = () => {
     const selectAllBtn = document.getElementById('selectAll');
     const newPostForm = document.getElementById('newPostForm');
 
-    function renderTags() {
+    const renderTags = () => {
         selectedTagsContainer.innerHTML = selectedTags.map(tag => `
             <span class="tag">
                 ${tag}
@@ -431,10 +436,10 @@ const newPost = () => {
             </span>
         `).join('');
 
-        const filteredTags = tags.filter(tag => 
+        const filteredTags = tags.filter(tag =>
             tag.toLowerCase().includes(searchBox.value.toLowerCase())
         );
-        
+
         optionsContainer.innerHTML = filteredTags.map(tag => `
             <div class="dropdown-item ${selectedTags.includes(tag) ? 'selected' : ''}" data-tag="${tag}">
                 ${tag}
@@ -483,11 +488,14 @@ const newPost = () => {
         renderTags();
     });
 
-    newPostForm.addEventListener("submit", async () => {
+    newPostForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
         const title = document.querySelector('input[name="title"]').value;
         const content = document.querySelector('textarea[name="content"]').value;
+        console.log(title, content)
+
         try {
-            await fetch('/newpost', {
+            const response = await fetch('/newpost', {
                 method: 'POST',
                 body: JSON.stringify({
                     Title: title,
@@ -495,7 +503,15 @@ const newPost = () => {
                     Categories: selectedTags
                 })
             })
-            // location.href = "/";
+            if (response.ok) {
+                location.href = "/";
+            } else {
+                const res = await response.json();
+                console.error(res);
+                document.getElementById("loginPopup").style.display = "block";
+                document.querySelector(".popup-content").innerHTML = `<h2>Nice try!</h2>
+                <p>It's required to write a title and the content for your new post</p>`
+            }
         } catch (err) {
             console.error(err);
         }
@@ -503,6 +519,13 @@ const newPost = () => {
 
     renderTags();
 }
+
+const loginPopup = document.getElementById("loginPopup");
+window.onclick = function (event) {
+    if (event.target == loginPopup) {
+        loginPopup.style.display = "none";
+    }
+};
 
 init();
 console.log(`
