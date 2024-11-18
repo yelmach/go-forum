@@ -2,10 +2,8 @@ package controllers
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"forum/database"
 	"forum/models"
@@ -13,33 +11,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// RegisterUser insert user information to user table
 func RegisterUser(user models.User) error {
-	cryptedPass, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPass, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
-	stmt, err := database.DataBase.Prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")
-	if err != nil {
+	// insert data
+	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
+	if _, err := database.DataBase.Exec(query, user.Username, user.Email, string(hashedPass)); err != nil {
 		return err
 	}
-	defer stmt.Close()
 
-	_, err = stmt.Exec(strings.ToLower(user.Username), strings.ToLower(user.Email), string(cryptedPass))
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
+// LoginUser checks if the user info are exists, and correct in user table database
 func LoginUser(user models.User) (models.User, int, error) {
 	existUser := models.User{}
-	stmt, err := database.DataBase.Prepare("SELECT id, username, email, password FROM users WHERE username = ? OR email = ?")
-	if err != nil {
-		return models.User{}, http.StatusInternalServerError, fmt.Errorf("error preparing statement: %w", err)
-	}
-	defer stmt.Close() // Ensure statement is closed
-
-	err = stmt.QueryRow(strings.ToLower(user.Username), strings.ToLower(user.Username)).Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
+	// check if username already exist
+	err := database.DataBase.QueryRow("SELECT id, username, email, password FROM users WHERE username = ? OR email = ?", user.Username, user.Username).
+		Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
 	if err == sql.ErrNoRows {
-		return models.User{}, http.StatusNotFound, errors.New("user not found")
+		return models.User{}, http.StatusUnauthorized, fmt.Errorf("user not found")
 	} else if err != nil {
 		return models.User{}, http.StatusInternalServerError, fmt.Errorf("error scanning row: %w", err)
 	}
@@ -49,4 +41,31 @@ func LoginUser(user models.User) (models.User, int, error) {
 		return models.User{}, http.StatusUnauthorized, err
 	}
 	return existUser, http.StatusOK, nil
+}
+
+// StoreSession is designed to save a new user session in a database if it doesn't already exist
+func StoreSession(w http.ResponseWriter, session_id string, user models.User) (int, error) {
+	// check session if already stored
+	var count int
+	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ?", user.Id).Scan(&count)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("error scanning row: %w", err)
+	}
+
+	switch {
+	case count > 0:
+		query := `UPDATE sessions SET session_id = ? WHERE user_id = ?`
+		if _, err := database.DataBase.Exec(query, session_id, user.Id); err != nil {
+			return http.StatusInternalServerError, err
+		}
+		return http.StatusOK, nil
+	case count == 0:
+		query := `INSERT INTO sessions (user_id, session_id) VALUES (?, ?)`
+		if _, err := database.DataBase.Exec(query, user.Id, session_id); err != nil {
+			return http.StatusInternalServerError, err
+		}
+		return http.StatusOK, nil
+	}
+
+	return http.StatusOK, nil
 }

@@ -9,10 +9,9 @@ import (
 
 func VerifyCategoriesMatch(categories []string) error {
 	dbCategories, err := database.DataBase.Query(`SELECT name FROM categories`)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return err
-		}
+	if err == sql.ErrNoRows {
+		return err
+	} else if err != nil {
 		return err
 	}
 	defer dbCategories.Close()

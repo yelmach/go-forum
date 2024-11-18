@@ -25,7 +25,7 @@ func SetupRoutes(mux *http.ServeMux) {
 	// auth
 	mux.HandleFunc("/auth/register", auth.RegisterUser)
 	mux.HandleFunc("/auth/login", auth.LoginUser)
-	mux.HandleFunc("/auth/logout", auth.LogoutUser)
+	mux.HandleFunc("/auth/logout", auth.LogOutUser)
 
 	// user activity
 	mux.HandleFunc("/newpost", middleware.Middleware(handlers.NewPostHandler))

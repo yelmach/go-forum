@@ -9,6 +9,7 @@ import (
 	"forum/utils"
 )
 
+// Middleware allows only users that authenticated to use next handler(add reaction, comment or post)
 func Middleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		is_valid := false
@@ -23,18 +24,22 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
+
 		user_id, err := strconv.Atoi(cookie_user.Value)
 		if err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
+
 		cookie_username, err := r.Cookie("username")
 		if err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
+
 		user_username := cookie_username.Value
-		if err := database.DataBase.QueryRow(`SELECT EXISTS(SELECT * FROM sessions JOIN users ON sessions.user_id = users.id WHERE session_id = ? AND user_id = ? AND users.username = ? )`, session_id, user_id, user_username).Scan(&is_valid); err != nil {
+		query := `SELECT EXISTS(SELECT * FROM sessions JOIN users ON sessions.user_id = users.id WHERE session_id = ? AND user_id = ? AND users.username = ? )`
+		if err := database.DataBase.QueryRow(query, session_id, user_id, user_username).Scan(&is_valid); err != nil {
 			handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		}
 		if !is_valid {
@@ -47,6 +52,8 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// RedirectMiddleware redirect the logged user to home page, if he
+// tries to reach login and register page
 func RedirectMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, err := r.Cookie("session_id")

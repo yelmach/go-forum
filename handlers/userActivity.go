@@ -11,6 +11,7 @@ import (
 	"forum/models"
 )
 
+// NewPostHandler handles creation post request and store it to database
 func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		ErrorHandler(w, r, http.StatusMethodNotAllowed)
@@ -18,9 +19,9 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post := models.Post{}
-	err := json.NewDecoder(r.Body).Decode(&post)
-	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
+		return
 	}
 
 	cookie, err := r.Cookie("user_id")
@@ -28,6 +29,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
 		return
 	}
+
 	post.UserId, err = strconv.Atoi(cookie.Value)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
@@ -45,24 +47,24 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: "category not found", Code: http.StatusBadRequest})
 		return
 	}
-	//
 
+	// check if title and content are written and not too long
 	if post.Title == "" || post.Content == "" {
-		utils.ResponseJSON(w, utils.Resp{Msg: "can't be empty", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: "input can't be empty", Code: http.StatusBadRequest})
 		return
 	} else if len(post.Title) >= 61 || len(post.Content) >= 2001 {
-		utils.ResponseJSON(w, utils.Resp{Msg: "can't process, input to long", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: "can't process, input too long", Code: http.StatusBadRequest})
 		return
 	}
 
-	err = controllers.CreatePost(post)
-	if err != nil {
+	if err := controllers.CreatePost(post); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
 }
 
+// NewCommentHandler handles the creation of new comment request
 func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		ErrorHandler(w, r, http.StatusMethodNotAllowed)
@@ -70,13 +72,12 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	comment := models.Comment{}
-	err := json.NewDecoder(r.Body).Decode(&comment)
-	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
+		return
 	}
-
-	postId := utils.IspostId(comment.PostId)
-	if !postId {
+	
+	if postId := utils.IspostId(comment.PostId); !postId {
 		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
 		return
 	}
@@ -93,23 +94,23 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check if comment are written and not too long
 	if comment.Content == "" {
-		utils.ResponseJSON(w, utils.Resp{Msg: "can't be empty", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: "comment can't be empty", Code: http.StatusBadRequest})
 		return
 	} else if len(comment.Content) >= 501 {
-		utils.ResponseJSON(w, utils.Resp{Msg: "cat't process, comment to long", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: "cat't process, comment too long", Code: http.StatusBadRequest})
 		return
 	}
 
-	err = controllers.CreateComment(comment)
-	if err != nil {
+	if err := controllers.CreateComment(comment); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
-
 	w.WriteHeader(http.StatusCreated)
 }
 
+// ReactionHandler handles the reaction request on a post or a comment
 func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		ErrorHandler(w, r, http.StatusMethodNotAllowed)
@@ -117,13 +118,17 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reaction := models.Reaction{}
-	err := json.NewDecoder(r.Body).Decode(&reaction)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&reaction); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
-	cookie, _ := r.Cookie("user_id")
+	cookie, err := r.Cookie("user_id")
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		return
+	}
+
 	reaction.UserId, err = strconv.Atoi(cookie.Value)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
@@ -134,17 +139,14 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Either post_id or comment_id must be provided", Code: http.StatusBadRequest})
 		return
 	}
-
 	if !reaction.IsLike && !reaction.IsDislike {
 		utils.ResponseJSON(w, utils.Resp{Msg: "new reaction must be provided", Code: http.StatusBadRequest})
 		return
 	}
 
-	err = controllers.CreateReaction(reaction)
-	if err != nil {
+	if err := controllers.CreateReaction(reaction); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
-
 	w.WriteHeader(http.StatusCreated)
 }

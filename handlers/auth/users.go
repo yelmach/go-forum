@@ -14,8 +14,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// this func responsible for writing responses to me for debbuging
-
+// RegisterUser handles regestration request
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
@@ -28,11 +27,19 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check if data provided exists
+	if user.Username == "" || user.Email == "" || user.Password == "" {
+		handlers.ErrorHandler(w, r, http.StatusBadRequest)
+		return
+	}
+
+	// check user if exist
 	if err := utils.CheckUserExist(user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
+	// check email
 	isValidEmail, err := utils.CheckEmailFormat(user.Email)
 	if err != nil {
 		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
@@ -42,18 +49,21 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check password
 	if isValidPassword := utils.CheckPasswordFormat(user.Password); !isValidPassword {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid password format", Code: http.StatusBadRequest})
 		return
 	}
 
+	// store user in database
 	if err := controllers.RegisterUser(user); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
-	HandleLoginAndSession(w, user)
+	loginToForum(w, user)
 }
 
+// LoginUser it handles login request
 func LoginUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
@@ -61,20 +71,23 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := models.User{}
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
-	HandleLoginAndSession(w, user)
+
+	loginToForum(w, user)
 }
 
-func HandleLoginAndSession(w http.ResponseWriter, user models.User) {
+// loginToForum logged the user to forum and create a session for that user
+func loginToForum(w http.ResponseWriter, user models.User) {
+	// check user if exists
 	user, statuscode, err := controllers.LoginUser(user)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
 	}
+
 	// create session
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -97,7 +110,8 @@ func HandleLoginAndSession(w http.ResponseWriter, user models.User) {
 	utils.ResponseJSON(w, utils.Resp{Msg: "Logged in", Code: http.StatusOK, SessionId: sessionId})
 }
 
-func LogoutUser(w http.ResponseWriter, r *http.Request) {
+// LogOutUser it handles log out request
+func LogOutUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
 		return
@@ -120,7 +134,7 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	utils.DeleteCookie(w, "username")
 
 	if r.Header.Get("Accept") == "application/json" {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Logdout successfly", Code: http.StatusOK})
+		utils.ResponseJSON(w, utils.Resp{Msg: "Loggedout successfuly", Code: http.StatusOK})
 	} else {
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
