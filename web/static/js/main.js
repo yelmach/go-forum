@@ -121,7 +121,7 @@ const openPost = async (postId) => {
     const userId = parseInt(getCookie("user_id"));
     const likeActive = post.likes.includes(userId) ? ' liked' : ''
     const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
-
+    
     comments.classList.add('comments');
     main.innerHTML = `
     <div class="post" data-id="${postId}">
@@ -197,7 +197,7 @@ const openPost = async (postId) => {
                 method: "POST",
                 body: JSON.stringify({ postId, content })
             })
-
+            
             if (response.ok) {
                 openPost(postId);
             } else {
@@ -436,10 +436,10 @@ const newPost = () => {
             </span>
         `).join('');
 
-        const filteredTags = tags.filter(tag =>
+        const filteredTags = tags.filter(tag => 
             tag.toLowerCase().includes(searchBox.value.toLowerCase())
         );
-
+        
         optionsContainer.innerHTML = filteredTags.map(tag => `
             <div class="dropdown-item ${selectedTags.includes(tag) ? 'selected' : ''}" data-tag="${tag}">
                 ${tag}
@@ -490,10 +490,10 @@ const newPost = () => {
 
     newPostForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+
         const title = document.querySelector('input[name="title"]').value;
         const content = document.querySelector('textarea[name="content"]').value;
         console.log(title, content)
-
         try {
             const response = await fetch('/newpost', {
                 method: 'POST',
@@ -521,9 +521,9 @@ const newPost = () => {
 }
 
 const loginPopup = document.getElementById("loginPopup");
-window.onclick = function (event) {
+window.onclick = function(event) {
     if (event.target == loginPopup) {
-        loginPopup.style.display = "none";
+    loginPopup.style.display = "none";
     }
 };
 

@@ -41,11 +41,16 @@
 
     <script>
         document
-            .getElementById("loginForm").addEventListener("submit", async function (e) {
+            .getElementById("loginForm")
+            .addEventListener("submit", async function (e) {
                 e.preventDefault();
 
-                const username = document.querySelector("input[name='username']").value;
-                const password = document.querySelector("input[name='password']").value;
+                const username = document.querySelector(
+                    "input[name='username']"
+                ).value;
+                const password = document.querySelector(
+                    "input[name='password']"
+                ).value;
                 const errorMessage = document.getElementById("errorMessage");
 
                 try {
@@ -59,7 +64,7 @@
                     if (response.ok) {
                         document.getElementById('errorMessage')?.remove();
                         document.getElementById('success').textContent = 'Logged in Successfully'
-                        setTimeout(() => location.href = "/", 700);
+                        setTimeout(() => location.href = "/", 700); // Redirect to home page after successful login
                     } else {
                         const result = await response.json();
                         console.error("Login failed:", result.msg);

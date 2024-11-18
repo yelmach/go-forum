@@ -13,7 +13,10 @@ import (
 
 // RegisterUser insert user information to user table
 func RegisterUser(user models.User) error {
-	hashedPass, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
 
 	// insert data
 	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"

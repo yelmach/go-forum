@@ -78,7 +78,6 @@ a {
 #login {
     color: #1682FD;
     background-color: #EAEAEA;
-
     i {
         background-color: #1682FD;
     }
@@ -86,8 +85,7 @@ a {
 
 #login:hover {
     color: #EAEAEA;
-    background-color: #1682FD;
-
+    background-color: #1682FD; 
     i {
         background-color: #fff;
     }
@@ -170,7 +168,6 @@ a {
     color: #f48023;
     border-color: #f48023;
     background-color: #FCF4EC;
-
     i {
         background-color: #f48023;
     }
@@ -200,7 +197,6 @@ a {
 
 .categories li:hover {
     color: #f48023;
-
     i {
         background-color: #f48023;
     }
@@ -213,9 +209,8 @@ a {
 
 li.activeCat {
     color: #f48023;
-
     i {
-        background-color: #f48023;
+        background-color:#f48023;
     }
 }
 
@@ -331,23 +326,21 @@ li.activeCat {
     gap: 5px;
 }
 
-.post .liked,
-.comment .liked {
+.post .liked, 
+.comment .liked{
     i {
         background-color: #1a73e8;
     }
-
     span {
         color: #1a73e8;
     }
 }
 
-.post .disliked,
-.comment .disliked {
+.post .disliked, 
+.comment .disliked{
     i {
         background-color: #EF476F;
     }
-
     span {
         color: #EF476F;
     }
@@ -462,14 +455,14 @@ li.activeCat {
     margin-left: 0;
 }
 
-.widget>img {
+.widget > img {
     width: 230px;
     height: 230px;
     border-radius: 50%;
     margin: .5rem auto;
 }
 
-.widget>p {
+.widget > p {
     font-size: 1.25rem;
     text-align: center;
     padding: 1rem 0;
@@ -676,18 +669,18 @@ textarea {
 }
 
 #selectedTags[data-placeholder]:not([data-placeholder=""]):empty::before {
-    content: attr(data-placeholder);
+  content: attr(data-placeholder);
 }
 
 input[type="text"]:focus,
 input[type="text"]:hover,
-textarea:focus,
+textarea:focus, 
 textarea:hover {
     border-color: #F48023;
 }
 
 /* icons */
-i {
+i { 
     width: 20px;
     height: 20px;
     background-color: #fff;
@@ -703,7 +696,7 @@ i {
     background-color: #808080;
 }
 
-.sidebar i,
+.sidebar i, 
 .widget i {
     background-color: #000;
 }

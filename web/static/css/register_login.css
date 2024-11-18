@@ -3,11 +3,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
 /* Reset Default Styles */
-*, html {
+*,
+html {
     box-sizing: border-box;
     padding: 0 0;
     margin: 0 0;
 }
+
+/* Reset Default Styles */
 
 html {
     font-size: 16px;
@@ -75,7 +78,6 @@ a {
 #login {
     color: #1682FD;
     background-color: #EAEAEA;
-
     i {
         background-color: #1682FD;
     }
@@ -83,8 +85,7 @@ a {
 
 #login:hover {
     color: #EAEAEA;
-    background-color: #1682FD;
-
+    background-color: #1682FD; 
     i {
         background-color: #fff;
     }
@@ -234,7 +235,7 @@ input:hover {
     }
 }
 
-i {
+i { 
     width: 20px;
     height: 20px;
     background-color: #fff;
