@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -84,7 +83,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 func loginToForum(w http.ResponseWriter, r *http.Request, user models.User) {
 	// check user if exists
 	user, statuscode, err := controllers.LoginUser(user)
-	if err == fmt.Errorf("user not found") {
+	if statuscode == http.StatusUnauthorized {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
 	} else if err != nil {
@@ -123,13 +122,13 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 
 	session_id, err := r.Cookie("session_id")
 	if err != nil {
-		handlers.ErrorHandler(w,r,http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
 	query := `DELETE FROM sessions WHERE session_id=?`
 	if _, err := database.DataBase.Exec(query, session_id.Value); err != nil {
-		handlers.ErrorHandler(w,r,http.StatusInternalServerError)
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 

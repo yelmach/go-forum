@@ -40,7 +40,7 @@ func LoginUser(user models.User) (models.User, int, error) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(existUser.Password), []byte(user.Password)); err != nil {
-		return models.User{}, http.StatusUnauthorized, fmt.Errorf("user not found")
+		return models.User{}, http.StatusUnauthorized, fmt.Errorf("incorrect password")
 	}
 	return existUser, http.StatusOK, nil
 }
