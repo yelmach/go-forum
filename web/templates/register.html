@@ -81,6 +81,8 @@
                             <li>Include at least one number and symbol.</li>
                             <li>Password must be between 8 and 21 characters long.</li>
                         </ul>`
+                        }else if(result.msg == 'Internal Server Error'){
+                            location.href = "/error.html"
                         } else {
                             errorMessage.innerHTML = `${result.msg}`
                         }

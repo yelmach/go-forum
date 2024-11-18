@@ -57,7 +57,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	// store user in database
 	if err := controllers.RegisterUser(user); err != nil {
-		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 		return
 	}
 	loginToForum(w, r, user)
