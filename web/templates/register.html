@@ -71,12 +71,20 @@
                     } else {
                         const result = await response.json();
                         console.error("Registration failed:", result.msg);
-                        errorMessage.innerHTML = result.msg === 'credentials already exists' ? 'User exists with that Username of Email' : `Your password needs to:
+                        if (result.msg === 'credentials already exists') {
+                            errorMessage.innerHTML = 'User exists with that Username of Email'
+                        } else if (result.msg === 'Invalid email format') {
+                            errorMessage.innerHTML = 'Invalid email format'
+                        } else if (result.msg === 'Invalid password format') {
+                            errorMessage.innerHTML = `Your password needs to:
                         <ul>
                             <li>include both lower and upper case characters.</li>
                             <li>include at least one number and symbol.</li>
                             <li>be at least 8 characters long.</li>
                         </ul>`
+                        } else {
+                            errorMessage.innerHTML = `${result.msg}`
+                        }
                     }
                 } catch (err) {
                     console.error("Error during registration:", err);
