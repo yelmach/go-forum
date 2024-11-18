@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -27,9 +28,9 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check if data provided exists
+	// check if the data provided exists
 	if user.Username == "" || user.Email == "" || user.Password == "" {
-		handlers.ErrorHandler(w, r, http.StatusBadRequest)
+		utils.ResponseJSON(w, utils.Resp{Msg: "username, email and password are required", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -60,7 +61,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
-	loginToForum(w, user)
+	loginToForum(w, r, user)
 }
 
 // LoginUser it handles login request
@@ -76,22 +77,25 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	loginToForum(w, user)
+	loginToForum(w, r, user)
 }
 
 // loginToForum logged the user to forum and create a session for that user
-func loginToForum(w http.ResponseWriter, user models.User) {
+func loginToForum(w http.ResponseWriter, r *http.Request, user models.User) {
 	// check user if exists
 	user, statuscode, err := controllers.LoginUser(user)
-	if err != nil {
+	if err == fmt.Errorf("user not found") {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
+		return
+	} else if err != nil {
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 
 	// create session
 	id, err := uuid.NewV7()
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	sessionId := id.String()
@@ -99,7 +103,7 @@ func loginToForum(w http.ResponseWriter, user models.User) {
 	// store session in database
 	statuscode, err = controllers.StoreSession(w, sessionId, user)
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
+		handlers.ErrorHandler(w, r, statuscode)
 		return
 	}
 
@@ -111,7 +115,7 @@ func loginToForum(w http.ResponseWriter, user models.User) {
 }
 
 // LogOutUser it handles log out request
-func LogOutUser(w http.ResponseWriter, r *http.Request) {
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
 		return
@@ -119,13 +123,13 @@ func LogOutUser(w http.ResponseWriter, r *http.Request) {
 
 	session_id, err := r.Cookie("session_id")
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		handlers.ErrorHandler(w,r,http.StatusInternalServerError)
 		return
 	}
 
 	query := `DELETE FROM sessions WHERE session_id=?`
 	if _, err := database.DataBase.Exec(query, session_id.Value); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		handlers.ErrorHandler(w,r,http.StatusInternalServerError)
 		return
 	}
 

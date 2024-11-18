@@ -31,17 +31,16 @@ func RegisterUser(user models.User) error {
 func LoginUser(user models.User) (models.User, int, error) {
 	existUser := models.User{}
 	// check if username already exist
-	err := database.DataBase.QueryRow("SELECT id, username, email, password FROM users WHERE username = ? OR email = ?", user.Username, user.Username).
-		Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
+	query := "SELECT id, username, email, password FROM users WHERE username = ? OR email = ?"
+	err := database.DataBase.QueryRow(query, user.Username, user.Username).Scan(&existUser.Id, &existUser.Username, &existUser.Email, &existUser.Password)
 	if err == sql.ErrNoRows {
 		return models.User{}, http.StatusUnauthorized, fmt.Errorf("user not found")
 	} else if err != nil {
-		return models.User{}, http.StatusInternalServerError, fmt.Errorf("error scanning row: %w", err)
+		return models.User{}, http.StatusInternalServerError, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(existUser.Password), []byte(user.Password))
-	if err != nil {
-		return models.User{}, http.StatusUnauthorized, err
+	if err := bcrypt.CompareHashAndPassword([]byte(existUser.Password), []byte(user.Password)); err != nil {
+		return models.User{}, http.StatusUnauthorized, fmt.Errorf("user not found")
 	}
 	return existUser, http.StatusOK, nil
 }
@@ -52,7 +51,7 @@ func StoreSession(w http.ResponseWriter, session_id string, user models.User) (i
 	var count int
 	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ?", user.Id).Scan(&count)
 	if err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("error scanning row: %w", err)
+		return http.StatusInternalServerError, err
 	}
 
 	switch {
