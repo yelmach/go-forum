@@ -17,10 +17,12 @@ func main() {
 	}
 
 	defer database.DataBase.Close()
-	mux := http.NewServeMux()
-	routers.SetupRoutes(mux)
+
+	rootMux := http.NewServeMux()
+
+	routers.SetupRoutes(rootMux)
 
 	fmt.Println("Server running on port: 8080")
 	fmt.Println("URL: http://localhost:8080")
-	http.ListenAndServe(":8080", mux)
+	http.ListenAndServe(":8080", rootMux)
 }

@@ -1,0 +1,10 @@
+package routers
+
+import "net/http"
+
+func SetupRoutes(rootMux *http.ServeMux) {
+	rootMux.Handle("/assets/", SetupAssetsRoutes())
+	rootMux.Handle("/", SetupHomeRoutes())
+	rootMux.Handle("/api/", SetupApiRoutes())
+	rootMux.Handle("/auth/", SetupAuthRoutes())
+}
