@@ -11,9 +11,9 @@ const loadData = async () => {
 };
 
 const init = async () => {
-    await loadData();
     const categContainer = document.querySelector('.categories');
 
+    await loadData();
     for (const category of data.allCategories) {
         const categoryElem = document.createElement('li')
         categoryElem.id = category;
@@ -43,8 +43,8 @@ const createPostElement = (post) => {
         </div>
     </div>
     <div class="post-content">
-        <h3 onclick="openPost(${post.id})">${post.title}</h3>
-        <p>${post.content.split('\n')[0].slice(0, 200)}${((post.content.match(/\n/g) && post.content.match(/\n/g).length > 2) || post.content.length > 200) ? `... <span class="read-more" onclick="openPost(${post.id})">Read-More</span>` : ''}</p>
+        <h3 onclick="openPost(${post.id})">${filterContent(post.title)}</h3>
+        <p>${filterContent(post.content.split('\n')[0]).slice(0, 200)}${((post.content.match(/\n/g) && post.content.match(/\n/g).length > 2) || post.content.length > 200) ? `... <span class="read-more" onclick="openPost(${post.id})">Read-More</span>` : ''}</p>
     </div>
     <div class="tags-stats">
         <div class="tags">
@@ -83,7 +83,7 @@ const createCommentElement = (comment) => {
         </div>
     </div>
     <div class="content">
-        <p>${comment.content}</p>
+        <p>${filterContent(comment.content)}</p>
     </div>
     <div class="tags-stats">
         <div class="post-stats">
@@ -115,7 +115,7 @@ const getPostData = async (postId) => {
 
 const openPost = async (postId) => {
     const post = await getPostData(postId);
-    const main = document.querySelector('.main');
+    const postsContainer = document.querySelector('.posts-container');
     const widget = document.querySelector('.widget');
     const comments = document.createElement('div');
     const userId = parseInt(getCookie("user_id"));
@@ -123,7 +123,7 @@ const openPost = async (postId) => {
     const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
     
     comments.classList.add('comments');
-    main.innerHTML = `
+    postsContainer.innerHTML = `
     <div class="post" data-id="${postId}">
         <div class="user-info">
             <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
@@ -133,8 +133,8 @@ const openPost = async (postId) => {
             </div>
         </div>
         <div class="post-content">
-            <h2>${post.title}</h2>
-            <p>${post.content.replace(/\n/g, "<br>")}</p>
+            <h2>${filterContent(post.title)}</h2>
+            <p>${filterContent(post.content)}</p>
         </div>
         <div class="tags-stats">
             <div class="tags">
@@ -174,7 +174,7 @@ const openPost = async (postId) => {
         const commentDiv = createCommentElement(comment);
         comments.append(commentDiv);
     }
-    main.append(comments);
+    postsContainer.append(comments);
 
     document.querySelector('.btn-cancel').onclick = () => {
         document.querySelector('.comment-input').value = '';
@@ -308,6 +308,22 @@ const timeAgo = (time) => {
         }
     }
     return 'just now';
+}
+
+const escapeHtml = (unsafe) => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+const filterContent = (content) => {
+    return escapeHtml(content)
+        .replace(/&lt;pre&gt;/g, '<pre>')
+        .replace(/&lt;\/pre&gt;/g, '</pre>')
+        .replace(/\n/g, '<br>')
 }
 
 function getCookie(name) {
@@ -509,8 +525,13 @@ const newPost = () => {
                 const res = await response.json();
                 console.error(res);
                 document.getElementById("loginPopup").style.display = "block";
-                document.querySelector(".popup-content").innerHTML = `<h2>Nice try!</h2>
-                <p>It's required to write a title and the content for your new post</p>`
+                document.querySelector(".popup-content").innerHTML = `
+                <h2>Nice try!</h2>
+                <ul>
+                    <li>It's required to write a title (max 50 character) and the content (max 2000 character) for your new post</li>
+                    <li>Unknown category or douplicated categories not allowed</li>
+                </ul>
+                `
             }
         } catch (err) {
             console.error(err);

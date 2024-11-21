@@ -10,6 +10,28 @@ html {
     margin: 0 0;
 }
 
+:root {
+    --bg-color: #fafafa;
+    --pbg-color: #ffffff;
+    --text-color: #000000;
+    --button-color: #f48023;
+    --border-color: #eaeaea;
+    --muted-color: #808080;
+    --link-color: #1682fd;
+    --warning-color: #ff0000;
+}
+
+/* dark mode root */
+/* :root {
+    --bg-color: #1a1a1a;
+    --pbg-color: #1f1f1f;
+    --text-color: #f2f2f2;
+    --button-color: #ff8c00;
+    --border-color: #333;
+    --muted-color: #bbb;
+    --link-color: #4d9eff;
+} */
+
 html {
     font-size: 16px;
 }
@@ -19,6 +41,7 @@ body {
     font-family: "Nunito", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
+    background-color: var(--bg-color);
 }
 
 a {
@@ -31,13 +54,14 @@ a {
     align-items: center;
     justify-content: space-between;
     padding: 1rem 3.5rem;
+    background-color: var(--pbg-color);
 }
 
 #logo {
     display: flex;
     align-items: center;
     gap: 5px;
-    color: #000;
+    color: var(--text-color);
 }
 
 #logo-img {
@@ -76,16 +100,16 @@ a {
 }
 
 #login {
-    color: #1682FD;
-    background-color: #EAEAEA;
+    color: var(--link-color);
+    background-color: var(--border-color);
     i {
-        background-color: #1682FD;
+        background-color: var(--link-color);
     }
 }
 
 #login:hover {
-    color: #EAEAEA;
-    background-color: #1682FD; 
+    color: var(--border-color);
+    background-color: var(--link-color); 
     i {
         background-color: #fff;
     }
@@ -95,7 +119,7 @@ a {
 #logout,
 #register {
     color: #fff;
-    background-color: #f48023;
+    background-color: var(--button-color);
 }
 
 #create:hover,
@@ -114,21 +138,23 @@ a {
     margin-right: 8px;
 }
 
-.navbar {
+/* .navbar {
     border-bottom: 1px solid #f0f0f0;
-}
+} */
 
 .container {
+    height: 92vh;
     display: grid;
     grid-template-columns: 1fr 3fr 1fr;
-    background-color: #FAFAFA;
+    background-color: var(--bg-color);
 }
 
 .sidebar {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background-color: #fff;
+    color: var(--text-color);
+    background-color: var(--pbg-color);
     padding: 2.5rem 0;
 }
 
@@ -137,7 +163,7 @@ a {
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #808080;
+    color: var(--muted-color);
     margin: 10px 40px;
 }
 
@@ -165,17 +191,17 @@ a {
 
 .active,
 .menu-select:hover {
-    color: #f48023;
-    border-color: #f48023;
+    color: var(--button-color);
+    border-color: var(--button-color);
     background-color: #FCF4EC;
     i {
-        background-color: #f48023;
+        background-color: var(--button-color);
     }
 }
 
 .disable {
-    color: #000 !important;
-    background-color: #fff !important;
+    color: var(--text-color) !important;
+    background-color: var(--white) !important;
     border-color: transparent !important;
 }
 
@@ -196,9 +222,9 @@ a {
 }
 
 .categories li:hover {
-    color: #f48023;
+    color: var(--button-color);
     i {
-        background-color: #f48023;
+        background-color: var(--button-color);
     }
 }
 
@@ -208,30 +234,31 @@ a {
 }
 
 li.activeCat {
-    color: #f48023;
+    color: var(--button-color);;
     i {
-        background-color:#f48023;
+        background-color:var(--button-color);
     }
 }
 
 .main {
-    padding: 2.5rem 3rem;
-    overflow-y: scroll;
-    height: 92vh;
-}
-
-.main::-webkit-scrollbar {
-    display: none;
+    padding: 0 3rem;
 }
 
 .posts-container {
     width: 100%;
-    height: 92vh;
+    height: 91vh;
+    overflow-y: scroll;
+    padding-top: 2.5rem;
+}
+
+.posts-container::-webkit-scrollbar {
+    display: none;
 }
 
 /********** Post **********/
 .post {
-    background-color: white;
+    color: var(--text-color);
+    background-color: var(--pbg-color);
     border-radius: .5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
@@ -249,7 +276,7 @@ li.activeCat {
 }
 
 .post-content>h3:hover {
-    color: #f48023;
+    color: var(--button-color);
 }
 
 .user-info {
@@ -293,8 +320,8 @@ li.activeCat {
 .tag {
     font-size: 0.8em;
     font-family: 'Courier New', Courier, monospace;
-    color: #808080;
-    background-color: #EAEAEA;
+    color: var(--muted-color);
+    background-color: var(--border-color);
     padding: 5px 10px;
     border-radius: 5px;
 }
@@ -308,7 +335,7 @@ li.activeCat {
 }
 
 .post-stats i {
-    background-color: #808080;
+    background-color: var(--muted-color);
     cursor: pointer;
 }
 
@@ -431,7 +458,7 @@ li.activeCat {
 
 .comment .content {
     padding-bottom: .5rem;
-    border-bottom: 1px solid #EAEAEA;
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: .5rem;
 }
 
@@ -446,7 +473,8 @@ li.activeCat {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    background-color: white;
+    color: var(--text-color);
+    background-color: var(--pbg-color);
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     height: fit-content;
@@ -466,7 +494,7 @@ li.activeCat {
     font-size: 1.25rem;
     text-align: center;
     padding: 1rem 0;
-    border-top: 1px solid #EAEAEA;
+    border-top: 1px solid var(--border-color);
 }
 
 .section-title {
@@ -476,7 +504,7 @@ li.activeCat {
     align-items: center;
     padding-bottom: 7px;
     margin-bottom: 12px;
-    border-bottom: 1px solid #EAEAEA;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .section-title i {
@@ -519,6 +547,7 @@ a:hover {
     flex-direction: column;
     gap: 1.25rem;
     padding: 30px 40px;
+    margin-top: 2.5rem;
 }
 
 input[type="text"],
@@ -564,7 +593,7 @@ textarea {
 }
 
 .btn-publish {
-    background-color: #f48023;
+    background-color: var(--button-color);
 }
 
 .btn-publish:hover {
@@ -676,7 +705,7 @@ input[type="text"]:focus,
 input[type="text"]:hover,
 textarea:focus, 
 textarea:hover {
-    border-color: #F48023;
+    border-color: var(--button-color);
 }
 
 /* icons */
@@ -693,12 +722,12 @@ i {
 .tags-stats i {
     width: 18px;
     height: 18px;
-    background-color: #808080;
+    background-color: var(--muted-color);
 }
 
 .sidebar i, 
 .widget i {
-    background-color: #000;
+    background-color: var(--text-color);
 }
 
 .widget i {
@@ -707,12 +736,13 @@ i {
 }
 
 .read-more {
+    color: #333;
     font-size: .85rem;
     cursor: pointer;
 }
 
 .read-more:hover {
-    color: #f48023
+    color: var(--button-color);
 }
 
 /* pop-up */
