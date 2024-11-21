@@ -34,8 +34,6 @@
 
                 <button id="submit" type="submit">register</button>
             </form>
-            <p id="success"></p>
-            <p id="errorMessage" class="error"></p>
         </div>
         <div class="register showcase-img"></div>
     </div>
@@ -46,6 +44,10 @@
             .addEventListener("submit", async function (e) {
                 e.preventDefault();
 
+                document.getElementById('errorMessage')?.remove()
+                document.getElementById('success')?.remove()
+                const form = document.querySelector('.form-container')
+                const messageDiv = document.createElement('p')
                 const email = document.querySelector("input[name='email']").value;
                 const username = document.querySelector(
                     "input[name='username']"
@@ -53,7 +55,6 @@
                 const password = document.querySelector(
                     "input[name='password']"
                 ).value;
-                const errorMessage = document.getElementById("errorMessage");
 
                 try {
                     const response = await fetch("/auth/register", {
@@ -64,32 +65,32 @@
                         body: JSON.stringify({ email, username, password }),
                     });
 
+                    messageDiv.classList.add('message')
                     if (response.ok) {
-                        document.getElementById('errorMessage')?.remove();
-                        document.getElementById('success').textContent = 'Registered Successfully'
+                        messageDiv.id = 'success'
+                        messageDiv.textContent = 'Registered Successfully'
                         setTimeout(() => location.href = "/", 700);
                     } else {
+                        messageDiv.id = 'errorMessage'
                         const result = await response.json();
+                        console.error(result)
                         if (result.msg === 'credentials already exists') {
-                            errorMessage.innerHTML = 'User exists with that Username of Email'
-                        } else if (result.msg === 'Invalid email format') {
-                            errorMessage.innerHTML = 'Invalid email format'
+                            messageDiv.innerHTML = 'User exists with that Username or Email'
                         } else if (result.msg === 'Invalid password format') {
-                            errorMessage.innerHTML = `Your password needs to:
+                            messageDiv.innerHTML = `Your password needs to:
                         <ul>
                             <li>Include both lower and upper case characters.</li>
                             <li>Include at least one number and symbol.</li>
                             <li>Password must be between 8 and 21 characters long.</li>
                         </ul>`
-                        }else if(result.msg == 'Internal Server Error'){
-                            location.href = "/error.html"
                         } else {
-                            errorMessage.innerHTML = `${result.msg}`
+                            messageDiv.innerHTML = result.msg
                         }
                     }
+                    form.append(messageDiv)
                 } catch (err) {
                     console.error("Error during registration:", err);
-                 }
+                }
             });
 
     const togglePassword = () => {

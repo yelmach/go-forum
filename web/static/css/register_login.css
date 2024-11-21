@@ -160,7 +160,7 @@ input {
     font-size: 0.95rem;
     display: block;
     width: 100%;
-    padding: 0.9rem 1.5rem;
+    padding: .9rem 3.6rem .9rem 1.5rem;
     border: 2px solid #EAEAEA;
     border-radius: 5px;
     outline: none;
@@ -195,15 +195,17 @@ input:hover {
     border-color: transparent;
 }
 
+.message {
+    font-weight: 400;
+    font-size: .95rem;
+}
+
 #success {
     color: #1a8754;
-    font-weight: 400;
 }
 
 #errorMessage {
     color: #f00;
-    font-weight: 400;
-    font-size: .95rem;
 }
 
 #errorMessage ul {
@@ -213,14 +215,6 @@ input:hover {
     list-style: square;
     list-style-position: inside;
     margin-top: 1rem;
-}
-
-#errorMessage a {
-    color: #000;
-}
-
-#errorMessage a:hover {
-    color: #f48023
 }
 
 /********** Register **********/
