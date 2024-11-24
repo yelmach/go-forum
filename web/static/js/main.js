@@ -375,9 +375,9 @@ const recentPosts = async () => {
 }
 
 const createdPosts = async () => {
+    await loadData();
     const username = getCookie("username");
     const posts = data.allPosts.filter(post => post.by == username)
-    await loadData();
     widgetBack();
     displayPosts(posts);
     document.getElementById('select_2').classList.add('active');
@@ -393,8 +393,8 @@ const likedPosts = async () => {
 }
 
 const filterByCategory = async (category) => {
-    const posts = data.allPosts.filter(post => post.categories.includes(category))
     await loadData();
+    const posts = data.allPosts.filter(post => post.categories.includes(category))
     widgetBack();
     displayPosts(posts);
     document.getElementById(category).classList.add('activeCat');

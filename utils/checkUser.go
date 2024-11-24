@@ -21,12 +21,26 @@ func CheckUserExist(user models.User) error {
 	return nil
 }
 
+// CheckUsernameFormat checks username format if it's valid
+func CheckUsernameFormat(username string) (bool, error) {
+	if len(username) < 3 || len(username) > 20 {
+		return false, nil
+	}
+
+	valid, err := regexp.MatchString(`^\S\w+$`, username)
+	if err != nil || !valid {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // CheckEmailFormat checks email format if it is valid
 func CheckEmailFormat(email string) (bool, error) {
 	if len(email) > 60 {
 		return false, nil
 	}
-	isValid, err := regexp.MatchString(`\w+@[a-z]+\.[a-z]+`, email)
+	isValid, err := regexp.MatchString(`(?i)^\w+@\w+.[a-z]+`, email)
 	if err != nil {
 		return false, err
 	} else if !isValid {
@@ -37,7 +51,7 @@ func CheckEmailFormat(email string) (bool, error) {
 
 // CheckPasswordFormat checks if password written correct
 func CheckPasswordFormat(password string) bool {
-	if len(password) < 8 || len(password) > 21 {
+	if len(password) < 8 || len(password) > 20 {
 		return false
 	}
 	isSpecial := regexp.MustCompile(`[^\w\s]`)
@@ -45,20 +59,4 @@ func CheckPasswordFormat(password string) bool {
 	isUpper := regexp.MustCompile(`[A-Z]`)
 	isDigit := regexp.MustCompile(`[0-9]`)
 	return isLower.MatchString(password) && isUpper.MatchString(password) && isDigit.MatchString(password) && isSpecial.MatchString(password)
-}
-
-func CheckUsernamelength(username string) (bool, error) {
-	if len(username) > 20 {
-		return false, nil
-	}
-
-	valid, err := regexp.MatchString(`^\S\w+$`, username)
-	if err != nil {
-		return false, err
-	}
-
-	if !valid {
-		return false, nil
-	}
-	return true, nil
 }

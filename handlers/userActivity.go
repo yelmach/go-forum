@@ -77,7 +77,7 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if postId := utils.IspostId(comment.PostId); !postId {
+	if postId := utils.ExistsPost(comment.PostId); !postId {
 		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
 		return
 	}

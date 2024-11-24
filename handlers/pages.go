@@ -15,27 +15,29 @@ type Tempaltes struct {
 }
 
 var (
-	TemplateError error
-	templates     Tempaltes
+	homeTemplateError     error
+	registerTemplateError error
+	loginTemplateError    error
+	templates             Tempaltes
 )
 
 // parse all tamplates at once in the beggining of the program
 func init() {
-	templates.Root, TemplateError = template.ParseFiles(
+	templates.Root, homeTemplateError = template.ParseFiles(
 		"./web/templates/index.html",
 		"./web/templates/components/guest_navbar.html",
 		"./web/templates/components/guest_sidebar.html",
 		"./web/templates/components/logged_navbar.html",
 		"./web/templates/components/logged_sidebar.html",
 	)
-	templates.Register, TemplateError = template.ParseFiles("./web/templates/register.html")
-	templates.Login, TemplateError = template.ParseFiles("./web/templates/login.html")
+	templates.Register, registerTemplateError = template.ParseFiles("./web/templates/register.html")
+	templates.Login, loginTemplateError = template.ParseFiles("./web/templates/login.html")
 }
 
 // HomeHandler it handles requests to home page "/"
 // execute the home page and show it to the user
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	if TemplateError != nil {
+	if homeTemplateError != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
@@ -88,7 +90,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 // RegisterHandler it handles requests to register page "/register"
 // parse the register page and show it to the user
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	if TemplateError != nil {
+	if registerTemplateError != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
@@ -107,7 +109,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 // RegisterHandler it handles requests to login page "/login"
 // parse the login page and show it to the user
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	if TemplateError != nil {
+	if loginTemplateError != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}

@@ -25,9 +25,9 @@
             <h2>We've missed you!</h2>
             <p>More than 120 questions are waiting for your wise suggestions!</p>
             <form id="loginForm">
-                <input type="text" name="username" placeholder="Username or Email" required />
+                <input type="text" name="username" minlength="3" maxlength="60" placeholder="Username or Email" required />
                 <div>
-                    <input type="password" name="password" placeholder="Password" required/>
+                    <input type="password" name="password" minlength="8" maxlength="20" placeholder="Password" required/>
                     <i class="eye-icon" onclick="togglePassword()"></i>
                 </div>
 
@@ -72,6 +72,7 @@
                     } else {
                         const result = await response.json();
                         console.error("Login failed:", result.msg);
+                        console.error(result)
                         messageDiv.id = 'errorMessage'
                         messageDiv.textContent = 'Username or Password Incorrect'
                     }

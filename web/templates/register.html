@@ -25,10 +25,10 @@
             <h2>Join 01Forum community</h2>
             <p>Get more features and priviliges by joining to the most helpful community</p>
             <form id="registerForm">
-                <input type="text" name="username" placeholder="Username" required />
-                <input type="email" name="email" placeholder="Email" required />
+                <input type="text" name="username" minlength="3" maxlength="20" placeholder="Username" required />
+                <input type="email" name="email" minlength="6" maxlength="60" placeholder="Email" required />
                 <div>
-                    <input type="password" name="password" placeholder="Password" required />
+                    <input type="password" name="password" minlength="8" maxlength="20" placeholder="Password" required />
                     <i class="eye-icon" onclick="togglePassword()"></i>
                 </div>
 

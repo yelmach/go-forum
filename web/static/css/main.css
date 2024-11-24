@@ -771,11 +771,20 @@ i {
 }
 
 .figure {
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+#sign {
     width: 400px;
     height: 350px;
     background-image: url('/assets/img/sign-up-form.svg');
-    background-size: cover;
-    background-repeat: no-repeat;
+}
+
+#nojs {
+    width: 420px;
+    height: 320px;
+    background-image: url('/assets/img/sad.svg');
 }
 
 .popup-content > div {
