@@ -33,6 +33,15 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	valid, err := utils.CheckUsernamelength(user.Username)
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		return
+	} else if !valid {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid username format", Code: http.StatusBadRequest})
+		return
+	}
+
 	// check user if exist
 	if err := utils.CheckUserExist(user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
