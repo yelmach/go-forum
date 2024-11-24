@@ -52,10 +52,11 @@ func CheckUsernamelength(username string) (bool, error) {
 		return false, nil
 	}
 
-	valid, err := regexp.MatchString(`^\S*$`, username)
+	valid, err := regexp.MatchString(`/^\S\w+$`, username)
 	if err != nil {
 		return false, err
 	}
+
 	if !valid {
 		return false, nil
 	}
