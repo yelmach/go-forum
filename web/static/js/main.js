@@ -102,10 +102,11 @@ const createCommentElement = (comment) => {
 const getPostData = async (postId) => {
     try {
         const response = await fetch(`/api/posts/${postId}`);
+        const res = await response.json();
+
         if (response.ok) {
-            return response.json();
+            return res
         } else {
-            const res = await response.json();
             console.error(res.msg)
         }
     } catch (err) {
@@ -203,19 +204,16 @@ const openPost = async (postId) => {
             } else {
                 const res = await response.json();
                 console.error(res.msg);
-                if(res.msg == 'You can only post once every  20 seconds'){
-                    document.getElementById("loginPopup").style.display = "block";
+                document.getElementById("loginPopup").style.display = "block";
+                if (res.msg != "unauthorized user") {
                     document.querySelector(".popup-content").innerHTML = `
                     <h2>Nice try!</h2>
                     <ul>
-                        <li>It's required to write a title (max 50 character) and the content (max 2000 character) for your new post</li>
-                        <li>You can only post once every  20 seconds</li>
+                        <li>You can only comment once every 20 seconds.</li>
                     </ul>
                     `
                 }
-                else{
-                    document.getElementById("loginPopup").style.display = "block";
-                }
+                
             }
         } catch (err) {
             console.error(err)
@@ -304,7 +302,7 @@ const dislikeAction = async (id, isPost) => {
 }
 
 const timeAgo = (time) => {
-    const seconds = Math.floor((Date.now()) - time) / 1000;
+    const seconds = Math.floor(Date.now() - time) / 1000;
     const intervals = {
         year: 31536000,
         month: 2592000,
