@@ -9,10 +9,12 @@ import (
 	"forum/models"
 )
 
-func getReaction(Id int, ispost bool) ([]int, []int, int, error) {
+// getReaction gets user id of users that do like or dislike action
+// from reactions table by (post/comment id)
+func getReaction(Id int, isPost bool) ([]int, []int, int, error) {
 	var queryLikes, queryDislikes string
 
-	switch ispost {
+	switch isPost {
 	case true:
 		queryLikes = `SELECT user_id FROM reactions WHERE post_id=? AND is_like=1`
 		queryDislikes = `SELECT user_id FROM reactions WHERE post_id=? AND is_like=0`
@@ -20,6 +22,7 @@ func getReaction(Id int, ispost bool) ([]int, []int, int, error) {
 		queryLikes = `SELECT user_id FROM reactions WHERE comment_id=? AND is_like=1`
 		queryDislikes = `SELECT user_id FROM reactions WHERE comment_id=? AND is_like=0`
 	}
+
 	userlikes, statuscode, err := getUsersIds(queryLikes, Id)
 	if err != nil {
 		return []int{}, []int{}, statuscode, err
@@ -33,6 +36,7 @@ func getReaction(Id int, ispost bool) ([]int, []int, int, error) {
 	return userlikes, userdislikes, http.StatusOK, nil
 }
 
+// getUsersIds gets user id of users that do like or dislike action on a post or comment
 func getUsersIds(query string, Id int) ([]int, int, error) {
 	usersIds := []int{}
 	rows, err := database.DataBase.Query(query, Id)
@@ -57,22 +61,22 @@ func getUsersIds(query string, Id int) ([]int, int, error) {
 	return usersIds, http.StatusOK, nil
 }
 
+// getUsername gets username from users table by user id
 func getUsername(userId int) (string, int, error) {
 	var username string
-	query := `SELECT username FROM users WHERE id=?`
 
-	err := database.DataBase.QueryRow(query, userId).Scan(&username)
-	if err != nil {
+	query := `SELECT username FROM users WHERE id=?`
+	if err := database.DataBase.QueryRow(query, userId).Scan(&username); err != nil {
 		if err == sql.ErrNoRows {
 			return "", http.StatusNotFound, fmt.Errorf("no rows found: %v", err)
 		} else {
 			return "", http.StatusInternalServerError, fmt.Errorf("internal Server Error")
 		}
 	}
-
 	return username, http.StatusOK, nil
 }
 
+// getPostComments gets all comments from comments table by post id
 func getPostComments(postId int) ([]models.CommentApi, int, error) {
 	comments := []models.CommentApi{}
 
@@ -92,8 +96,7 @@ func getPostComments(postId int) ([]models.CommentApi, int, error) {
 		var userId int
 		var statuscode int
 
-		err := dbComments.Scan(&comment.Id, &userId, &comment.Content, &comment.CreatedAt)
-		if err != nil {
+		if err := dbComments.Scan(&comment.Id, &userId, &comment.Content, &comment.CreatedAt); err != nil {
 			return []models.CommentApi{}, http.StatusInternalServerError, err
 		}
 
@@ -112,10 +115,11 @@ func getPostComments(postId int) ([]models.CommentApi, int, error) {
 	return comments, http.StatusOK, nil
 }
 
+// getPostCategories gets all categories that assosiated to a post by post id
 func getPostCategories(postId int) ([]string, int, error) {
 	categories := []string{}
-	query := `SELECT category_id FROM post_categories WHERE post_id=?`
 
+	query := `SELECT category_id FROM post_categories WHERE post_id=?`
 	queryRow, err := database.DataBase.Query(query, postId)
 	if err != nil {
 		if err == sql.ErrNoRows {

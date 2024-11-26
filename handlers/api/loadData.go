@@ -7,11 +7,18 @@ import (
 	"strconv"
 
 	"forum/database"
+	"forum/handlers"
 	"forum/models"
 	"forum/utils"
 )
 
+// LoadPostData gets data of one post from database and send it to js
 func LoadPostData(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	var post models.PostApi
 	var userId int
 	statuscode := 0
@@ -63,14 +70,20 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(post)
 }
 
+// LoadData gets all data from database and send it to js as a json format
 func LoadData(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	dbPosts, err := database.DataBase.Query(`SELECT id, user_id, title, content, image_url, created_at FROM posts ORDER BY created_at DESC`)
+	if err == sql.ErrNoRows {
+		utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
+		return
+	}
 	if err != nil {
-		if err == sql.ErrNoRows {
-			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
-		} else {
-			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-		}
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 		return
 	}
 	defer dbPosts.Close()
@@ -82,8 +95,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		var userId int
 		var statuscode int
 
-		err := dbPosts.Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt)
-		if err != nil {
+		if err := dbPosts.Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 			return
 		}
@@ -125,7 +137,13 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(posts)
 }
 
+// LoadAllCategories gets all categories from database and send it to js
 func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+	
 	dbCategories, err := database.DataBase.Query(`SELECT name FROM categories`)
 	if err != nil {
 		if err == sql.ErrNoRows {

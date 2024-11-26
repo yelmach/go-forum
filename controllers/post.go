@@ -7,6 +7,7 @@ import (
 	"forum/models"
 )
 
+// CreatePost stores content of the post, and relation between posts and categories.
 func CreatePost(post models.Post) error {
 	res, err := database.DataBase.Exec(`INSERT INTO posts(user_id, title, content, image_url) VALUES(?, ?, ?, ?)`, post.UserId, post.Title, post.Content, post.ImageUrl)
 	if err != nil {
@@ -24,20 +25,21 @@ func CreatePost(post models.Post) error {
 			return err
 		}
 		if _, err := database.DataBase.Exec(`INSERT INTO post_categories(post_id, category_id) VALUES(?, ?)`, postId, categoryId); err != nil {
-			return fmt.Errorf("error linking post to category %s: %w", category, err)
+			return fmt.Errorf("error linking post to a category %s: %w", category, err)
 		}
 	}
-
 	return nil
 }
 
+// CreateComment stores the comment in the database
 func CreateComment(comment models.Comment) error {
 	if _, err := database.DataBase.Exec(`INSERT INTO comments(post_id, user_id, content) VALUES(?, ?, ?)`, comment.PostId, comment.UserId, comment.Content); err != nil {
-		return fmt.Errorf("error executing statement: %w", err)
+		return err
 	}
 	return nil
 }
 
+// CreateReaction stores the reaction in the database
 func CreateReaction(r models.Reaction) error {
 	liked, disliked := false, false
 	isPost := r.PostId != 0
@@ -61,7 +63,6 @@ func CreateReaction(r models.Reaction) error {
 				return fmt.Errorf("error executing statement: %w", err)
 			}
 		}
-
 	} else {
 		if err := database.DataBase.QueryRow(`SELECT EXISTS(SELECT is_like FROM reactions WHERE user_id=? AND comment_id=? AND is_like=1)`, r.UserId, r.CommentId).Scan(&liked); err != nil {
 			return err

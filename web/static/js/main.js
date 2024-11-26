@@ -11,9 +11,9 @@ const loadData = async () => {
 };
 
 const init = async () => {
-    await loadData();
     const categContainer = document.querySelector('.categories');
 
+    await loadData();
     for (const category of data.allCategories) {
         const categoryElem = document.createElement('li')
         categoryElem.id = category;
@@ -43,12 +43,12 @@ const createPostElement = (post) => {
         </div>
     </div>
     <div class="post-content">
-        <h3 onclick="openPost(${post.id})">${post.title}</h3>
-        <p>${post.content.replace(/\n/g, "<br>")}</p>
+        <h3 onclick="openPost(${post.id})">${filterContent(post.title)}</h3>
+        <p>${filterContent(post.content.split('\n')[0]).slice(0, 200)}${((post.content.match(/\n/g) && post.content.match(/\n/g).length > 2) || post.content.length > 200) ? `... <span class="read-more" onclick="openPost(${post.id})">Read-More</span>` : ''}</p>
     </div>
     <div class="tags-stats">
         <div class="tags">
-            ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('\n')}
+            ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('')}
         </div>
         <div class="post-stats">
             <div class="stat${likeActive}">
@@ -83,15 +83,15 @@ const createCommentElement = (comment) => {
         </div>
     </div>
     <div class="content">
-        <p>${comment.content}</p>
+        <p>${filterContent(comment.content)}</p>
     </div>
     <div class="tags-stats">
         <div class="post-stats">
-            <div class="stat">
-                <i class="ri-thumb-up-line${likeActive}" onclick="likeAction(${comment.id}, false)"></i><span class="${likeActive}">${comment.likes.length}</span>
+            <div class="stat${likeActive}">
+                <i class="like-icon" onclick="likeAction(${comment.id}, false)"></i><span>${comment.likes.length}</span>
             </div>
-            <div class="stat">
-                <i class="ri-thumb-down-line dislike${dislikeActive}" onclick="dislikeAction(${comment.id}, false)"></i><span class="${dislikeActive}">${comment.dislikes.length}</span>
+            <div class="stat${dislikeActive}">
+                <i class="dislike-icon dislike" onclick="dislikeAction(${comment.id}, false)"></i><span>${comment.dislikes.length}</span>
             </div>
         </div>
     </div>
@@ -102,31 +102,60 @@ const createCommentElement = (comment) => {
 const getPostData = async (postId) => {
     try {
         const response = await fetch(`/api/posts/${postId}`);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
+        if (response.ok) {
+            return response.json();
+        } else {
+            const res = await response.json();
+            console.error(res.msg)
         }
-
-        return response.json();
-    } catch (error) {
-        console.error(error.message);
+    } catch (err) {
+        console.error(err);
     }
 }
 
 const openPost = async (postId) => {
     const post = await getPostData(postId);
-    const main = document.querySelector('.main');
+    const postsContainer = document.querySelector('.posts-container');
     const widget = document.querySelector('.widget');
     const comments = document.createElement('div');
+    const userId = parseInt(getCookie("user_id"));
+    const likeActive = post.likes.includes(userId) ? ' liked' : ''
+    const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
+    
     comments.classList.add('comments');
+    postsContainer.innerHTML = `
+    <div class="post" data-id="${postId}">
+        <div class="user-info">
+            <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
+            <div>
+                <div class="username">${post.by}</div>
+                <div class="timestamp">${timeAgo(new Date(post.createdAt).getTime())}</div>
+            </div>
+        </div>
+        <div class="post-content">
+            <h2>${filterContent(post.title)}</h2>
+            <p>${filterContent(post.content)}</p>
+        </div>
+        <div class="tags-stats">
+            <div class="tags">
+                ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>
+            <div class="post-stats">
+                <div class="stat${likeActive}">
+                    <i class="like-icon" onclick="likeAction(${post.id}, true)"></i><span>${post.likes.length}</span>
+                </div>
+                <div class="stat${dislikeActive}">
+                    <i class="dislike-icon dislike" onclick="dislikeAction(${post.id}, true)"></i><span>${post.dislikes.length}</span>
+                </div>
+                <div class="stat">
+                    <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    for (const comment of post.comments) {
-        const commentDiv = createCommentElement(comment);
-        comments.append(commentDiv);
-    }
-    main.innerHTML = createPostElement(post).outerHTML;
-    main.innerHTML += `
-    <div class="comment-box">
-        <textarea class="comment-input" placeholder="Type here your wise suggestion"></textarea>
+    <form id="commentForm" class="comment-box">
+        <textarea class="comment-input" placeholder="Type here your wise suggestion" required></textarea>
         <div class="button-group">
             <button class="btn btn-cancel">Cancel</button>
             <button class="btn btn-comment">
@@ -135,16 +164,24 @@ const openPost = async (postId) => {
         </div>
     </div>
     `
+
     widget.innerHTML = `
     <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">
     <p class="username">@${post.by}</p>
     `
-    main.append(comments);
+
+    for (const comment of post.comments) {
+        const commentDiv = createCommentElement(comment);
+        comments.append(commentDiv);
+    }
+    postsContainer.append(comments);
 
     document.querySelector('.btn-cancel').onclick = () => {
         document.querySelector('.comment-input').value = '';
     };
-    document.querySelector('.btn-comment').onclick = async () => {
+    document.getElementById('commentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
         const commentArea = document.querySelector('.comment-input');
         const content = commentArea.value;
         commentArea.value = '';
@@ -154,16 +191,36 @@ const openPost = async (postId) => {
             commentArea.style.setProperty('--placeholder-color', 'red');
             return
         }
+
         try {
-            await fetch("/newcomment", {
+            const response = await fetch("/newcomment", {
                 method: "POST",
                 body: JSON.stringify({ postId, content })
             })
-            openPost(postId);
+            
+            if (response.ok) {
+                openPost(postId);
+            } else {
+                const res = await response.json();
+                console.error(res.msg);
+                if(res.msg == 'You can only post once every  20 seconds'){
+                    document.getElementById("loginPopup").style.display = "block";
+                    document.querySelector(".popup-content").innerHTML = `
+                    <h2>Nice try!</h2>
+                    <ul>
+                        <li>It's required to write a title (max 50 character) and the content (max 2000 character) for your new post</li>
+                        <li>You can only post once every  20 seconds</li>
+                    </ul>
+                    `
+                }
+                else{
+                    document.getElementById("loginPopup").style.display = "block";
+                }
+            }
         } catch (err) {
             console.error(err)
         }
-    };
+    })
 }
 
 const displayPosts = (posts) => {
@@ -178,7 +235,6 @@ const displayPosts = (posts) => {
         `
     } else {
         for (const post of posts) {
-            // console.log(post.content)
             const postDiv = createPostElement(post);
             postsContainer.append(postDiv);
         }
@@ -186,22 +242,34 @@ const displayPosts = (posts) => {
     }
 }
 
+const getPostId = () => {
+    return document.querySelector('.post').dataset.id
+}
+
+const closedPost = () => {
+    return document.querySelector('.comment-box') == undefined
+}
+
 const likeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isLike: true } : { commentId: id, isLike: true }
     try {
-        await fetch("/reaction", {
+        const response = await fetch("/reaction", {
             method: "POST",
             body: JSON.stringify(reqData)
         })
-        if (isPost) {
-            const post = await getPostData(id);
-            const postDiv = document.querySelector(`.post[data-id="${id}"]`)
-            postDiv.innerHTML = createPostElement(post).innerHTML;
+        if (response.ok) {
+            if (isPost && closedPost()) {
+                const post = await getPostData(id);
+                const postDiv = document.querySelector(`.post[data-id="${id}"]`)
+                postDiv.innerHTML = createPostElement(post).innerHTML;
+            } else {
+                const postId = getPostId();
+                openPost(postId);
+            }
         } else {
-            const postId = function(){
-                return document.querySelector('.post').dataset.id
-            }();
-            openPost(postId);
+            const res = await response.json();
+            console.error(res);
+            document.getElementById("loginPopup").style.display = "block";
         }
     } catch (err) {
         console.error(err)
@@ -211,20 +279,25 @@ const likeAction = async (id, isPost) => {
 const dislikeAction = async (id, isPost) => {
     const reqData = isPost ? { postId: id, isDislike: true } : { commentId: id, isDislike: true }
     try {
-        await fetch("/reaction", {
+        const response = await fetch("/reaction", {
             method: "POST",
             body: JSON.stringify(reqData)
         })
-        if (isPost) {
-            const post = await getPostData(id);
-            const postDiv = document.querySelector(`.post[data-id="${id}"]`)
-            postDiv.innerHTML = createPostElement(post).innerHTML;
+        if (response.ok) {
+            if (isPost && closedPost()) {
+                const post = await getPostData(id);
+                const postDiv = document.querySelector(`.post[data-id="${id}"]`)
+                postDiv.innerHTML = createPostElement(post).innerHTML;
+            } else {
+                const postId = getPostId();
+                openPost(postId);
+            }
         } else {
-            const postId = function(){
-                return document.querySelector('.post').dataset.id
-            }();
-            openPost(postId);
+            const res = await response.json();
+            console.error(res);
+            document.getElementById("loginPopup").style.display = "block";
         }
+
     } catch (err) {
         console.error(err)
     }
@@ -247,6 +320,22 @@ const timeAgo = (time) => {
         }
     }
     return 'just now';
+}
+
+const escapeHtml = (unsafe) => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+const filterContent = (content) => {
+    return escapeHtml(content)
+        .replace(/&lt;pre&gt;/g, '<pre>')
+        .replace(/&lt;\/pre&gt;/g, '</pre>')
+        .replace(/\n/g, '<br>')
 }
 
 function getCookie(name) {
@@ -272,8 +361,8 @@ const widgetBack = () => {
             Must-read posts
         </h2>
         <ul>
-            <li><a href="#">Please read rules before you start working on a platform</a></li>
-            <li><a href="#">Vision & Strategy of AIemhelp</a></li>
+            <li><a href="#" target="_blank">Please read rules before you start using our platform</a></li>
+            <li><a href="https://www.paypal.com/paypalme/outiskteanas" target="_blank">Donate for 01Forum</a></li>
         </ul>
     </div>
     <div class="section">
@@ -282,9 +371,9 @@ const widgetBack = () => {
             Featured links
         </h2>
         <ul>
-            <li><a href="#">AIemhelp source-code on GitHub</a></li>
-            <li><a href="#">Golang best-practices</a></li>
-            <li><a href="#">AIem School dashboard</a></li>
+            <li><a href="https://github.com/ANAS-OU/go_forum" target="_blank">01Forum source-code on GitHub</a></li>
+            <li><a href="https://medium.com/@golangda/golang-quick-reference-top-20-best-coding-practices-c0cea6a43f20" target="_blank">Golang best-practices</a></li>
+            <li><a href="https://zone01oujda.ma/" target="_blank">Zone01-Oujda Company</a></li>
         </ul>
     </div>
     `
@@ -298,9 +387,9 @@ const recentPosts = async () => {
 }
 
 const createdPosts = async () => {
+    await loadData();
     const username = getCookie("username");
     const posts = data.allPosts.filter(post => post.by == username)
-    await loadData();
     widgetBack();
     displayPosts(posts);
     document.getElementById('select_2').classList.add('active');
@@ -316,8 +405,8 @@ const likedPosts = async () => {
 }
 
 const filterByCategory = async (category) => {
-    const posts = data.allPosts.filter(post => post.categories.includes(category))
     await loadData();
+    const posts = data.allPosts.filter(post => post.categories.includes(category))
     widgetBack();
     displayPosts(posts);
     document.getElementById(category).classList.add('activeCat');
@@ -367,7 +456,7 @@ const newPost = () => {
     const selectAllBtn = document.getElementById('selectAll');
     const newPostForm = document.getElementById('newPostForm');
 
-    function renderTags() {
+    const renderTags = () => {
         selectedTagsContainer.innerHTML = selectedTags.map(tag => `
             <span class="tag">
                 ${tag}
@@ -425,13 +514,16 @@ const newPost = () => {
             selectedTags = [...tags];
         }
         renderTags();
-    });
+    });jsdhjvhsd
+   
+    newPostForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    newPostForm.addEventListener("submit", async () => {
         const title = document.querySelector('input[name="title"]').value;
         const content = document.querySelector('textarea[name="content"]').value;
+        console.log(title, content)
         try {
-            await fetch('/newpost', {
+            const response = await fetch('/newpost', {
                 method: 'POST',
                 body: JSON.stringify({
                     Title: title,
@@ -439,7 +531,21 @@ const newPost = () => {
                     Categories: selectedTags
                 })
             })
-            // location.href = "/";
+            if (response.ok) {
+                location.href = "/";
+            } else {
+                const res = await response.json();
+                console.error(res);
+                document.getElementById("loginPopup").style.display = "block";
+                document.querySelector(".popup-content").innerHTML = `
+                <h2>Nice try!</h2>
+                <ul>
+                    <li>It's required to write a title (max 50 character) and the content (max 2000 character) for your new post</li>
+                    <li>Unknown category or douplicated categories not allowed</li>
+                    <li>You can only post once every 5 minutes</li>
+                </ul>
+                `
+            }
         } catch (err) {
             console.error(err);
         }
@@ -447,6 +553,13 @@ const newPost = () => {
 
     renderTags();
 }
+
+const loginPopup = document.getElementById("loginPopup");
+window.onclick = function(event) {
+    if (event.target == loginPopup) {
+    loginPopup.style.display = "none";
+    }
+};
 
 init();
 console.log(`

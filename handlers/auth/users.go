@@ -14,78 +14,96 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// this func responsible for writing responses to me for debbuging
-
+// RegisterUser handles regestration request
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
 	user := models.User{}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
-	isValidPassword := utils.CheckPasswordFormat(user.Password)
+	// check if the data provided exists
+	if user.Username == "" || user.Email == "" || user.Password == "" {
+		utils.ResponseJSON(w, utils.Resp{Msg: "username, email and password are required", Code: http.StatusBadRequest})
+		return
+	}
+
+	valid, err := utils.CheckUsernameFormat(user.Username)
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		return
+	} else if !valid {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid username format", Code: http.StatusBadRequest})
+		return
+	}
+
+	// check email
 	isValidEmail, err := utils.CheckEmailFormat(user.Email)
 	if err != nil {
 		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
-	}
-
-	if isValidEmail && isValidPassword {
-		if err := controllers.RegisterUser(user); err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
-			return
-		}
-	} else {
-		utils.ResponseJSON(w, utils.Resp{Msg: "invalid format", Code: http.StatusBadRequest})
+	} else if !isValidEmail {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid email format", Code: http.StatusBadRequest})
 		return
 	}
-	HandleLoginAndSession(w, user)
-}
 
-func LoginUser(w http.ResponseWriter, r *http.Request) {
-	user := models.User{}
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
+	// check user if exist
+	if err := utils.CheckUserExist(user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
-	HandleLoginAndSession(w, user)
-}
 
-func LogoutUser(w http.ResponseWriter, r *http.Request) {
-	session_id, err := r.Cookie("session_id")
-	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+	// check password
+	if !utils.CheckPasswordFormat(user.Password) {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid password format", Code: http.StatusBadRequest})
 		return
 	}
 
-	query := `DELETE FROM sessions WHERE session_id=?`
-	if _, err := database.DataBase.Exec(query, session_id.Value); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+	// store user in database
+	if err := controllers.RegisterUser(user); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		return
+	}
+	loginToForum(w, r, user)
+}
+
+// LoginUser it handles login request
+func LoginUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
 		return
 	}
 
-	utils.DeleteCookie(w, "session_id")
-	utils.DeleteCookie(w, "user_id")
-	utils.DeleteCookie(w, "username")
-
-	if r.Header.Get("Accept") == "application/json" {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Logdout successfly", Code: http.StatusOK})
-	} else {
-		http.Redirect(w, r, "/", http.StatusFound)
+	user := models.User{}
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+		return
 	}
+
+	loginToForum(w, r, user)
 }
 
-func HandleLoginAndSession(w http.ResponseWriter, user models.User) {
+// loginToForum logged the user to forum and create a session for that user
+func loginToForum(w http.ResponseWriter, r *http.Request, user models.User) {
+	// check user if exists
 	user, statuscode, err := controllers.LoginUser(user)
-	if err != nil {
+	if statuscode == http.StatusUnauthorized {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
+	} else if err != nil {
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		return
 	}
+
 	// create session
 	id, err := uuid.NewV7()
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	sessionId := id.String()
@@ -93,7 +111,7 @@ func HandleLoginAndSession(w http.ResponseWriter, user models.User) {
 	// store session in database
 	statuscode, err = controllers.StoreSession(w, sessionId, user)
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
+		handlers.ErrorHandler(w, r, statuscode)
 		return
 	}
 
@@ -102,4 +120,34 @@ func HandleLoginAndSession(w http.ResponseWriter, user models.User) {
 	utils.AddCookie(w, "username", user.Username)
 
 	utils.ResponseJSON(w, utils.Resp{Msg: "Logged in", Code: http.StatusOK, SessionId: sessionId})
+}
+
+// LogOutUser it handles log out request
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		return
+	}
+
+	session_id, err := r.Cookie("session_id")
+	if err != nil {
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		return
+	}
+
+	query := `DELETE FROM sessions WHERE session_id=?`
+	if _, err := database.DataBase.Exec(query, session_id.Value); err != nil {
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		return
+	}
+
+	utils.DeleteCookie(w, "session_id")
+	utils.DeleteCookie(w, "user_id")
+	utils.DeleteCookie(w, "username")
+
+	if r.Header.Get("Accept") == "application/json" {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Loggedout successfuly", Code: http.StatusOK})
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
 }

@@ -12,7 +12,7 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, status int) {
 		return
 	}
 
-	var DetelsError struct {
+	var DetailsError struct {
 		Title  string
 		Status int
 		Method string
@@ -21,26 +21,25 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, status int) {
 
 	switch status {
 	case http.StatusNotFound:
-		DetelsError.Title = "Error 404 (Not Found)!!"
+		DetailsError.Title = "Error 404 (Not Found)!!"
 	case http.StatusMethodNotAllowed:
-		DetelsError.Title = "Error 405 (Method Not Allowed)!!"
+		DetailsError.Title = "Error 405 (Method Not Allowed)!!"
 	case http.StatusInternalServerError:
-		DetelsError.Title = "Error 500 (Internal Server Error)!!"
+		DetailsError.Title = "Error 500 (Internal Server Error)!!"
 	case http.StatusCreated:
-		DetelsError.Title = "Error 201 (Status Created)!!"
+		DetailsError.Title = "Error 201 (Status Created)!!"
 	case http.StatusBadRequest:
-		DetelsError.Title = "Error 400 (Status Bad Request)"
+		DetailsError.Title = "Error 400 (Status Bad Request)"
 	case http.StatusBadGateway:
-		DetelsError.Title = "Error 502 (Status Bad Gateway)"
+		DetailsError.Title = "Error 502 (Status Bad Gateway)"
 	}
 
 	w.WriteHeader(status)
-	DetelsError.Status = status
-	DetelsError.Method = r.Method
-	DetelsError.Path = r.URL.Path
-	if err := tem.Execute(w, DetelsError); err != nil {
+	DetailsError.Status = status
+	DetailsError.Method = r.Method
+	DetailsError.Path = r.URL.Path
+	if err := tem.Execute(w, DetailsError); err != nil {
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return
-
 	}
 }
