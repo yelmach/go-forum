@@ -60,13 +60,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		IsLoggedIn = false
 		err = templates.Root.ExecuteTemplate(w, "index.html", IsLoggedIn)
 	} else {
-		count := 0
-		if err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE session_id=?", cookie.Value).Scan(&count); err != nil {
+		var isValid bool
+		if err := database.DataBase.QueryRow("SELECT EXISTS(SELECT * FROM sessions WHERE session_id=?)", cookie.Value).Scan(&isValid); err != nil {
 			ErrorHandler(w, r, http.StatusInternalServerError)
 			return
 		}
 
-		if count == 0 {
+		if !isValid {
 			utils.DeleteCookie(w, "session_id")
 			utils.DeleteCookie(w, "user_id")
 			utils.DeleteCookie(w, "username")

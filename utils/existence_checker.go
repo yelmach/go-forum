@@ -9,3 +9,11 @@ func ExistsPost(postId int) bool {
 	}
 	return true
 }
+
+func ExistsComment(commentId int) bool {
+	isValid := true
+	if err := database.DataBase.QueryRow(`SELECT EXISTS (SELECT * FROM comments WHERE id = ?)`, commentId).Scan(&isValid); err != nil || !isValid {
+		return false
+	}
+	return true
+}

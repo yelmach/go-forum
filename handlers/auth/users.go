@@ -59,7 +59,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check password
-	if isValidPassword := utils.CheckPasswordFormat(user.Password); !isValidPassword {
+	if !utils.CheckPasswordFormat(user.Password) {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid password format", Code: http.StatusBadRequest})
 		return
 	}

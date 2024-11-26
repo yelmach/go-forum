@@ -18,6 +18,11 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if utils.DelayPost() {
+		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every 5 minutes", Code: http.StatusBadRequest})
+		return
+	}
+
 	post := models.Post{}
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
@@ -71,13 +76,20 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if utils.DelayComment() {
+		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every  20 seconds", Code: http.StatusBadRequest})
+		return
+	}
+
 	comment := models.Comment{}
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
-	if postId := utils.ExistsPost(comment.PostId); !postId {
+	defer r.Body.Close()
+
+	if !utils.ExistsPost(comment.PostId) {
 		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
 		return
 	}
@@ -123,6 +135,28 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if (reaction.PostId != 0 && reaction.CommentId != 0) || (reaction.PostId == 0 && reaction.CommentId == 0) {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Either post_id or comment_id must be provided", Code: http.StatusBadRequest})
+		return
+	}
+
+	if !reaction.IsLike && !reaction.IsDislike {
+		utils.ResponseJSON(w, utils.Resp{Msg: "new reaction must be provided", Code: http.StatusBadRequest})
+		return
+	}
+
+	if reaction.PostId != 0 {
+		if !utils.ExistsPost(reaction.PostId) {
+			utils.ResponseJSON(w, utils.Resp{Msg: "Post not found", Code: http.StatusNotFound})
+			return
+		}
+	} else {
+		if !utils.ExistsComment(reaction.CommentId) {
+			utils.ResponseJSON(w, utils.Resp{Msg: "Comment not found", Code: http.StatusNotFound})
+			return
+		}
+	}
+
 	cookie, err := r.Cookie("user_id")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
@@ -132,15 +166,6 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	reaction.UserId, err = strconv.Atoi(cookie.Value)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
-		return
-	}
-
-	if reaction.CommentId == 0 && reaction.PostId == 0 {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Either post_id or comment_id must be provided", Code: http.StatusBadRequest})
-		return
-	}
-	if !reaction.IsLike && !reaction.IsDislike {
-		utils.ResponseJSON(w, utils.Resp{Msg: "new reaction must be provided", Code: http.StatusBadRequest})
 		return
 	}
 

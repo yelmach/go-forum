@@ -203,7 +203,19 @@ const openPost = async (postId) => {
             } else {
                 const res = await response.json();
                 console.error(res.msg);
-                document.getElementById("loginPopup").style.display = "block";
+                if(res.msg == 'You can only post once every  20 seconds'){
+                    document.getElementById("loginPopup").style.display = "block";
+                    document.querySelector(".popup-content").innerHTML = `
+                    <h2>Nice try!</h2>
+                    <ul>
+                        <li>It's required to write a title (max 50 character) and the content (max 2000 character) for your new post</li>
+                        <li>You can only post once every  20 seconds</li>
+                    </ul>
+                    `
+                }
+                else{
+                    document.getElementById("loginPopup").style.display = "block";
+                }
             }
         } catch (err) {
             console.error(err)
@@ -530,6 +542,7 @@ const newPost = () => {
                 <ul>
                     <li>It's required to write a title (max 50 character) and the content (max 2000 character) for your new post</li>
                     <li>Unknown category or douplicated categories not allowed</li>
+                    <li>You can only post once every 5 minutes</li>
                 </ul>
                 `
             }

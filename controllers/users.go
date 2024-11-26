@@ -48,20 +48,20 @@ func LoginUser(user models.User) (models.User, int, error) {
 // StoreSession is designed to save a new user session in a database if it doesn't already exist
 func StoreSession(w http.ResponseWriter, session_id string, user models.User) (int, error) {
 	// check session if already stored
-	var count int
-	err := database.DataBase.QueryRow("SELECT COUNT(*) FROM sessions WHERE user_id = ?", user.Id).Scan(&count)
+	var isValid bool
+	err := database.DataBase.QueryRow("SELECT EXISTS(SELECT * FROM sessions WHERE user_id = ?)", user.Id).Scan(&isValid)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
 
 	switch {
-	case count > 0:
+	case isValid:
 		query := `UPDATE sessions SET session_id = ? WHERE user_id = ?`
 		if _, err := database.DataBase.Exec(query, session_id, user.Id); err != nil {
 			return http.StatusInternalServerError, err
 		}
 		return http.StatusOK, nil
-	case count == 0:
+	case !isValid:
 		query := `INSERT INTO sessions (user_id, session_id) VALUES (?, ?)`
 		if _, err := database.DataBase.Exec(query, user.Id, session_id); err != nil {
 			return http.StatusInternalServerError, err
