@@ -21,3 +21,4 @@ func DelayComment() bool {
 	}
 	return true
 }
+

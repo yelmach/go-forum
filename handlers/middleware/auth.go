@@ -1,13 +1,26 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"sync/atomic"
+	"time"
 
 	"forum/database"
 	"forum/handlers"
 	"forum/utils"
 )
+
+var requestCount uint64
+
+func CounterRequest() {
+	now := time.Now()
+
+	fmt.Println(now.Minute())
+	count := atomic.AddUint64(&requestCount, 1)
+	fmt.Println("count : ", count)
+}
 
 // Middleware allows only users that authenticated to use next handler(add reaction, comment or post)
 func Middleware(next http.HandlerFunc) http.HandlerFunc {
@@ -24,7 +37,6 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
-
 		user_id, err := strconv.Atoi(cookie_user.Value)
 		if err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
@@ -48,6 +60,7 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 			utils.DeleteCookie(w, "username")
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
+		CounterRequest()
 		next.ServeHTTP(w, r)
 	}
 }
