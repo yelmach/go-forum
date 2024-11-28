@@ -6,6 +6,7 @@ import (
 	"forum/handlers/auth"
 )
 
+// Setup Auth Routes
 func SetupAuthRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 

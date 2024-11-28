@@ -5,7 +5,7 @@ import (
 
 	"forum/handlers"
 )
-
+// Setup Assets Routes
 func SetupAssetsRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 

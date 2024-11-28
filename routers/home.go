@@ -7,6 +7,7 @@ import (
 	"forum/handlers/middleware"
 )
 
+// Setup Home Routes
 func SetupHomeRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 

@@ -5,7 +5,7 @@ import (
 
 	"forum/handlers/api"
 )
-
+// Setup Api Routes
 func SetupApiRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 

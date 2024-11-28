@@ -10,16 +10,13 @@ import (
 )
 
 func main() {
-	err := database.InitDb()
-	if err != nil {
+	if err := database.InitDb(); err != nil {
 		log.Fatalln(err)
-		return
 	}
 
 	defer database.DataBase.Close()
 
 	rootMux := http.NewServeMux()
-
 	routers.SetupRoutes(rootMux)
 
 	fmt.Println("Server running on port: 8080")
