@@ -1,11 +1,20 @@
 package handlers
 
 import (
+	"html/template"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var templates *template.Template
+
+// parse all tamplates at once in the beggining of the program
+func init() {
+	templates = template.Must(templates.ParseGlob("./web/templates/*.html"))
+	templates = template.Must(templates.ParseGlob("./web/templates/components/*.html"))
+}
 
 // AssetsHandler serves static files
 func AssetsHandler(w http.ResponseWriter, r *http.Request) {
