@@ -12,11 +12,11 @@ func DelayPost() bool {
 	return true
 }
 
-func DelayComment() bool {
+func DelayComment(PostId int) bool {
 	isValid := false
 	if err := database.DataBase.QueryRow(`SELECT EXISTS(
 		SELECT * FROM comments JOIN users ON comments.user_id = users.id 
-		WHERE created_at >= datetime('now', '-20 seconds'))`).Scan(&isValid); err != nil || !isValid {
+		WHERE created_at >= datetime('now', '-20 seconds') AND comments.post_id = ?)`, PostId).Scan(&isValid); err != nil || !isValid {
 		return false
 	}
 	return true

@@ -76,11 +76,6 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if utils.DelayComment() {
-		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every  20 seconds", Code: http.StatusBadRequest})
-		return
-	}
-
 	comment := models.Comment{}
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
@@ -91,6 +86,11 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !utils.ExistsPost(comment.PostId) {
 		utils.ResponseJSON(w, utils.Resp{Msg: "bad request", Code: http.StatusBadRequest})
+		return
+	}
+
+	if utils.DelayComment(comment.PostId) {
+		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every  20 seconds", Code: http.StatusBadRequest})
 		return
 	}
 
