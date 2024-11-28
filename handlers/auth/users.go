@@ -33,9 +33,10 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check username
 	valid, err := utils.CheckUsernameFormat(user.Username)
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	} else if !valid {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid username format", Code: http.StatusBadRequest})
@@ -66,7 +67,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	// store user in database
 	if err := controllers.RegisterUser(user); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	loginToForum(w, r, user)
