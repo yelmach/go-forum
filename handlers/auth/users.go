@@ -23,7 +23,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	user := models.User{}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: "invalid credentials", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -83,6 +83,11 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
+		return
+	}
+
+	if len(user.Username) > 60 {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Username or Password Incorrect", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -146,9 +151,5 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	utils.DeleteCookie(w, "user_id")
 	utils.DeleteCookie(w, "username")
 
-	if r.Header.Get("Accept") == "application/json" {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Loggedout successfuly", Code: http.StatusOK})
-	} else {
-		http.Redirect(w, r, "/", http.StatusFound)
-	}
+	http.Redirect(w, r, "/", http.StatusFound)
 }

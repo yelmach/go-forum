@@ -23,10 +23,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	var IsLoggedIn bool
 
 	// check if user already logged in from another browser
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
+	cookie, errNoCookie := r.Cookie("session_id")
+	if errNoCookie != nil {
 		IsLoggedIn = false
-		err = templates.ExecuteTemplate(w, "index.html", IsLoggedIn)
+		if err := templates.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
+			ErrorHandler(w, r, http.StatusInternalServerError)
+			return
+		}
 	} else {
 		var isValid bool
 		if err := database.DataBase.QueryRow("SELECT EXISTS(SELECT * FROM sessions WHERE session_id=?)", cookie.Value).Scan(&isValid); err != nil {
@@ -39,19 +42,17 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			utils.DeleteCookie(w, "user_id")
 			utils.DeleteCookie(w, "username")
 			IsLoggedIn = false
-			if err = templates.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
+			if err := templates.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
 				ErrorHandler(w, r, http.StatusInternalServerError)
 				return
 			}
 		}
 
 		IsLoggedIn = true
-		err = templates.ExecuteTemplate(w, "index.html", IsLoggedIn)
-	}
-
-	if err != nil {
-		ErrorHandler(w, r, http.StatusInternalServerError)
-		return
+		if err := templates.ExecuteTemplate(w, "index.html", IsLoggedIn); err != nil {
+			ErrorHandler(w, r, http.StatusInternalServerError)
+			return
+		}
 	}
 }
 

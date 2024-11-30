@@ -53,61 +53,55 @@
     </div>
 
     <script>
-        document
-            .getElementById("registerForm").addEventListener("submit", async function (e) {
-                e.preventDefault();
+        document.getElementById("registerForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
 
-                document.getElementById('errorMessage')?.remove()
-                document.getElementById('success')?.remove()
-                const form = document.querySelector('.form-container')
-                const messageDiv = document.createElement('p')
-                const email = document.querySelector("input[name='email']").value;
-                const username = document.querySelector("input[name='username']").value;
-                const password = document.querySelector("input[name='password']").value;
+            document.getElementById('errorMessage')?.remove()
+            document.getElementById('success')?.remove()
+            const form = document.querySelector('.form-container')
+            const messageDiv = document.createElement('p')
+            const email = document.querySelector("input[name='email']").value;
+            const username = document.querySelector("input[name='username']").value;
+            const password = document.querySelector("input[name='password']").value;
 
-                try {
-                    const response = await fetch("/auth/register", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ email, username, password }),
-                    })
+            try {
+                const response = await fetch("/auth/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, username, password }),
+                })
 
-                    messageDiv.classList.add('message')
-                    if (response.ok) {
-                        messageDiv.id = 'success'
-                        messageDiv.textContent = 'Registered Successfully'
-                        setTimeout(() => location.href = "/", 700);
+                messageDiv.classList.add('message')
+                if (response.ok) {
+                    messageDiv.id = 'success'
+                    messageDiv.textContent = 'Registered Successfully'
+                    setTimeout(() => location.href = "/", 700);
+                } else {
+                    if (response.headers.get('content-type').includes('text/html')) {
+                        response.text().then(resp => document.documentElement.innerHTML = resp);
                     } else {
-                        if (response.headers.get('content-type').includes('text/html')) {
-                            response.text().then(resp => {
-                                document.documentElement.innerHTML = resp;
-                            });
-                        } else {
-                            messageDiv.id = 'errorMessage'
-                            const result = await response.json();
-                            console.error(result)
-                            if (result.msg === 'credentials already exists') {
-                                messageDiv.innerHTML = 'User exists with that Username or Email'
-                            } else if (result.msg === 'Invalid password format') {
-                                messageDiv.innerHTML = `Your password needs to:
+                        messageDiv.id = 'errorMessage'
+                        const result = await response.json();
+                        console.error(result)
+                        if (result.msg === 'Invalid password format') {
+                            messageDiv.innerHTML = `Your password needs to:
                             <ul>
                                 <li>Include both lower and upper case characters.</li>
                                 <li>Include at least one number and symbol.</li>
                                 <li>Password must be between 8 and 21 characters long.</li>
                             </ul>`
-                            } else {
-                                messageDiv.innerHTML = "invalid input"
-                            }
+                        } else {
+                            messageDiv.innerHTML = result.msg
                         }
                     }
-                    form.append(messageDiv)
-                } catch (err) {
-
-                    console.error("Error during registration:", err);
                 }
-            });
+                form.append(messageDiv)
+            } catch (err) {
+                console.error("Error during registration:", err);
+            }
+        });
 
         const togglePassword = () => {
             fieldPw = document.querySelector("input[name='password']");
