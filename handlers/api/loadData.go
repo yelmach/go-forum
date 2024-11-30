@@ -77,7 +77,24 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbPosts, err := database.DataBase.Query(`SELECT id, user_id, title, content, image_url, created_at FROM posts ORDER BY created_at DESC`)
+	// Get page and limit from query parameters
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit := 20
+	offset := (page - 1) * limit
+
+	// Modify the query to include LIMIT and OFFSET
+	dbPosts, err := database.DataBase.Query(`
+		 SELECT id, user_id, title, content, image_url, created_at 
+		 FROM posts 
+		 ORDER BY created_at DESC 
+		 LIMIT ? OFFSET ?`,
+		limit, offset,
+	)
+
 	if err == sql.ErrNoRows {
 		utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
 		return
@@ -132,9 +149,26 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var total int
+	err = database.DataBase.QueryRow("SELECT COUNT(*) FROM posts").Scan(&total)
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		return
+	}
+
+	response := struct {
+		Posts   []models.PostApi `json:"posts"`
+		HasMore bool             `json:"hasMore"`
+		Total   int              `json:"total"`
+	}{
+		Posts:   posts,
+		HasMore: (offset + len(posts)) < total,
+		Total:   total,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(posts)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // LoadAllCategories gets all categories from database and send it to js
@@ -143,7 +177,7 @@ func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	dbCategories, err := database.DataBase.Query(`SELECT name FROM categories`)
 	if err != nil {
 		if err == sql.ErrNoRows {
