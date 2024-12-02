@@ -4,69 +4,57 @@ const data = {
     currentPage: 1,
     isLoading: false,
     hasMore: true,
-    currentView: 'recent', // 'recent', 'created', 'liked', 'category'
+    currentView: 'recent',
     currentCategory: null,
 };
-// my modification
-const createLoadingSpinner = () => {
-    const spinnerContainer = document.createElement('div');
-    spinnerContainer.classList.add('loading-spinner');
-    spinnerContainer.style.cssText = `
-        text-align: center;
-        padding: 20px;
-        display: none;
-        position: relative;
-        bottom: 0;
-        width: 100%;
-    `;
 
-    const spinner = document.createElement('div');
-    spinner.classList.add('spinner');
-    spinner.style.cssText = `
-        width: 40px;
-        height: 40px;
-        margin: 0 auto;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #3498db;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    `;
-
-    if (!document.querySelector('#spinnerStyle')) {
-        const styleSheet = document.createElement('style');
-        styleSheet.id = 'spinnerStyle';
-        styleSheet.textContent = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
+const initInfiniteScroll = () => {
+    const postsContainer = document.querySelector('.posts-container');
+    if (!postsContainer) return;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !data.isLoading && data.hasMore) {
+                loadMorePosts();
             }
-        `;
-        document.head.appendChild(styleSheet);
-    }
+        });
+    }, {
+        root: postsContainer,
+        rootMargin: '100px',
+        threshold: 0.1
+    });
 
-    spinnerContainer.appendChild(spinner);
-    return spinnerContainer;
-};  
+    // Add sentinel element at bottom of container
+    const sentinel = document.createElement('div');
+    sentinel.className = 'scroll-sentinel';
+    postsContainer.appendChild(sentinel);
+    observer.observe(sentinel);
+};
+
+const loadMorePosts = async () => {
+    const nextPage = data.currentPage + 1;
+    await loadData(nextPage, false);
+
+    const postsContainer = document.querySelector('.posts-container');
+
+    data.allPosts.slice(-20).forEach(post => {
+        const postDiv = createPostElement(post);
+        postsContainer.insertBefore(postDiv, postsContainer.lastElementChild);
+    });
+};
 
 const loadData = async (page = 1, resetData = false) => {
-    console.log("im in loadData");
-
     if (resetData) {
         data.allPosts = [];
         data.currentPage = 1;
         data.hasMore = true;
     }
 
-    if (!data.hasMore || data.isLoading) return [];
+    if (!data.hasMore || data.isLoading) return;
 
     data.isLoading = true;
-    const spinner = document.querySelector('.loading-spinner');
-    if (spinner) spinner.style.display = 'block';
-
     try {
         let url = `/api/posts?page=${page}`;
 
-        // Add appropriate filters based on current view
         switch (data.currentView) {
             case 'created':
                 url += `&filter=created&userId=${getCookie('user_id')}`;
@@ -88,83 +76,18 @@ const loadData = async (page = 1, resetData = false) => {
         data.hasMore = result.hasMore;
         data.currentPage = result.page;
 
-        // Load categories only on first load
-        if (page === 1 && data.allCategories.length === 0) {
+        if (data.allCategories.length === 0 || page === 1) {
             data.allCategories = await fetch("/api/categories")
                 .then(response => response.json());
         }
-
-        return result.posts;
     } catch (error) {
         console.error('Error loading posts:', error);
-        return [];
     } finally {
         data.isLoading = false;
-        if (spinner) spinner.style.display = 'none';
     }
 };
-
-const throttle = (func, wait) => {
-    console.log("im in throtle");
-    
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-};
-
-const handleScroll = throttle(() => {
-    console.log('Scroll event triggered'); // Debug log
-    
-    if (document.querySelector('.post-content')) return;
-
-    const container = document.querySelector('.container');
-    const main = document.querySelector('.main');
-    
-    if (!container || !main) {
-        console.log('Container or main not found');
-        return;
-    }
-
-    // Calculate the scroll position relative to the container
-    const containerHeight = container.clientHeight;
-    const mainHeight = main.scrollHeight;
-    const scrollPosition = container.scrollTop + containerHeight;
-
-    console.log({
-        containerHeight,
-        mainHeight,
-        scrollPosition,
-        difference: mainHeight - scrollPosition
-    });
-
-    // Check if we're near the bottom of the main content
-    if (mainHeight - scrollPosition < 100) {
-        console.log('Near bottom, attempting to load more');
-        if (data.hasMore && !data.isLoading) {
-            loadData(data.currentPage + 1).then(newPosts => {
-                if (newPosts && newPosts.length > 0) {
-                    const postsContainer = document.querySelector('.posts-container');
-                    if (postsContainer) {
-                        newPosts.forEach(post => {
-                            const postDiv = createPostElement(post);
-                            postsContainer.appendChild(postDiv);
-                        });
-                    }
-                }
-            });
-        }
-    }
-}, 200);
 
 const init = async () => {
-    console.log("im in init")
-
     const categContainer = document.querySelector('.categories');
 
     await loadData(1, true);
@@ -179,19 +102,14 @@ const init = async () => {
     }
     displayPosts(data.allPosts);
     document.getElementById('select_1').classList.add('active');
-
-    window.addEventListener('scroll', handleScroll);
 };
 
 const displayPosts = (posts) => {
-    console.log("im in displayPosts")
-
     const main = document.querySelector('.main');
     const postsContainer = document.createElement('div');
     postsContainer.classList.add('posts-container');
     disactive();
     main.innerHTML = '';
-
     if (!posts.length) {
         main.innerHTML += `
         <img id="no_data" src="/assets/img/no_data.svg" alt="no result"/>
@@ -202,15 +120,12 @@ const displayPosts = (posts) => {
             postsContainer.append(postDiv);
         }
         main.append(postsContainer);
-
-        // Add loading spinner after posts container
-        const spinner = createLoadingSpinner();
-        main.append(spinner);
     }
+
+    initInfiniteScroll()
 };
 
 const recentPosts = async () => {
-    console.log("im in recentPosts");
     data.currentView = 'recent';
     await loadData(1, true);
     widgetBack();
@@ -219,7 +134,6 @@ const recentPosts = async () => {
 };
 
 const createdPosts = async () => {
-    console.log("im in createdPosts");
     data.currentView = 'created';
     await loadData(1, true);
     widgetBack();
@@ -228,7 +142,6 @@ const createdPosts = async () => {
 };
 
 const likedPosts = async () => {
-    console.log("im in likedPosts");
     data.currentView = 'liked';
     await loadData(1, true);
     widgetBack();
@@ -237,7 +150,6 @@ const likedPosts = async () => {
 };
 
 const filterByCategory = async (category) => {
-    console.log("im in filterByCategory");
     data.currentView = 'category';
     data.currentCategory = category;
     await loadData(1, true);
@@ -245,7 +157,7 @@ const filterByCategory = async (category) => {
     displayPosts(data.allPosts);
     document.getElementById(category).classList.add('activeCat');
 };
-// rest
+
 const createPostElement = (post) => {
     const userId = parseInt(getCookie("user_id"));
     const postDiv = document.createElement("div");

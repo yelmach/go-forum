@@ -76,15 +76,10 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get page parameter from query string, default to 1 if not provided
-	page := 1
-	if pageStr := r.URL.Query().Get("page"); pageStr != "" {
-		var err error
-		page, err = strconv.Atoi(pageStr)
-		if err != nil || page < 1 {
-			utils.ResponseJSON(w, utils.Resp{Msg: "Invalid page parameter", Code: http.StatusBadRequest})
-			return
-		}
+	// Get page parameter from query string, default is 1
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 1
 	}
 
 	// Get filter type
