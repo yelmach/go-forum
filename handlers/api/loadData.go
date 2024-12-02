@@ -70,36 +70,74 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(post)
 }
 
-// LoadData gets all data from database and send it to js as a json format
 func LoadData(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Get page and limit from query parameters
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 {
-		page = 1
+	// Get page parameter from query string, default to 1 if not provided
+	page := 1
+	if pageStr := r.URL.Query().Get("page"); pageStr != "" {
+		var err error
+		page, err = strconv.Atoi(pageStr)
+		if err != nil || page < 1 {
+			utils.ResponseJSON(w, utils.Resp{Msg: "Invalid page parameter", Code: http.StatusBadRequest})
+			return
+		}
 	}
 
-	limit := 20
-	offset := (page - 1) * limit
+	// Get filter type
+	filterType := r.URL.Query().Get("filter")
+	userID := r.URL.Query().Get("userId")
+	category := r.URL.Query().Get("category")
 
-	// Modify the query to include LIMIT and OFFSET
-	dbPosts, err := database.DataBase.Query(`
-		 SELECT id, user_id, title, content, image_url, created_at 
-		 FROM posts 
-		 ORDER BY created_at DESC 
-		 LIMIT ? OFFSET ?`,
-		limit, offset,
-	)
+	// Set posts per page
+	const postsPerPage = 20
+	offset := (page - 1) * postsPerPage
 
-	if err == sql.ErrNoRows {
-		utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
-		return
+	var query string
+	var args []interface{}
+
+	switch filterType {
+	case "created":
+		query = `SELECT id, user_id, title, content, image_url, created_at 
+                 FROM posts 
+                 WHERE user_id = ? 
+                 ORDER BY created_at DESC 
+                 LIMIT ? OFFSET ?`
+		args = []interface{}{userID, postsPerPage, offset}
+	case "liked":
+		query = `SELECT p.id, p.user_id, p.title, p.content, p.image_url, p.created_at 
+                 FROM posts p
+                 JOIN reactions r ON p.id = r.post_id 
+                 WHERE r.user_id = ? AND r.is_like = 1
+                 ORDER BY p.created_at DESC 
+                 LIMIT ? OFFSET ?`
+		args = []interface{}{userID, postsPerPage, offset}
+	case "category":
+		query = `SELECT p.id, p.user_id, p.title, p.content, p.image_url, p.created_at 
+                 FROM posts p
+                 JOIN post_categories pc ON p.id = pc.post_id 
+                 JOIN categories c ON pc.category_id = c.id
+                 WHERE c.name = ?
+                 ORDER BY p.created_at DESC 
+                 LIMIT ? OFFSET ?`
+		args = []interface{}{category, postsPerPage, offset}
+	default:
+		query = `SELECT id, user_id, title, content, image_url, created_at 
+                 FROM posts 
+                 ORDER BY created_at DESC 
+                 LIMIT ? OFFSET ?`
+		args = []interface{}{postsPerPage, offset}
 	}
+
+	dbPosts, err := database.DataBase.Query(query, args...)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
+			return
+		}
 		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 		return
 	}
@@ -117,6 +155,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Get all related data for the post
 		post.By, statuscode, err = getUsername(userId)
 		if err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
@@ -144,26 +183,45 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 
-	if err = dbPosts.Err(); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-		return
+	// Get total count based on filter
+	var countQuery string
+	var countArgs []interface{}
+
+	switch filterType {
+	case "created":
+		countQuery = "SELECT COUNT(*) FROM posts WHERE user_id = ?"
+		countArgs = []interface{}{userID}
+	case "liked":
+		countQuery = `SELECT COUNT(*) FROM posts p
+                      JOIN reactions r ON p.id = r.post_id 
+                      WHERE r.user_id = ? AND r.is_like = 1`
+		countArgs = []interface{}{userID}
+	case "category":
+		countQuery = `SELECT COUNT(*) FROM posts p
+                      JOIN post_categories pc ON p.id = pc.post_id 
+                      JOIN categories c ON pc.category_id = c.id
+                      WHERE c.name = ?`
+		countArgs = []interface{}{category}
+	default:
+		countQuery = "SELECT COUNT(*) FROM posts"
 	}
 
-	var total int
-	err = database.DataBase.QueryRow("SELECT COUNT(*) FROM posts").Scan(&total)
-	if err != nil {
+	var totalPosts int
+	if err := database.DataBase.QueryRow(countQuery, countArgs...).Scan(&totalPosts); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 		return
 	}
 
 	response := struct {
-		Posts   []models.PostApi `json:"posts"`
-		HasMore bool             `json:"hasMore"`
-		Total   int              `json:"total"`
+		Posts      []models.PostApi `json:"posts"`
+		TotalPosts int              `json:"totalPosts"`
+		HasMore    bool             `json:"hasMore"`
+		Page       int              `json:"page"`
 	}{
-		Posts:   posts,
-		HasMore: (offset + len(posts)) < total,
-		Total:   total,
+		Posts:      posts,
+		TotalPosts: totalPosts,
+		HasMore:    offset+len(posts) < totalPosts,
+		Page:       page,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
