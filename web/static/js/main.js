@@ -2,7 +2,6 @@ const data = {
     allPosts: [],
     allCategories: [],
     currentPage: 1,
-    isLoading: false,
     hasMore: true,
     currentView: 'recent',
     currentCategory: null,
@@ -11,23 +10,21 @@ const data = {
 const initInfiniteScroll = () => {
     const postsContainer = document.querySelector('.posts-container');
     if (!postsContainer) return;
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !data.isLoading && data.hasMore) {
+    const observer = new IntersectionObserver((elements) => {
+        elements.forEach(elem => {
+            if (elem.isIntersecting && data.hasMore) {
                 loadMorePosts();
             }
         });
     }, {
         root: postsContainer,
-        rootMargin: '100px',
         threshold: 0.1
     });
 
-    // Add sentinel element at bottom of container
-    const sentinel = document.createElement('div');
-    sentinel.className = 'scroll-sentinel';
-    postsContainer.appendChild(sentinel);
-    observer.observe(sentinel);
+    const trigger = document.createElement('div');
+    trigger.className = 'scroll-trigger';
+    postsContainer.appendChild(trigger);
+    observer.observe(trigger);
 };
 
 const loadMorePosts = async () => {
@@ -36,7 +33,7 @@ const loadMorePosts = async () => {
 
     const postsContainer = document.querySelector('.posts-container');
 
-    data.allPosts.slice(-20).forEach(post => {
+    data.allPosts.slice(-100).forEach(post => {
         const postDiv = createPostElement(post);
         postsContainer.insertBefore(postDiv, postsContainer.lastElementChild);
     });
@@ -49,9 +46,8 @@ const loadData = async (page = 1, resetData = false) => {
         data.hasMore = true;
     }
 
-    if (!data.hasMore || data.isLoading) return;
+    if (!data.hasMore) return;
 
-    data.isLoading = true;
     try {
         let url = `/api/posts?page=${page}`;
 
@@ -82,8 +78,6 @@ const loadData = async (page = 1, resetData = false) => {
         }
     } catch (error) {
         console.error('Error loading posts:', error);
-    } finally {
-        data.isLoading = false;
     }
 };
 
