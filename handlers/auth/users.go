@@ -53,15 +53,15 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check user if exist
-	if err := utils.CheckUserExist(user); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
-		return
-	}
-
 	// check password
 	if !utils.CheckPasswordFormat(user.Password) {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid password format", Code: http.StatusBadRequest})
+		return
+	}
+
+	// check user if exist
+	if err := utils.CheckUserExist(user); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
@@ -86,7 +86,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(user.Username) > 60 {
+	if len(user.Username) > 60 || len(user.Password) > 20 {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Username or Password Incorrect", Code: http.StatusBadRequest})
 		return
 	}

@@ -88,7 +88,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 
 	// Set posts per page
-	const postsPerPage = 20
+	const postsPerPage = 50
 	offset := (page - 1) * postsPerPage
 
 	var query string

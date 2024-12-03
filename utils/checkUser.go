@@ -23,11 +23,7 @@ func CheckUserExist(user models.User) error {
 
 // CheckUsernameFormat checks username format if it's valid
 func CheckUsernameFormat(username string) (bool, error) {
-	if len(username) < 3 || len(username) > 20 {
-		return false, nil
-	}
-
-	valid, err := regexp.MatchString(`^\S\w+$`, username)
+	valid, err := regexp.MatchString(`^[a-zA-Z0-9_-]{3,21}$`, username)
 	if err != nil || !valid {
 		return false, err
 	}
@@ -40,7 +36,7 @@ func CheckEmailFormat(email string) (bool, error) {
 	if len(email) > 60 {
 		return false, nil
 	}
-	isValid, err := regexp.MatchString(`(?i)^\w+@\w+.[a-z]+`, email)
+	isValid, err := regexp.MatchString(`^[a-zA-Z-0-9]+\.?[a-zA-Z-0-9]+@[a-zA-Z-0-9]+\.[a-z]+$`, email)
 	if err != nil {
 		return false, err
 	} else if !isValid {

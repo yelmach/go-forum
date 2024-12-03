@@ -33,7 +33,7 @@ const loadMorePosts = async () => {
 
     const postsContainer = document.querySelector('.posts-container');
 
-    data.allPosts.slice(-100).forEach(post => {
+    data.allPosts.slice(-20).forEach(post => {
         const postDiv = createPostElement(post);
         postsContainer.insertBefore(postDiv, postsContainer.lastElementChild);
     });
