@@ -18,11 +18,6 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if utils.DelayPost() {
-		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every 5 minutes", Code: http.StatusBadRequest})
-		return
-	}
-
 	post := models.Post{}
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadRequest})
@@ -38,6 +33,11 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	post.UserId, err = strconv.Atoi(cookie.Value)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
+		return
+	}
+
+	if utils.DelayPost(post.UserId) {
+		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every 5 minutes", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -89,11 +89,6 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if utils.DelayComment(comment.PostId) {
-		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every  20 seconds", Code: http.StatusBadRequest})
-		return
-	}
-
 	cookie, err := r.Cookie("user_id")
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
@@ -103,6 +98,11 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	comment.UserId, err = strconv.Atoi(cookie.Value)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusBadGateway})
+		return
+	}
+
+	if utils.DelayComment(comment.PostId, comment.UserId) {
+		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every  20 seconds", Code: http.StatusBadRequest})
 		return
 	}
 

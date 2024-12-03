@@ -2,21 +2,24 @@ package utils
 
 import "forum/database"
 
-func DelayPost() bool {
+func DelayPost(UserId int) bool {
 	isValid := false
 	if err := database.DataBase.QueryRow(`SELECT EXISTS(
 		SELECT * FROM posts JOIN users ON posts.user_id = users.id 
-		WHERE created_at >= datetime('now', '-5 minutes'))`).Scan(&isValid); err != nil || !isValid {
+		WHERE created_at >= datetime('now', '-5 minutes') 
+		AND posts.user_id =? )`, UserId).Scan(&isValid); err != nil || !isValid {
 		return false
 	}
 	return true
 }
 
-func DelayComment(PostId int) bool {
+func DelayComment(PostId, UserId int) bool {
 	isValid := false
 	if err := database.DataBase.QueryRow(`SELECT EXISTS(
 		SELECT * FROM comments JOIN users ON comments.user_id = users.id 
-		WHERE created_at >= datetime('now', '-20 seconds') AND comments.post_id = ?)`, PostId).Scan(&isValid); err != nil || !isValid {
+		WHERE created_at >= datetime('now', '-20 seconds') 
+		AND comments.post_id = ? 
+		AND comments.user_id = ?)`, PostId, UserId).Scan(&isValid); err != nil || !isValid {
 		return false
 	}
 	return true
