@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -72,14 +73,25 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 
 func LoadData(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		utils.ResponseJSON(w, utils.Resp{Msg: "Method Not Allowed", Code: http.StatusMethodNotAllowed})
 		return
 	}
 
-	// Get page parameter from query string, default is 1
+	var totalPosts int
+	if err := database.DataBase.QueryRow(`SELECT COUNT(*) FROM posts`).Scan(&totalPosts); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		return
+	}
+
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 {
-		page = 1
+	if err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Bad Request", Code: http.StatusBadRequest})
+		return
+	}
+	if page < 1 || page > totalPosts {
+		msg := fmt.Sprintf("Bad Request ( interval is [1-%d])", totalPosts/20)
+		utils.ResponseJSON(w, utils.Resp{Msg: msg, Code: http.StatusBadRequest})
+		return
 	}
 
 	// Get filter type
@@ -201,7 +213,6 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		countQuery = "SELECT COUNT(*) FROM posts"
 	}
 
-	var totalPosts int
 	if err := database.DataBase.QueryRow(countQuery, countArgs...).Scan(&totalPosts); err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 		return
@@ -235,10 +246,11 @@ func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
+			return
 		} else {
 			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+			return
 		}
-		return
 	}
 	defer dbCategories.Close()
 
