@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"forum/database"
-	"forum/handlers"
 	"forum/utils"
 )
 
@@ -15,7 +14,7 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 		is_valid := false
 		cookie_session, err := r.Cookie("session_id")
 		if err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized session", Code: http.StatusUnauthorized})
 			return
 		}
 		session_id := cookie_session.Value
@@ -33,20 +32,22 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 
 		cookie_username, err := r.Cookie("username")
 		if err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized username", Code: http.StatusUnauthorized})
 			return
 		}
 
 		user_username := cookie_username.Value
 		query := `SELECT EXISTS(SELECT * FROM sessions JOIN users ON sessions.user_id = users.id WHERE session_id = ? AND user_id = ? AND users.username = ? )`
 		if err := database.DataBase.QueryRow(query, session_id, user_id, user_username).Scan(&is_valid); err != nil {
-			handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized", Code: http.StatusUnauthorized})
+			return
 		}
 		if !is_valid {
 			utils.DeleteCookie(w, "session_id")
 			utils.DeleteCookie(w, "user_id")
 			utils.DeleteCookie(w, "username")
-			http.Redirect(w, r, "/", http.StatusFound)
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized", Code: http.StatusUnauthorized})
+			return
 		}
 		next.ServeHTTP(w, r)
 	}
@@ -61,6 +62,6 @@ func RedirectMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			next.ServeHTTP(w, r)
 			return
 		}
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 	}
 }
