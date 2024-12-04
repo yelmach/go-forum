@@ -334,7 +334,7 @@ const openPost = async (postId) => {
                     document.querySelector(".popup-content").innerHTML = `
                     <h2>Nice try!</h2>
                     <ul>
-                        <li>You can only comment once every 20 seconds.</li>
+                        <li>${res.msg}</li>
                     </ul>
                     `
                 }
@@ -612,9 +612,7 @@ const newPost = () => {
                 document.querySelector(".popup-content").innerHTML = `
                 <h2>Nice try!</h2>
                 <ul>
-                    <li>It's required to write a title (max 50 character) and the content (max 2000 character) for your new post</li>
-                    <li>Unknown category or douplicated categories not allowed</li>
-                    <li>You can only post once every 5 minutes</li>
+                    <li>${res.msg}</li>
                 </ul>
                 `
             }
