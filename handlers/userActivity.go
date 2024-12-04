@@ -14,7 +14,7 @@ import (
 // NewPostHandler handles creation post request and store it to database
 func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		return
 	}
 
@@ -57,8 +57,11 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	if post.Title == "" || post.Content == "" {
 		utils.ResponseJSON(w, utils.Resp{Msg: "input can't be empty", Code: http.StatusBadRequest})
 		return
-	} else if len(post.Title) >= 61 || len(post.Content) >= 2001 {
-		utils.ResponseJSON(w, utils.Resp{Msg: "can't process, input too long", Code: http.StatusBadRequest})
+	} else if len(post.Title) < 3 || len(post.Title) > 60 {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Title should be between 3 and 60 characters", Code: http.StatusBadRequest})
+		return
+	} else if len(post.Content) < 10 || len(post.Content) > 2000 {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Content should be between 10 and 2000 characters", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -72,7 +75,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 // NewCommentHandler handles the creation of new comment request
 func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		return
 	}
 
@@ -110,8 +113,8 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if comment.Content == "" {
 		utils.ResponseJSON(w, utils.Resp{Msg: "comment can't be empty", Code: http.StatusBadRequest})
 		return
-	} else if len(comment.Content) >= 501 {
-		utils.ResponseJSON(w, utils.Resp{Msg: "cat't process, comment too long", Code: http.StatusBadRequest})
+	} else if len(comment.Content) < 5 || len(comment.Content) >= 500 {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Content should be between 5 and 500 characters", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -125,7 +128,7 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 // ReactionHandler handles the reaction request on a post or a comment
 func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		return
 	}
 
