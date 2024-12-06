@@ -14,15 +14,17 @@
     <div class="error-code">{{ .Status}}</div>
     <h1>Oops, something went wrong!</h1>
     <p>
-      <b>{{.Status}}.</b> <ins>That's an error.<img src="/assets/img/icons8-happy.gif" > </ins>
+      <b>{{.Status}}.</b> <ins>That's an error.<img src="/assets/img/icons8-happy.gif"> </ins>
     </p>
     <p>
       {{if eq .Status 404}}
       The requested URL <code>{{.Path}}</code> was not found on this server.
       {{else if eq .Status 405}}
       The request method <code>{{.Method}}</code> is inappropriate for the URL <code>{{.Path}}</code>.
-      {{else}}
+      {{else if eq .Status 500}}
       Ops! Seems An Internal Server Error Occurred.
+      {{else}}
+      {{.Title}}
       {{end}}
       <ins>That's all we know.</ins>
     </p>

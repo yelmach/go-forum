@@ -80,7 +80,7 @@
                     setTimeout(() => location.href = "/", 700);
                 } else {
                     if (response.headers.get('content-type').includes('text/html')) {
-                        response.text().then(resp => document.documentElement.innerHTML = resp);
+                        document.innerHTML = response.text();
                     } else {
                         messageDiv.id = 'errorMessage'
                         const result = await response.json();

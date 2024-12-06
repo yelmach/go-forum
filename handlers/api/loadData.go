@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,6 +11,8 @@ import (
 	"forum/models"
 	"forum/utils"
 )
+
+const POST_PER_PAGE = 50
 
 // LoadPostData gets data of one post from database and send it to js
 func LoadPostData(w http.ResponseWriter, r *http.Request) {
@@ -33,12 +34,7 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT id, user_id, title, content, image_url, created_at FROM posts WHERE id=?`
 	err = database.DataBase.QueryRow(query, id).Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Header().Set("Content-Type", "application/json")
-		newError := models.Error{}
-		newError.Error.Status = http.StatusNotFound
-		newError.Error.Code = "not_found"
-		json.NewEncoder(w).Encode(newError)
+		utils.ResponseJSON(w, utils.Resp{Msg: "not found", Code: http.StatusNotFound})
 		return
 	}
 
@@ -84,13 +80,8 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil {
+	if err != nil || page < 1 || page > totalPosts/POST_PER_PAGE+1 {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Bad Request", Code: http.StatusBadRequest})
-		return
-	}
-	if page < 1 || page > totalPosts {
-		msg := fmt.Sprintf("Bad Request ( interval is [1-%d])", totalPosts/20)
-		utils.ResponseJSON(w, utils.Resp{Msg: msg, Code: http.StatusBadRequest})
 		return
 	}
 
@@ -100,8 +91,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 
 	// Set posts per page
-	const postsPerPage = 50
-	offset := (page - 1) * postsPerPage
+	offset := (page - 1) * POST_PER_PAGE
 
 	var query string
 	var args []interface{}
@@ -113,7 +103,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
                  WHERE user_id = ? 
                  ORDER BY created_at DESC 
                  LIMIT ? OFFSET ?`
-		args = []interface{}{userID, postsPerPage, offset}
+		args = []interface{}{userID, POST_PER_PAGE, offset}
 	case "liked":
 		query = `SELECT p.id, p.user_id, p.title, p.content, p.image_url, p.created_at 
                  FROM posts p
@@ -121,7 +111,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
                  WHERE r.user_id = ? AND r.is_like = 1
                  ORDER BY p.created_at DESC 
                  LIMIT ? OFFSET ?`
-		args = []interface{}{userID, postsPerPage, offset}
+		args = []interface{}{userID, POST_PER_PAGE, offset}
 	case "category":
 		query = `SELECT p.id, p.user_id, p.title, p.content, p.image_url, p.created_at 
                  FROM posts p
@@ -130,13 +120,13 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
                  WHERE c.name = ?
                  ORDER BY p.created_at DESC 
                  LIMIT ? OFFSET ?`
-		args = []interface{}{category, postsPerPage, offset}
+		args = []interface{}{category, POST_PER_PAGE, offset}
 	default:
 		query = `SELECT id, user_id, title, content, image_url, created_at 
                  FROM posts 
                  ORDER BY created_at DESC 
                  LIMIT ? OFFSET ?`
-		args = []interface{}{postsPerPage, offset}
+		args = []interface{}{POST_PER_PAGE, offset}
 	}
 
 	dbPosts, err := database.DataBase.Query(query, args...)
@@ -145,7 +135,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
 			return
 		}
-		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
 	}
 	defer dbPosts.Close()

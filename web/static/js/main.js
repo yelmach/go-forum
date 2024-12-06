@@ -169,7 +169,7 @@ const createPostElement = (post) => {
     </div>
     <div class="post-content">
         <h3 onclick="openPost(${post.id})">${filterContent(post.title)}</h3>
-        <p>${filterContent(post.content.split('\n')[0]).slice(0, 200)}${((post.content.match(/\n/g) && post.content.match(/\n/g).length > 2) || post.content.length > 200) ? `... <span class="read-more" onclick="openPost(${post.id})">Read-More</span>` : ''}</p>
+        <p>${displayContent(post.content, post.id)}</p>
     </div>
     <div class="tags-stats">
         <div class="tags">
@@ -189,6 +189,18 @@ const createPostElement = (post) => {
     </div>
     `
     return postDiv;
+}
+
+const displayContent = (content, id) => {
+    if (content.match(/\n/g) && content.match(/\n/g).length < 3 && content.length < 200) {
+        return filterContent(content)
+    } else if (content.match(/\n/g) && content.match(/\n/g).length < 2 && content.length > 200) {
+        return filterContent(content).slice(0, 200) + `... <span class="read-more" onclick="openPost(${id})">Read-More</span>`
+    } else if (content.match(/\n/g) && content.match(/\n/g).length > 1) {
+        return filterContent(content.split('\n')[0]).slice(0, 200) + `... <span class="read-more" onclick="openPost(${id})">Read-More</span>`
+    } else {
+        return filterContent(content)
+    }
 }
 
 const createCommentElement = (comment) => {

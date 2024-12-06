@@ -80,7 +80,7 @@
                     setTimeout(() => location.href = "/", 700); // Redirect to home page after successful login
                 } else {
                     if (response.headers.get('content-type').includes('text/html')) {
-                        response.text().then(resp => document.documentElement.innerHTML = resp);
+                        document.innerHTML = response.text();
                     } else {
                         const result = await response.json();
                         console.error("Login failed:", result.msg);

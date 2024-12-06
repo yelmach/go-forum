@@ -19,8 +19,6 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, status int) {
 		DetailsError.Title = "Error 405 (Method Not Allowed)!!"
 	case http.StatusInternalServerError:
 		DetailsError.Title = "Error 500 (Internal Server Error)!!"
-	case http.StatusCreated:
-		DetailsError.Title = "Error 201 (Status Created)!!"
 	case http.StatusBadRequest:
 		DetailsError.Title = "Error 400 (Status Bad Request)"
 	case http.StatusBadGateway:
