@@ -7,15 +7,179 @@ const data = {
     currentCategory: null,
 };
 
+var currentPage = 1
+var hasMoreComments = true
+
+// load post with its comments (pagination implemented)
+const initCommentInfiniteScroll = (postId) => {
+    const commentsContainer = document.querySelector('.comments');
+    if (!commentsContainer) return;
+
+    const observer = new IntersectionObserver((elem) => {
+        if (elem[0].isIntersecting && hasMoreComments) {
+            loadMoreComments(postId);
+        }
+    }, {
+        root: document.querySelector('.posts-container'),
+        threshold: 0.1
+    });
+
+    const trigger = document.createElement('div');
+    trigger.className = 'scroll-trigger';
+    commentsContainer.appendChild(trigger);
+    observer.observe(trigger);
+};
+
+const loadMoreComments = async (postId) => {
+    const nextPage = currentPage + 1;
+    const post = await getPostData(postId, nextPage);
+    hasMoreComments = post.hasMoreComments
+
+    const commentsContainer = document.querySelector('.comments');
+    post.comments.forEach(comment => {
+        const commentDiv = createCommentElement(comment);
+        commentsContainer.insertBefore(commentDiv, commentsContainer.lastElementChild);
+    });
+
+    currentPage = nextPage;
+};
+
+const getPostData = async (postId, page = 1) => {
+    console.log("getPostData");
+
+    try {
+        const response = await fetch(`/api/posts/${postId}?page=${page}`);
+        const res = await response.json();
+
+        if (response.ok) {
+            return res
+        } else {
+            console.error(res.msg)
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+const openPost = async (postId) => {
+    currentPage = 1;
+    const post = await getPostData(postId);
+    hasMoreComments = post.hasMoreComments
+    const postsContainer = document.querySelector('.posts-container');
+    const widget = document.querySelector('.widget');
+    const comments = document.createElement('div');
+    const userId = parseInt(getCookie("user_id"));
+    const likeActive = post.likes.includes(userId) ? ' liked' : ''
+    const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
+
+    comments.classList.add('comments');
+    postsContainer.innerHTML = `
+    <div class="post" data-id="${postId}">
+        <div class="user-info">
+            <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
+            <div>
+                <div class="username">${post.by}</div>
+                <div class="timestamp">${timeAgo(new Date(post.createdAt).getTime())}</div>
+            </div>
+        </div>
+        <div class="post-content">
+            <h2>${filterContent(post.title)}</h2>
+            <p>${filterContent(post.content)}</p>
+        </div>
+        <div class="tags-stats">
+            <div class="tags">
+                ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>
+            <div class="post-stats">
+                <div class="stat${likeActive}">
+                    <i class="like-icon" onclick="likeAction(${post.id}, true)"></i><span>${post.likes.length}</span>
+                </div>
+                <div class="stat${dislikeActive}">
+                    <i class="dislike-icon dislike" onclick="dislikeAction(${post.id}, true)"></i><span>${post.dislikes.length}</span>
+                </div>
+                <div class="stat">
+                    <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.totalComments}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="commentForm" class="comment-box">
+        <textarea class="comment-input" placeholder="Type here your wise suggestion" required></textarea>
+        <div class="button-group">
+            <button class="btn btn-cancel">Cancel</button>
+            <button class="btn btn-comment">
+                <i class="comment-icon"></i>Comment
+            </button>
+        </div>
+    </div>
+    `
+
+    widget.innerHTML = `
+    <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">
+    <p class="username">@${post.by}</p>
+    `
+
+    for (const comment of post.comments) {
+        const commentDiv = createCommentElement(comment);
+        comments.append(commentDiv);
+    }
+    postsContainer.append(comments);
+
+    document.querySelector('.btn-cancel').onclick = () => {
+        document.querySelector('.comment-input').value = '';
+    };
+    document.getElementById('commentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const commentArea = document.querySelector('.comment-input');
+        const content = commentArea.value;
+        commentArea.value = '';
+
+        if (content.trim() == "") {
+            commentArea.placeholder = 'Please type a valid comment ⚠'
+            commentArea.style.setProperty('--placeholder-color', 'red');
+            return
+        }
+
+        try {
+            const response = await fetch("/newcomment", {
+                method: "POST",
+                body: JSON.stringify({ postId, content })
+            })
+
+            if (response.ok) {
+                openPost(postId);
+            } else {
+                const res = await response.json();
+                console.error(res.msg);
+                document.getElementById("loginPopup").style.display = "block";
+                if (res.msg != "unauthorized user") {
+                    document.querySelector(".popup-content").innerHTML = `
+                    <h2>Nice try!</h2>
+                    <ul>
+                        <li>${res.msg}</li>
+                    </ul>
+                    `
+                }
+
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    })
+
+    initCommentInfiniteScroll(postId);
+}
+
+// load all posts (pagination implemented)
 const initInfiniteScroll = () => {
     const postsContainer = document.querySelector('.posts-container');
     if (!postsContainer) return;
-    const observer = new IntersectionObserver((elements) => {
-        elements.forEach(elem => {
-            if (elem.isIntersecting && data.hasMore) {
-                loadMorePosts();
-            }
-        });
+    const observer = new IntersectionObserver((elem) => {
+        if (elem[0].isIntersecting && data.hasMore) {
+            loadMorePosts();
+        }
     }, {
         root: postsContainer,
         threshold: 0.1
@@ -33,7 +197,7 @@ const loadMorePosts = async () => {
 
     const postsContainer = document.querySelector('.posts-container');
 
-    data.allPosts.slice(-50).forEach(post => {
+    data.allPosts.slice(-100).forEach(post => {
         const postDiv = createPostElement(post);
         postsContainer.insertBefore(postDiv, postsContainer.lastElementChild);
     });
@@ -183,7 +347,7 @@ const createPostElement = (post) => {
                 <i class="dislike-icon dislike" onclick="dislikeAction(${post.id}, true)"></i><span>${post.dislikes.length}</span>
             </div>
             <div class="stat">
-                <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
+                <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.totalComments}</span>
             </div>
         </div>
     </div>
@@ -234,128 +398,6 @@ const createCommentElement = (comment) => {
     </div>
     `
     return commentDiv;
-}
-
-const getPostData = async (postId) => {
-    try {
-        const response = await fetch(`/api/posts/${postId}`);
-        const res = await response.json();
-
-        if (response.ok) {
-            return res
-        } else {
-            console.error(res.msg)
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-const openPost = async (postId) => {
-    const post = await getPostData(postId);
-    const postsContainer = document.querySelector('.posts-container');
-    const widget = document.querySelector('.widget');
-    const comments = document.createElement('div');
-    const userId = parseInt(getCookie("user_id"));
-    const likeActive = post.likes.includes(userId) ? ' liked' : ''
-    const dislikeActive = post.dislikes.includes(userId) ? ' disliked' : ''
-
-    comments.classList.add('comments');
-    postsContainer.innerHTML = `
-    <div class="post" data-id="${postId}">
-        <div class="user-info">
-            <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar" class="avatar">
-            <div>
-                <div class="username">${post.by}</div>
-                <div class="timestamp">${timeAgo(new Date(post.createdAt).getTime())}</div>
-            </div>
-        </div>
-        <div class="post-content">
-            <h2>${filterContent(post.title)}</h2>
-            <p>${filterContent(post.content)}</p>
-        </div>
-        <div class="tags-stats">
-            <div class="tags">
-                ${post.categories.map(tag => `<span class="tag">${tag}</span>`).join('')}
-            </div>
-            <div class="post-stats">
-                <div class="stat${likeActive}">
-                    <i class="like-icon" onclick="likeAction(${post.id}, true)"></i><span>${post.likes.length}</span>
-                </div>
-                <div class="stat${dislikeActive}">
-                    <i class="dislike-icon dislike" onclick="dislikeAction(${post.id}, true)"></i><span>${post.dislikes.length}</span>
-                </div>
-                <div class="stat">
-                    <i class="comment-icon" onclick="openPost(${post.id})"></i><span>${post.comments.length}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <form id="commentForm" class="comment-box">
-        <textarea class="comment-input" placeholder="Type here your wise suggestion" required></textarea>
-        <div class="button-group">
-            <button class="btn btn-cancel">Cancel</button>
-            <button class="btn btn-comment">
-                <i class="comment-icon"></i>Comment
-            </button>
-        </div>
-    </div>
-    `
-
-    widget.innerHTML = `
-    <img src="https://ui-avatars.com/api/?name=${post.by}" alt="User avatar">
-    <p class="username">@${post.by}</p>
-    `
-
-    for (const comment of post.comments) {
-        const commentDiv = createCommentElement(comment);
-        comments.append(commentDiv);
-    }
-    postsContainer.append(comments);
-
-    document.querySelector('.btn-cancel').onclick = () => {
-        document.querySelector('.comment-input').value = '';
-    };
-    document.getElementById('commentForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const commentArea = document.querySelector('.comment-input');
-        const content = commentArea.value;
-        commentArea.value = '';
-
-        if (content.trim() == "") {
-            commentArea.placeholder = 'Please type a valid comment ⚠'
-            commentArea.style.setProperty('--placeholder-color', 'red');
-            return
-        }
-
-        try {
-            const response = await fetch("/newcomment", {
-                method: "POST",
-                body: JSON.stringify({ postId, content })
-            })
-
-            if (response.ok) {
-                openPost(postId);
-            } else {
-                const res = await response.json();
-                console.error(res.msg);
-                document.getElementById("loginPopup").style.display = "block";
-                if (res.msg != "unauthorized user") {
-                    document.querySelector(".popup-content").innerHTML = `
-                    <h2>Nice try!</h2>
-                    <ul>
-                        <li>${res.msg}</li>
-                    </ul>
-                    `
-                }
-
-            }
-        } catch (err) {
-            console.error(err)
-        }
-    })
 }
 
 const getPostId = () => {

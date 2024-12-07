@@ -12,7 +12,7 @@ import (
 	"forum/utils"
 )
 
-const POST_PER_PAGE = 50
+const POST_PER_PAGE = 100
 
 // LoadPostData gets data of one post from database and send it to js
 func LoadPostData(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +31,12 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Bad Request", Code: http.StatusBadRequest})
+		return
+	}
+
 	query := `SELECT id, user_id, title, content, image_url, created_at FROM posts WHERE id=?`
 	err = database.DataBase.QueryRow(query, id).Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt)
 	if err != nil {
@@ -44,7 +50,7 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post.Comments, statuscode, err = getPostComments(post.Id)
+	post.Comments, statuscode, post.TotalComments, post.HasMoreComments, err = getPostComments(post.Id, page)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
@@ -98,14 +104,14 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 
 	switch filterType {
 	case "created":
-		query = `SELECT id, user_id, title, content, image_url, created_at 
+		query = `SELECT id, user_id, title, content, created_at 
                  FROM posts 
                  WHERE user_id = ? 
                  ORDER BY created_at DESC 
                  LIMIT ? OFFSET ?`
 		args = []interface{}{userID, POST_PER_PAGE, offset}
 	case "liked":
-		query = `SELECT p.id, p.user_id, p.title, p.content, p.image_url, p.created_at 
+		query = `SELECT p.id, p.user_id, p.title, p.content, p.created_at 
                  FROM posts p
                  JOIN reactions r ON p.id = r.post_id 
                  WHERE r.user_id = ? AND r.is_like = 1
@@ -113,7 +119,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
                  LIMIT ? OFFSET ?`
 		args = []interface{}{userID, POST_PER_PAGE, offset}
 	case "category":
-		query = `SELECT p.id, p.user_id, p.title, p.content, p.image_url, p.created_at 
+		query = `SELECT p.id, p.user_id, p.title, p.content, p.created_at 
                  FROM posts p
                  JOIN post_categories pc ON p.id = pc.post_id 
                  JOIN categories c ON pc.category_id = c.id
@@ -122,7 +128,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
                  LIMIT ? OFFSET ?`
 		args = []interface{}{category, POST_PER_PAGE, offset}
 	default:
-		query = `SELECT id, user_id, title, content, image_url, created_at 
+		query = `SELECT id, user_id, title, content, created_at 
                  FROM posts 
                  ORDER BY created_at DESC 
                  LIMIT ? OFFSET ?`
@@ -147,7 +153,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		var userId int
 		var statuscode int
 
-		if err := dbPosts.Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt); err != nil {
+		if err := dbPosts.Scan(&post.Id, &userId, &post.Title, &post.Content, &post.CreatedAt); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 			return
 		}
@@ -159,8 +165,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		post.Comments, statuscode, err = getPostComments(post.Id)
-		if err != nil {
+		if err := database.DataBase.QueryRow(`SELECT COUNT(*) FROM comments WHERE post_id=?`, post.Id).Scan(&post.TotalComments); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 			return
 		}

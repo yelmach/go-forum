@@ -2,6 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
+.scroll-trigger {
+    padding: 10px;
+}
+
 /* Reset Default Styles */
 *,
 html {

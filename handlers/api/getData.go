@@ -64,7 +64,7 @@ func getUsersIds(query string, Id int) ([]int, int, error) {
 // getUsername gets username from users table by user id
 func getUsername(userId int) (string, int, error) {
 	var username string
-
+	
 	query := `SELECT username FROM users WHERE id=?`
 	if err := database.DataBase.QueryRow(query, userId).Scan(&username); err != nil {
 		if err == sql.ErrNoRows {
@@ -77,17 +77,25 @@ func getUsername(userId int) (string, int, error) {
 }
 
 // getPostComments gets all comments from comments table by post id
-func getPostComments(postId int) ([]models.CommentApi, int, error) {
+func getPostComments(postId int, page int) ([]models.CommentApi, int, int, bool, error) {
 	comments := []models.CommentApi{}
 
-	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=? ORDER BY created_at DESC`
-	dbComments, err := database.DataBase.Query(query, postId)
+	offset := (page - 1) * POST_PER_PAGE
+
+	// Get total comments count
+	var totalComments int
+	if err := database.DataBase.QueryRow(`SELECT COUNT(*) FROM comments WHERE post_id=?`, postId).Scan(&totalComments); err != nil {
+		return []models.CommentApi{}, 500, 0, false, err
+	}
+
+	// Get paginated comments
+	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=? ORDER BY created_at DESC LIMIT ? OFFSET ?`
+	dbComments, err := database.DataBase.Query(query, postId, POST_PER_PAGE, offset)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return []models.CommentApi{}, http.StatusNotFound, err
-		} else {
-			return []models.CommentApi{}, http.StatusInternalServerError, err
+			return []models.CommentApi{}, http.StatusNotFound, 0, false, err
 		}
+		return []models.CommentApi{}, http.StatusInternalServerError, 0, false, err
 	}
 	defer dbComments.Close()
 
@@ -97,22 +105,22 @@ func getPostComments(postId int) ([]models.CommentApi, int, error) {
 		var statuscode int
 
 		if err := dbComments.Scan(&comment.Id, &userId, &comment.Content, &comment.CreatedAt); err != nil {
-			return []models.CommentApi{}, http.StatusInternalServerError, err
+			return []models.CommentApi{}, http.StatusInternalServerError, 0, false, err
 		}
 
 		comment.Likes, comment.Dislikes, statuscode, err = getReaction(comment.Id, false)
 		if err != nil {
-			return []models.CommentApi{}, statuscode, err
+			return []models.CommentApi{}, statuscode, 0, false, err
 		}
 
 		comment.By, statuscode, err = getUsername(userId)
 		if err != nil {
-			return []models.CommentApi{}, statuscode, err
+			return []models.CommentApi{}, statuscode, 0, false, err
 		}
 		comments = append(comments, comment)
 	}
-
-	return comments, http.StatusOK, nil
+	hasMore := offset+len(comments) < totalComments
+	return comments, http.StatusOK, totalComments, hasMore, nil
 }
 
 // getPostCategories gets all categories that assosiated to a post by post id

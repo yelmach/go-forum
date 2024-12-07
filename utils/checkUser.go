@@ -36,6 +36,7 @@ func CheckEmailFormat(email string) (bool, error) {
 	if len(email) > 60 {
 		return false, nil
 	}
+
 	isValid, err := regexp.MatchString(`^[a-zA-Z-0-9]+\.?[a-zA-Z-0-9]+@[a-zA-Z-0-9]+\.[a-z]+$`, email)
 	if err != nil {
 		return false, err

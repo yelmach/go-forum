@@ -5,16 +5,18 @@ import (
 )
 
 type PostApi struct {
-	Id         int            `json:"id"`
-	By         string         `json:"by"`
-	Title      string         `json:"title"`
-	Content    string         `json:"content"`
-	ImageURL   sql.NullString `json:"imageUrl"`
-	CreatedAt  string         `json:"createdAt"`
-	Comments   []CommentApi  `json:"comments"`
-	Categories []string       `json:"categories"`
-	Likes      []int          `json:"likes"`
-	Dislikes   []int          `json:"dislikes"`
+	Id              int            `json:"id"`
+	By              string         `json:"by"`
+	Title           string         `json:"title"`
+	Content         string         `json:"content"`
+	ImageURL        sql.NullString `json:"imageUrl"`
+	CreatedAt       string         `json:"createdAt"`
+	Comments        []CommentApi   `json:"comments"`
+	TotalComments   int            `json:"totalComments"`
+	HasMoreComments bool           `json:"hasMoreComments"`
+	Categories      []string       `json:"categories"`
+	Likes           []int          `json:"likes"`
+	Dislikes        []int          `json:"dislikes"`
 }
 
 type CommentApi struct {
