@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"forum/database"
-	"forum/handlers"
 	"forum/models"
 	"forum/utils"
 )
@@ -17,7 +16,7 @@ const POST_PER_PAGE = 100
 // LoadPostData gets data of one post from database and send it to js
 func LoadPostData(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		utils.ResponseJSON(w, utils.Resp{Msg: "Method Not Allowed", Code: http.StatusMethodNotAllowed})
 		return
 	}
 
@@ -37,8 +36,8 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := `SELECT id, user_id, title, content, image_url, created_at FROM posts WHERE id=?`
-	err = database.DataBase.QueryRow(query, id).Scan(&post.Id, &userId, &post.Title, &post.Content, &post.ImageURL, &post.CreatedAt)
+	query := `SELECT id, user_id, title, content, created_at FROM posts WHERE id=?`
+	err = database.DataBase.QueryRow(query, id).Scan(&post.Id, &userId, &post.Title, &post.Content, &post.CreatedAt)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: "not found", Code: http.StatusNotFound})
 		return
@@ -73,6 +72,7 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(post)
 }
 
+// LoadData gets all posts data from database and send it to js
 func LoadData(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Method Not Allowed", Code: http.StatusMethodNotAllowed})
@@ -141,7 +141,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
 			return
 		}
-		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 		return
 	}
 	defer dbPosts.Close()
@@ -233,7 +233,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 // LoadAllCategories gets all categories from database and send it to js
 func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		handlers.ErrorHandler(w, r, http.StatusMethodNotAllowed)
+		utils.ResponseJSON(w, utils.Resp{Msg: "Method Not Allowed", Code: http.StatusMethodNotAllowed})
 		return
 	}
 

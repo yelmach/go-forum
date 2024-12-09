@@ -22,7 +22,7 @@ func getReaction(Id int, isPost bool) ([]int, []int, int, error) {
 		queryLikes = `SELECT user_id FROM reactions WHERE comment_id=? AND is_like=1`
 		queryDislikes = `SELECT user_id FROM reactions WHERE comment_id=? AND is_like=0`
 	}
-
+ 
 	userlikes, statuscode, err := getUsersIds(queryLikes, Id)
 	if err != nil {
 		return []int{}, []int{}, statuscode, err

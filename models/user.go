@@ -13,7 +13,6 @@ type Post struct {
 	Title      string
 	Content    string
 	Categories []string
-	ImageUrl   string
 }
 
 type Comment struct {

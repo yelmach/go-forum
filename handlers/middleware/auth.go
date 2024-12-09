@@ -39,7 +39,7 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 		user_username := cookie_username.Value
 		query := `SELECT EXISTS(SELECT * FROM sessions JOIN users ON sessions.user_id = users.id WHERE session_id = ? AND user_id = ? AND users.username = ? )`
 		if err := database.DataBase.QueryRow(query, session_id, user_id, user_username).Scan(&is_valid); err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized", Code: http.StatusUnauthorized})
+			utils.ResponseJSON(w, utils.Resp{Msg: "internal server error", Code: http.StatusInternalServerError})
 			return
 		}
 		if !is_valid {

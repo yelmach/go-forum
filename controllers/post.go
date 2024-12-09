@@ -9,7 +9,7 @@ import (
 
 // CreatePost stores content of the post, and relation between posts and categories.
 func CreatePost(post models.Post) error {
-	res, err := database.DataBase.Exec(`INSERT INTO posts(user_id, title, content, image_url) VALUES(?, ?, ?, ?)`, post.UserId, post.Title, post.Content, post.ImageUrl)
+	res, err := database.DataBase.Exec(`INSERT INTO posts(user_id, title, content) VALUES(?, ?, ?)`, post.UserId, post.Title, post.Content)
 	if err != nil {
 		return err
 	}

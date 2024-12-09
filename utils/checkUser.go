@@ -37,7 +37,7 @@ func CheckEmailFormat(email string) (bool, error) {
 		return false, nil
 	}
 
-	isValid, err := regexp.MatchString(`^[a-zA-Z-0-9]+\.?[a-zA-Z-0-9]+@[a-zA-Z-0-9]+\.[a-z]+$`, email)
+	isValid, err := regexp.MatchString(`(?i)^[a-z0-9]+\.?[a-z0-9]+@[a-z0-9]+\.[a-z]+$`, email)
 	if err != nil {
 		return false, err
 	} else if !isValid {

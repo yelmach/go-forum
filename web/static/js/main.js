@@ -45,8 +45,6 @@ const loadMoreComments = async (postId) => {
 };
 
 const getPostData = async (postId, page = 1) => {
-    console.log("getPostData");
-
     try {
         const response = await fetch(`/api/posts/${postId}?page=${page}`);
         const res = await response.json();
