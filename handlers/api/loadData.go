@@ -39,8 +39,13 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 	query := `SELECT id, user_id, title, content, created_at FROM posts WHERE id=?`
 	err = database.DataBase.QueryRow(query, id).Scan(&post.Id, &userId, &post.Title, &post.Content, &post.CreatedAt)
 	if err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "not found", Code: http.StatusNotFound})
-		return
+		if err == sql.ErrNoRows {
+			utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
+			return
+		} else {
+			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+			return
+		}
 	}
 
 	post.By, statuscode, err = getUsername(userId)
@@ -81,8 +86,13 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 
 	var totalPosts int
 	if err := database.DataBase.QueryRow(`SELECT COUNT(*) FROM posts`).Scan(&totalPosts); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-		return
+		if err == sql.ErrNoRows {
+			utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
+			return
+		} else {
+			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+			return
+		}
 	}
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
@@ -138,11 +148,12 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	dbPosts, err := database.DataBase.Query(query, args...)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
+			utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
+			return
+		} else {
+			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
 			return
 		}
-		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-		return
 	}
 	defer dbPosts.Close()
 
@@ -166,8 +177,13 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := database.DataBase.QueryRow(`SELECT COUNT(*) FROM comments WHERE post_id=?`, post.Id).Scan(&post.TotalComments); err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
-			return
+			if err == sql.ErrNoRows {
+				utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
+				return
+			} else {
+				utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+				return
+			}
 		}
 
 		post.Categories, statuscode, err = getPostCategories(post.Id)
@@ -209,8 +225,14 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := database.DataBase.QueryRow(countQuery, countArgs...).Scan(&totalPosts); err != nil {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-		return
+		if err == sql.ErrNoRows {
+			utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
+			return
+
+		} else {
+			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+			return
+		}
 	}
 
 	response := struct {
@@ -240,7 +262,7 @@ func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 	dbCategories, err := database.DataBase.Query(`SELECT name FROM categories`)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			utils.ResponseJSON(w, utils.Resp{Msg: "no rows found", Code: http.StatusNotFound})
+			utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
 			return
 		} else {
 			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
@@ -254,8 +276,13 @@ func LoadAllCategories(w http.ResponseWriter, r *http.Request) {
 	for dbCategories.Next() {
 		var category string
 		if err := dbCategories.Scan(&category); err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-			return
+			if err == sql.ErrNoRows {
+				utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
+				return
+			} else {
+				utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+				return
+			}
 		}
 		categories = append(categories, category)
 	}
