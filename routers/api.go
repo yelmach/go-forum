@@ -12,10 +12,7 @@ func SetupApiRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "api/posts" {
-			handlers.ErrorHandler(w, r, http.StatusNotFound)
-			return
-		}
+		handlers.ErrorHandler(w, r, http.StatusNotFound)
 	})
 
 	mux.HandleFunc("/api/posts", api.LoadData)
