@@ -96,7 +96,7 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 || page > totalPosts/POST_PER_PAGE+1 {
+	if err != nil || page < 1 || page > (totalPosts+POST_PER_PAGE-1)/POST_PER_PAGE {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Bad Request", Code: http.StatusBadRequest})
 		return
 	}
