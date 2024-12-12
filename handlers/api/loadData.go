@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -11,7 +12,7 @@ import (
 	"forum/utils"
 )
 
-const POST_PER_PAGE = 100
+const POSTS_PER_PAGE = 10
 
 // LoadPostData gets data of one post from database and send it to js
 func LoadPostData(w http.ResponseWriter, r *http.Request) {
@@ -20,9 +21,11 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var post models.PostApi
-	var userId int
-	statuscode := 0
+	var (
+		post       models.PostApi
+		userId     int
+		statuscode int
+	)
 
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
@@ -30,8 +33,8 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 {
+	currentPage, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || currentPage < 1 {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Bad Request", Code: http.StatusBadRequest})
 		return
 	}
@@ -54,7 +57,7 @@ func LoadPostData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post.Comments, statuscode, post.TotalComments, post.HasMoreComments, err = getPostComments(post.Id, page)
+	post.Comments, statuscode, post.TotalComments, post.HasMoreComments, err = getPostComments(post.Id, currentPage)
 	if err != nil {
 		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: statuscode})
 		return
@@ -84,71 +87,98 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var totalPosts int
-	if err := database.DataBase.QueryRow(`SELECT COUNT(*) FROM posts`).Scan(&totalPosts); err != nil {
-		if err == sql.ErrNoRows {
-			utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
+	var (
+		userId      int
+		totalPosts  int
+		countQuery  string
+		filterQuery string
+		countArgs   []interface{}
+		filterArgs  []interface{}
+	)
+
+	// Get filter type
+	filterBy := r.URL.Query().Get("filterBy")
+	category := r.URL.Query().Get("category")
+
+	if filterBy == "created" || filterBy == "liked" {
+		cookie_token, err := r.Cookie("session_id")
+		if err != nil {
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
-		} else {
-			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-			return
+		}
+
+		if err := database.DataBase.QueryRow("SELECT user_id FROM sessions WHERE session_id = ?", cookie_token.Value).Scan(&userId); err != nil {
+			if err == sql.ErrNoRows {
+				utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
+				return
+			} else {
+				utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+				return
+			}
 		}
 	}
 
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 || page > (totalPosts+POST_PER_PAGE-1)/POST_PER_PAGE {
-		utils.ResponseJSON(w, utils.Resp{Msg: "Bad Request", Code: http.StatusBadRequest})
-		return
-	}
-
-	// Get filter type
-	filterType := r.URL.Query().Get("filter")
-	userID := r.URL.Query().Get("userId")
-	category := r.URL.Query().Get("category")
-
-	// Set posts per page
-	offset := (page - 1) * POST_PER_PAGE
-
-	var query string
-	var args []interface{}
-
-	switch filterType {
+	switch filterBy {
 	case "created":
-		query = `SELECT id, user_id, title, content, created_at 
-                 FROM posts 
+		countArgs = append(countArgs, userId)
+		filterArgs = append(filterArgs, userId)
+		countQuery = "SELECT COUNT(*) FROM posts WHERE user_id = ?"
+		filterQuery = `SELECT id, user_id, title, content, created_at FROM posts 
                  WHERE user_id = ? 
                  ORDER BY created_at DESC 
                  LIMIT ? OFFSET ?`
-		args = []interface{}{userID, POST_PER_PAGE, offset}
 	case "liked":
-		query = `SELECT p.id, p.user_id, p.title, p.content, p.created_at 
-                 FROM posts p
+		countArgs = append(countArgs, userId)
+		filterArgs = append(filterArgs, userId)
+		countQuery = `SELECT COUNT(*) FROM posts p
+                 JOIN reactions r ON p.id = r.post_id 
+                 WHERE r.user_id = ? AND r.is_like = 1`
+		filterQuery = `SELECT p.id, p.user_id, p.title, p.content, p.created_at FROM posts p
                  JOIN reactions r ON p.id = r.post_id 
                  WHERE r.user_id = ? AND r.is_like = 1
                  ORDER BY p.created_at DESC 
                  LIMIT ? OFFSET ?`
-		args = []interface{}{userID, POST_PER_PAGE, offset}
 	case "category":
-		query = `SELECT p.id, p.user_id, p.title, p.content, p.created_at 
-                 FROM posts p
+		countArgs = append(countArgs, category)
+		filterArgs = append(filterArgs, category)
+		countQuery = `SELECT COUNT(*) FROM posts p
+                 JOIN post_categories pc ON p.id = pc.post_id 
+                 JOIN categories c ON pc.category_id = c.id
+                 WHERE c.name = ?`
+		filterQuery = `SELECT p.id, p.user_id, p.title, p.content, p.created_at FROM posts p
                  JOIN post_categories pc ON p.id = pc.post_id 
                  JOIN categories c ON pc.category_id = c.id
                  WHERE c.name = ?
                  ORDER BY p.created_at DESC 
                  LIMIT ? OFFSET ?`
-		args = []interface{}{category, POST_PER_PAGE, offset}
 	default:
-		query = `SELECT id, user_id, title, content, created_at 
-                 FROM posts 
+		countQuery = "SELECT COUNT(*) FROM posts"
+		filterQuery = `SELECT id, user_id, title, content, created_at FROM posts 
                  ORDER BY created_at DESC 
                  LIMIT ? OFFSET ?`
-		args = []interface{}{POST_PER_PAGE, offset}
 	}
 
-	dbPosts, err := database.DataBase.Query(query, args...)
+	// Get total count based on filter
+	if err := database.DataBase.QueryRow(countQuery, countArgs...).Scan(&totalPosts); err != nil {
+		utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+		return
+	}
+
+	currentPage, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || currentPage < 1 || float64(currentPage) > math.Ceil(float64(totalPosts)/float64(POSTS_PER_PAGE)) {
+		utils.ResponseJSON(w, utils.Resp{Msg: "No Post Found", Code: http.StatusNotFound})
+		return
+	}
+
+	// Set posts offset
+	offset := (currentPage - 1) * POSTS_PER_PAGE
+	filterArgs = append(filterArgs, POSTS_PER_PAGE, offset)
+
+	// Get all filtered posts at the current page
+	dbPosts, err := database.DataBase.Query(filterQuery, filterArgs...)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
+			utils.ResponseJSON(w, utils.Resp{Msg: "No Post Found", Code: http.StatusNotFound})
 			return
 		} else {
 			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
@@ -160,9 +190,11 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 	posts := []models.PostApi{}
 
 	for dbPosts.Next() {
-		var post models.PostApi
-		var userId int
-		var statuscode int
+		var (
+			userId     int
+			statuscode int
+			post       models.PostApi
+		)
 
 		if err := dbPosts.Scan(&post.Id, &userId, &post.Title, &post.Content, &post.CreatedAt); err != nil {
 			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
@@ -177,13 +209,8 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := database.DataBase.QueryRow(`SELECT COUNT(*) FROM comments WHERE post_id=?`, post.Id).Scan(&post.TotalComments); err != nil {
-			if err == sql.ErrNoRows {
-				utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
-				return
-			} else {
-				utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-				return
-			}
+			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+			return
 		}
 
 		post.Categories, statuscode, err = getPostCategories(post.Id)
@@ -201,50 +228,16 @@ func LoadData(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 
-	// Get total count based on filter
-	var countQuery string
-	var countArgs []interface{}
-
-	switch filterType {
-	case "created":
-		countQuery = "SELECT COUNT(*) FROM posts WHERE user_id = ?"
-		countArgs = []interface{}{userID}
-	case "liked":
-		countQuery = `SELECT COUNT(*) FROM posts p
-                      JOIN reactions r ON p.id = r.post_id 
-                      WHERE r.user_id = ? AND r.is_like = 1`
-		countArgs = []interface{}{userID}
-	case "category":
-		countQuery = `SELECT COUNT(*) FROM posts p
-                      JOIN post_categories pc ON p.id = pc.post_id 
-                      JOIN categories c ON pc.category_id = c.id
-                      WHERE c.name = ?`
-		countArgs = []interface{}{category}
-	default:
-		countQuery = "SELECT COUNT(*) FROM posts"
-	}
-
-	if err := database.DataBase.QueryRow(countQuery, countArgs...).Scan(&totalPosts); err != nil {
-		if err == sql.ErrNoRows {
-			utils.ResponseJSON(w, utils.Resp{Msg: "No Rows Found", Code: http.StatusNotFound})
-			return
-
-		} else {
-			utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
-			return
-		}
-	}
-
 	response := struct {
-		Posts      []models.PostApi `json:"posts"`
-		TotalPosts int              `json:"totalPosts"`
-		HasMore    bool             `json:"hasMore"`
-		Page       int              `json:"page"`
+		Posts       []models.PostApi `json:"posts"`
+		TotalPosts  int              `json:"totalPosts"`
+		HasMore     bool             `json:"hasMore"`
+		CurrentPage int              `json:"currentPage"`
 	}{
-		Posts:      posts,
-		TotalPosts: totalPosts,
-		HasMore:    offset+len(posts) < totalPosts,
-		Page:       page,
+		Posts:       posts,
+		TotalPosts:  totalPosts,
+		HasMore:     offset+len(posts) < totalPosts,
+		CurrentPage: currentPage,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

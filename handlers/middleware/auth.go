@@ -14,7 +14,7 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 		is_valid := false
 		cookie_session, err := r.Cookie("session_id")
 		if err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized session", Code: http.StatusUnauthorized})
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
 		session_id := cookie_session.Value
@@ -32,7 +32,7 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 
 		cookie_username, err := r.Cookie("username")
 		if err != nil {
-			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized username", Code: http.StatusUnauthorized})
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
 
@@ -46,7 +46,7 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 			utils.DeleteCookie(w, "session_id")
 			utils.DeleteCookie(w, "user_id")
 			utils.DeleteCookie(w, "username")
-			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized", Code: http.StatusUnauthorized})
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
 		next.ServeHTTP(w, r)

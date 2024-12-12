@@ -16,14 +16,14 @@ func CheckUserExist(user models.User) error {
 		return err
 	}
 	if isExist {
-		return errors.New("credentials already exists")
+		return errors.New("username or email already taken")
 	}
 	return nil
 }
 
 // CheckUsernameFormat checks username format if it's valid
 func CheckUsernameFormat(username string) (bool, error) {
-	valid, err := regexp.MatchString(`^[a-zA-Z0-9_-]{3,21}$`, username)
+	valid, err := regexp.MatchString(`(?i)^[a-z0-9]{3,21}$`, username)
 	if err != nil || !valid {
 		return false, err
 	}

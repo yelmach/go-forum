@@ -23,7 +23,7 @@ func AssetsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fp, _ := strings.CutPrefix(filepath.Clean(r.URL.Path), "/assets")
+	fp, _ := strings.CutPrefix(r.URL.Path, "/assets")
 	fp = filepath.Join("web/static", fp)
 
 	_, err := os.Stat(fp)

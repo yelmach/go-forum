@@ -2,13 +2,13 @@ const data = {
     allPosts: [],
     allCategories: [],
     currentPage: 1,
+    currentCommentsPage: 1,
+    postsPerPage: 10,
     hasMore: true,
+    hasMoreComments: true,
     currentView: 'recent',
     currentCategory: null,
 };
-
-var currentPage = 1
-var hasMoreComments = true
 
 // load post with its comments (pagination implemented)
 const initCommentInfiniteScroll = (postId) => {
@@ -16,8 +16,8 @@ const initCommentInfiniteScroll = (postId) => {
     if (!commentsContainer) return;
 
     const observer = new IntersectionObserver((elem) => {
-        if (elem[0].isIntersecting && hasMoreComments) {
-            loadMoreComments(postId);
+        if (elem[0].isIntersecting && data.hasMoreComments) {
+            setTimeout(() => loadMoreComments(postId), 700);
         }
     }, {
         root: document.querySelector('.posts-container'),
@@ -31,9 +31,9 @@ const initCommentInfiniteScroll = (postId) => {
 };
 
 const loadMoreComments = async (postId) => {
-    const nextPage = currentPage + 1;
+    const nextPage = ++data.currentCommentsPage;
     const post = await getPostData(postId, nextPage);
-    hasMoreComments = post.hasMoreComments
+    data.hasMoreComments = post.hasMoreComments
 
     const commentsContainer = document.querySelector('.comments');
     post.comments.forEach(comment => {
@@ -62,7 +62,7 @@ const getPostData = async (postId, page = 1) => {
 const openPost = async (postId) => {
     currentPage = 1;
     const post = await getPostData(postId);
-    hasMoreComments = post.hasMoreComments
+    data.hasMoreComments = post.hasMoreComments
     const postsContainer = document.querySelector('.posts-container');
     const widget = document.querySelector('.widget');
     const comments = document.createElement('div');
@@ -152,7 +152,7 @@ const openPost = async (postId) => {
                 const res = await response.json();
                 console.error(res.msg);
                 document.getElementById("loginPopup").style.display = "block";
-                if (res.msg != "unauthorized user") {
+                if (res.code != 401) {
                     document.querySelector(".popup-content").innerHTML = `
                     <h2>Nice try!</h2>
                     <ul>
@@ -176,7 +176,7 @@ const initInfiniteScroll = () => {
     if (!postsContainer) return;
     const observer = new IntersectionObserver((elem) => {
         if (elem[0].isIntersecting && data.hasMore) {
-            loadMorePosts();
+            setTimeout(() => loadMorePosts(), 1000);
         }
     }, {
         root: postsContainer,
@@ -190,18 +190,17 @@ const initInfiniteScroll = () => {
 };
 
 const loadMorePosts = async () => {
-    const nextPage = data.currentPage + 1;
+    const postsContainer = document.querySelector('.posts-container');
+    const nextPage = ++data.currentPage;
     await loadData(nextPage, false);
 
-    const postsContainer = document.querySelector('.posts-container');
-
-    data.allPosts.slice(-100).forEach(post => {
+    data.allPosts.slice(-data.postsPerPage).forEach(post => {
         const postDiv = createPostElement(post);
         postsContainer.insertBefore(postDiv, postsContainer.lastElementChild);
     });
 };
 
-const loadData = async (page = 1, resetData = false) => {
+const loadData = async (page, resetData = false) => {
     if (resetData) {
         data.allPosts = [];
         data.currentPage = 1;
@@ -215,37 +214,32 @@ const loadData = async (page = 1, resetData = false) => {
 
         switch (data.currentView) {
             case 'created':
-                url += `&filter=created&userId=${getCookie('user_id')}`;
+                url += `&filterBy=created`;
             case 'liked':
-                url += `&filter=liked&userId=${getCookie('user_id')}`;
+                url += `&filterBy=liked`;
             case 'category':
-                url += `&filter=category&category=${data.currentCategory}`;
+                url += `&filterBy=category&category=${data.currentCategory}`;
         }
 
         const response = await fetch(url);
         const result = await response.json();
-
-        if (resetData) {
-            data.allPosts = result.posts;
-        } else {
-            data.allPosts = [...data.allPosts, ...result.posts];
+        if (!response.ok) {
+            console.error(result)
         }
 
+        data.allPosts = resetData ? result.posts : [...data.allPosts, ...result.posts];
         data.hasMore = result.hasMore;
-        data.currentPage = result.page;
-
-        if (data.allCategories.length === 0 || page === 1) {
-            data.allCategories = await fetch("/api/categories")
-                .then(response => response.json());
-        }
+        data.currentPage = result.currentPage;
     } catch (error) {
         console.error('Error loading posts:', error);
     }
 };
 
 const init = async () => {
-    const categContainer = document.querySelector('.categories');
+    data.allCategories = await fetch("/api/categories")
+        .then(response => response.json());
 
+    const categContainer = document.querySelector('.categories');
     await loadData(1, true);
     for (const category of data.allCategories) {
         const categoryElem = document.createElement('li')
@@ -266,10 +260,10 @@ const displayPosts = (posts) => {
     postsContainer.classList.add('posts-container');
     disactive();
     main.innerHTML = '';
-    if (!posts.length) {
+    if (!posts || !posts.length) {
         main.innerHTML += `
         <img id="no_data" src="/assets/img/no_data.svg" alt="no result"/>
-        `;
+        `
     } else {
         for (const post of posts) {
             const postDiv = createPostElement(post);
@@ -489,8 +483,9 @@ const escapeHtml = (unsafe) => {
 
 const filterContent = (content) => {
     return escapeHtml(content)
-        .replace(/&lt;pre&gt;/g, '<pre>')
-        .replace(/&lt;\/pre&gt;/g, '</pre>')
+        .replace(/&lt;code&gt;/g, '<pre>')
+        .replace(/&lt;\/code&gt;/g, '</pre>')
+        .replace(/<pre>\n/g, '<pre>')
         .replace(/\n/g, '<br>')
 }
 
@@ -645,7 +640,17 @@ const newPost = () => {
 
         const title = document.querySelector('input[name="title"]').value;
         const content = document.querySelector('textarea[name="content"]').value;
-        console.log(title, content)
+        if (!title.trim() || !content.trim()) {
+            document.getElementById("loginPopup").style.display = "block";
+            document.querySelector(".popup-content").innerHTML = `
+            <h2>Nice try!</h2>
+            <ul>
+                <li>The new post's title shouldn't be empty!</li>
+                <li>The new post's content shouldn't be empty!</li>
+            </ul>
+            `
+            return
+        }
         try {
             const response = await fetch('/newpost', {
                 method: 'POST',

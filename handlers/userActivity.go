@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"forum/controllers"
 	"forum/utils"
@@ -37,7 +38,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if utils.DelayPost(post.UserId) {
-		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every 5 minutes", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every 1 minutes", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -54,8 +55,8 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if title and content are written and not too long
-	if post.Title == "" || post.Content == "" {
-		utils.ResponseJSON(w, utils.Resp{Msg: "input can't be empty", Code: http.StatusBadRequest})
+	if strings.Trim(post.Title, " ") == "" || strings.Trim(post.Content, " ") == "" {
+		utils.ResponseJSON(w, utils.Resp{Msg: "New post's title and content shouldn't be empty", Code: http.StatusBadRequest})
 		return
 	} else if len(post.Title) < 3 || len(post.Title) > 60 {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Title should be between 3 and 60 characters", Code: http.StatusBadRequest})
@@ -66,7 +67,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := controllers.CreatePost(post); err != nil {
-		ErrorHandler(w, r, http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -105,7 +106,7 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if utils.DelayComment(comment.PostId, comment.UserId) {
-		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every  20 seconds", Code: http.StatusBadRequest})
+		utils.ResponseJSON(w, utils.Resp{Msg: "You can only post once every 5 seconds", Code: http.StatusBadRequest})
 		return
 	}
 
@@ -119,7 +120,7 @@ func NewCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := controllers.CreateComment(comment); err != nil {
-		ErrorHandler(w, r, http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -173,7 +174,7 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := controllers.CreateReaction(reaction); err != nil {
-		ErrorHandler(w, r, http.StatusInternalServerError)
+		utils.ResponseJSON(w, utils.Resp{Msg: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
 	w.WriteHeader(http.StatusCreated)

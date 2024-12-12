@@ -80,7 +80,7 @@ func getUsername(userId int) (string, int, error) {
 func getPostComments(postId int, page int) ([]models.CommentApi, int, int, bool, error) {
 	comments := []models.CommentApi{}
 
-	offset := (page - 1) * POST_PER_PAGE
+	offset := (page - 1) * POSTS_PER_PAGE
 
 	// Get total comments count
 	var totalComments int
@@ -90,7 +90,7 @@ func getPostComments(postId int, page int) ([]models.CommentApi, int, int, bool,
 
 	// Get paginated comments
 	query := `SELECT id, user_id, content, created_at FROM comments WHERE post_id=? ORDER BY created_at DESC LIMIT ? OFFSET ?`
-	dbComments, err := database.DataBase.Query(query, postId, POST_PER_PAGE, offset)
+	dbComments, err := database.DataBase.Query(query, postId, POSTS_PER_PAGE, offset)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return []models.CommentApi{}, http.StatusNotFound, 0, false, err

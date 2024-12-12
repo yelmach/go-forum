@@ -34,21 +34,21 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check username
-	valid, err := utils.CheckUsernameFormat(user.Username)
+	valid_username, err := utils.CheckUsernameFormat(user.Username)
 	if err != nil {
 		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
-	} else if !valid {
+	} else if !valid_username {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid username format", Code: http.StatusBadRequest})
 		return
 	}
 
 	// check email
-	isValidEmail, err := utils.CheckEmailFormat(user.Email)
+	valid_email, err := utils.CheckEmailFormat(user.Email)
 	if err != nil {
 		handlers.ErrorHandler(w, r, http.StatusInternalServerError)
 		return
-	} else if !isValidEmail {
+	} else if !valid_email {
 		utils.ResponseJSON(w, utils.Resp{Msg: "Invalid email format", Code: http.StatusBadRequest})
 		return
 	}
@@ -125,7 +125,7 @@ func loginToForum(w http.ResponseWriter, r *http.Request, user models.User) {
 	utils.AddCookie(w, "user_id", strconv.Itoa(user.Id))
 	utils.AddCookie(w, "username", user.Username)
 
-	utils.ResponseJSON(w, utils.Resp{Msg: "Logged in", Code: http.StatusOK, SessionId: sessionId})
+	utils.ResponseJSON(w, utils.Resp{Msg: "Logged in successfuly", Code: http.StatusOK, SessionId: sessionId})
 }
 
 // LogOutUser it handles log out request

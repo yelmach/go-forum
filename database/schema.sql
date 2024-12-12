@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Posts table - stores all forum posts
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
+    user_id INTEGER NOT NULL,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -58,7 +58,6 @@ CREATE TABLE IF NOT EXISTS reactions (
 
 -- Sessions table - manage user authentication
 CREATE TABLE IF NOT EXISTS sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     session_id TEXT NOT NULL UNIQUE,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE

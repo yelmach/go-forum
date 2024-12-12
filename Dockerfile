@@ -1,4 +1,6 @@
-FROM golang:1.22.6
+FROM golang:1.22.6-alpine
+
+RUN apk add --no-cache gcc musl-dev bash
 
 WORKDIR /APP
 
