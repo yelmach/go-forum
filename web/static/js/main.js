@@ -27,6 +27,7 @@ const initCommentInfiniteScroll = (postId) => {
     const trigger = document.createElement('div');
     trigger.className = 'scroll-trigger';
     commentsContainer.appendChild(trigger);
+    trigger.style.display = data.hasMoreComments ? 'block' : 'none';
     observer.observe(trigger);
 };
 
@@ -40,6 +41,11 @@ const loadMoreComments = async (postId) => {
         const commentDiv = createCommentElement(comment);
         commentsContainer.insertBefore(commentDiv, commentsContainer.lastElementChild);
     });
+
+    const trigger = document.querySelector('.comments .scroll-trigger');
+    if (trigger) {
+        trigger.style.display = data.hasMoreComments ? 'block' : 'none';
+    }
 
     currentPage = nextPage;
 };
@@ -186,6 +192,7 @@ const initInfiniteScroll = () => {
     const trigger = document.createElement('div');
     trigger.className = 'scroll-trigger';
     postsContainer.appendChild(trigger);
+    trigger.style.display = data.hasMore ? 'block' : 'none';
     observer.observe(trigger);
 };
 
@@ -229,6 +236,10 @@ const loadData = async (page, resetData = false) => {
 
         data.allPosts = resetData ? result.posts : [...data.allPosts, ...result.posts];
         data.hasMore = result.hasMore;
+        const trigger = document.querySelector('.scroll-trigger');
+        if (trigger) {
+            trigger.style.display = data.hasMore ? 'block' : 'none';
+        }
         data.currentPage = result.currentPage;
     } catch (error) {
         console.error('Error loading posts:', error);
