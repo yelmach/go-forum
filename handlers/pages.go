@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"net/http"
 
 	"forum/database"
@@ -33,8 +34,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var isValid bool
 		if err := database.DataBase.QueryRow("SELECT EXISTS(SELECT * FROM sessions WHERE session_id=?)", cookie.Value).Scan(&isValid); err != nil {
-			ErrorHandler(w, r, http.StatusInternalServerError)
-			return
+			if err == sql.ErrNoRows {
+				utils.ResponseJSON(w, utils.Resp{Msg: "databse is empty", Code: http.StatusUnauthorized})
+				return
+			} else {
+				utils.ResponseJSON(w, utils.Resp{Msg: "Internal Server Error", Code: http.StatusInternalServerError})
+				return
+			}
 		}
 
 		if !isValid {
