@@ -49,7 +49,7 @@
   - Post creation limits
   - API request limiting
 
-### Technical Implementation
+### 🛠 Technical Implementation
 - **Database Management**
   - SQLite integration
   - Efficient query optimization
@@ -95,7 +95,7 @@ Building this project from scratch provides invaluable experience in various asp
    - Responsive design
    - Cross-browser compatibility
 
-### System Design
+### 📝 System Design
 1. **Architecture Patterns**
    - MVC pattern implementation
    - Service layer design
@@ -110,7 +110,7 @@ Building this project from scratch provides invaluable experience in various asp
 
 ## 🚀 Installation Instructions
 
-### Standard Installation
+### 💾 Standard Installation
 ```bash
 # Clone repository
 git clone https://github.com/ANAS-OU/go_forum.git
@@ -152,13 +152,13 @@ GO_FORUM/
 
 ## 📝 API Documentation
 
-### Authentication Endpoints
+### 🪪 Authentication Endpoints
 
 - `POST /auth/register` - Register new user
 - `POST /auth/login` - User login
 - `POST /auth/logout` - User logout
 
-### Post Endpoints
+### 📨 Post Endpoints
 
 - `GET /api/posts` - Get all posts
 - `GET /api/posts/{id}` - Get specific post
@@ -166,7 +166,7 @@ GO_FORUM/
 - `POST /newcomment` - Add comment to post
 - `POST /reaction` - React to post/comment
 
-### Category Endpoints
+### 📚 Category Endpoints
 
 - `GET /api/categories` - Get all categories
 
@@ -182,7 +182,6 @@ GO_FORUM/
 ## 👥 Team
 
 Project developed by:
-[Zone01-Oujda](https://zone01oujda.ma/)
 - [@ikazbat](https://github.com/kazbatdriss1)
 - [@yelmach](https://github.com/yassinalmach)
 - [@asaaoud](https://github.com/Saaoud99)
