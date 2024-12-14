@@ -13,7 +13,7 @@ func CreateCategories() {
 		fmt.Printf("Error checking existence of category: %v\n", err)
 	}
 	if !isValid {
-		if _, err := database.DataBase.Exec(`INSERT INTO categories(name) VALUES ('Technology'),('GoLang'),('Gaming'),('Sports'),('Programming',('Zone01',('Back-end',('Front-end')`); err != nil {
+		if _, err := database.DataBase.Exec(`INSERT INTO categories(name) VALUES ('Technology'),('GoLang'),('Gaming'),('Sports'),('Programming'),('Zone01'),('Back-end'),('Front-end')`); err != nil {
 			fmt.Printf("Error inserting categories: %v\n", err)
 		}
 	}
