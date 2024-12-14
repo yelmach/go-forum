@@ -14,25 +14,25 @@ func Middleware(next http.HandlerFunc) http.HandlerFunc {
 		is_valid := false
 		cookie_session, err := r.Cookie("session_id")
 		if err != nil {
-			http.Redirect(w, r, "/", http.StatusMovedPermanently)
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
 		session_id := cookie_session.Value
 		cookie_user, err := r.Cookie("user_id")
 		if err != nil {
-			http.Redirect(w, r, "/", http.StatusMovedPermanently)
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
 
 		user_id, err := strconv.Atoi(cookie_user.Value)
 		if err != nil {
-			http.Redirect(w, r, "/", http.StatusMovedPermanently)
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
 
 		cookie_username, err := r.Cookie("username")
 		if err != nil {
-			http.Redirect(w, r, "/", http.StatusMovedPermanently)
+			utils.ResponseJSON(w, utils.Resp{Msg: "unauthorized user", Code: http.StatusUnauthorized})
 			return
 		}
 
