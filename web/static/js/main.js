@@ -109,7 +109,7 @@ const openPost = async (postId) => {
     </div>
 
     <form id="commentForm" class="comment-box">
-        <textarea class="comment-input" placeholder="Type here your wise suggestion" required></textarea>
+        <textarea class="comment-input" placeholder="Type here your wise suggestion" minlength="5" maxlength="500" required></textarea>
         <div class="button-group">
             <button class="btn btn-cancel">Cancel</button>
             <button class="btn btn-comment">
@@ -147,9 +147,10 @@ const openPost = async (postId) => {
         }
 
         try {
+
             const response = await fetch("/newcomment", {
                 method: "POST",
-                body: JSON.stringify({ postId, content })
+                body: JSON.stringify({ postId : parseInt(postId), content })
             })
 
             if (response.ok) {
@@ -365,6 +366,8 @@ const displayContent = (content, id) => {
         return filterContent(content).slice(0, 200) + `... <span class="read-more" onclick="openPost(${id})">Read-More</span>`
     } else if (content.match(/\n/g) && content.match(/\n/g).length > 1) {
         return filterContent(content.split('\n')[0]).slice(0, 200) + `... <span class="read-more" onclick="openPost(${id})">Read-More</span>`
+    } else if (content.length > 100) {
+        return filterContent(content.split('\n')[0]).slice(0, 100) + `... <span class="read-more" onclick="openPost(${id})">Read-More</span>`
     } else {
         return filterContent(content)
     }
@@ -565,7 +568,7 @@ const newPost = () => {
             </div>
         </div>
         <input type="text" name="title" placeholder="Type catching attention title" required>
-        <textarea name="content" placeholder="Type some content" required></textarea>
+        <textarea name="content" placeholder="Type some content" minlength="10" maxlength="2000" required></textarea>
         <div class="button-container">
             <button class="btn btn-add-image">
                 <i class="image-icon"></i>Add Image
