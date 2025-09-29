@@ -1,4 +1,4 @@
-# 01Forum - Web Discussion Platform
+# 01Forum - Web Forum Platform
 
 ## 🌐 Overview
 
